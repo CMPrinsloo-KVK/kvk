@@ -736,8 +736,8 @@
 <script>
 (function(){
   // Reviews — fetch from Supabase
-  var SUPABASE_URL  = 'YOUR_SUPABASE_URL';
-  var SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
+  var SUPABASE_URL  = 'https://jqwdzkxcspuzbvismjhl.supabase.co';
+  var SUPABASE_ANON = 'sb_publishable_cZlEmuWU3aFxkGIv75AA5A_qhKxzeOU';
   fetch(SUPABASE_URL+'/rest/v1/reviews?select=*&approved=eq.true&order=created_at.desc', {
     headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
   }).then(function(r){return r.json()})
