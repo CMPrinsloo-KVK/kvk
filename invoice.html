@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KVK — Invoice Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Gloock&family=Italiana&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <style>
+    :root {
+      --black:      #0B0A09;
+      --dark:       #24211F;
+      --mid:        #4C433B;
+      --grey:       #75726C;
+      --sienna:     #B34B1D;
+      --orange:     #D37835;
+      --sand:       #DFB373;
+      --bg:         #F7F0E6;
+      --rule:       #D9C4A8;
+      --rule-light: #EDE3D6;
+      --green:      #4CAF79;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--dark);
+      font-family: 'Work Sans', sans-serif; font-size: 15px;
+      line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.025; pointer-events: none; z-index: 1000;
+    }
+
+    /* Header */
+    header { background: var(--black); }
+    header::after { content: ''; display: block; height: 3px; background: var(--sienna); }
+    .header-inner { max-width: 1100px; margin: 0 auto; padding: 32px 40px 28px; display: flex; align-items: center; gap: 32px; }
+    .logo-wrap img { height: 90px; filter: drop-shadow(0 4px 24px rgba(179,75,29,0.25)); }
+    .header-text { flex: 1; }
+    .brand-name { font-family: 'Italiana', serif; font-size: clamp(28px,4vw,42px); color:#fff; line-height:1.1; }
+    .brand-sub  { font-size:10px; font-weight:500; letter-spacing:.18em; color:var(--sand); text-transform:uppercase; margin-top:6px; }
+    nav { background:var(--black); border-top:1px solid rgba(255,255,255,0.06); }
+    .nav-inner { max-width:1100px; margin:0 auto; padding:0 40px; display:flex; }
+    nav a { font-size:11px; font-weight:500; letter-spacing:.12em; text-transform:uppercase; color:var(--sand); opacity:.6; text-decoration:none; padding:12px 20px 12px 0; transition:opacity .2s; }
+    nav a:hover { opacity:1; }
+
+    /* Main layout */
+    main { flex:1; max-width:1200px; margin:0 auto; padding:52px 40px 80px; width:100%; }
+    .page-header { margin-bottom: 36px; }
+    .page-title { font-family:'Gloock',serif; font-size:clamp(28px,4vw,44px); color:var(--dark); line-height:1.1; margin-bottom:8px; }
+    .page-sub { font-family:'Crimson Pro',serif; font-style:italic; font-size:16px; color:var(--grey); }
+
+    .builder-grid { display:grid; grid-template-columns:1fr 420px; gap:48px; align-items:start; }
+
+    /* Form styles */
+    .section-label {
+      font-size:10px; font-weight:600; letter-spacing:.16em; color:var(--sienna);
+      text-transform:uppercase; padding-bottom:6px;
+      border-bottom:1px solid var(--rule); margin-bottom:16px; margin-top:28px;
+    }
+    .section-label:first-child { margin-top:0; }
+    .form-group { margin-bottom:14px; }
+    label { display:block; font-size:10px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--sienna); margin-bottom:5px; }
+    input, textarea, select {
+      width:100%; background:rgba(255,255,255,0.6); border:1px solid var(--rule);
+      border-radius:4px; padding:9px 11px; font-family:'Work Sans',sans-serif;
+      font-size:13px; color:var(--dark); outline:none;
+      transition:border-color .2s, box-shadow .2s; appearance:none;
+    }
+    input:focus, textarea:focus, select:focus { border-color:var(--sienna); box-shadow:0 0 0 3px rgba(179,75,29,0.1); }
+    select {
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2375726C' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat:no-repeat; background-position:right 11px center; padding-right:28px; cursor:pointer;
+    }
+    textarea { resize:vertical; min-height:80px; font-size:12px; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .form-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+
+    /* Scope items */
+    .scope-items { display:flex; flex-direction:column; gap:6px; margin-bottom:8px; }
+    .scope-item { display:grid; grid-template-columns:28px 1fr 24px; gap:8px; align-items:center; }
+    .scope-num {
+      width:28px; height:28px; background:var(--sienna); color:#fff;
+      border-radius:4px; display:flex; align-items:center; justify-content:center;
+      font-size:11px; font-weight:600; flex-shrink:0;
+    }
+    .scope-num.check { background:var(--green); }
+    .scope-num.cross { background:var(--mid); font-size:14px; }
+
+    /* Line items */
+    .line-item-header { display:grid; grid-template-columns:1fr 90px 90px 80px 24px; gap:8px; margin-bottom:4px; }
+    .line-item-header span { font-size:9px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--grey); }
+    .line-items { display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
+    .line-item { display:grid; grid-template-columns:1fr 90px 90px 80px 24px; gap:8px; align-items:center; }
+    .line-item input { margin:0; }
+    .amount-display {
+      background:rgba(255,255,255,0.4); border:1px solid var(--rule-light);
+      border-radius:4px; padding:9px 11px; font-size:13px; color:var(--mid);
+      text-align:right; white-space:nowrap; overflow:hidden;
+    }
+    .remove-btn {
+      width:24px; height:24px; border-radius:50%; background:transparent;
+      border:1px solid var(--rule); color:var(--grey); font-size:14px;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      transition:all .15s; flex-shrink:0;
+    }
+    .remove-btn:hover { background:#e05050; border-color:#e05050; color:#fff; }
+    .add-line-btn {
+      background:transparent; border:1px dashed var(--rule); border-radius:4px;
+      color:var(--sienna); font-family:'Work Sans',sans-serif; font-size:12px;
+      font-weight:500; letter-spacing:.06em; padding:8px; width:100%;
+      cursor:pointer; transition:all .2s; margin-bottom:14px;
+    }
+    .add-line-btn:hover { border-color:var(--sienna); background:rgba(179,75,29,0.04); }
+
+    /* Totals */
+    .totals-area { background:rgba(255,255,255,0.5); border:1px solid var(--rule-light); border-radius:6px; padding:14px 16px; }
+    .total-row { display:flex; justify-content:space-between; padding:3px 0; font-size:13px; color:var(--mid); }
+    .total-row.grand { border-top:2px solid var(--sienna); margin-top:8px; padding-top:8px; font-size:15px; font-weight:600; color:var(--dark); }
+    .total-row.grand span:last-child { color:var(--sienna); }
+
+    /* Signature upload */
+    .sig-upload-area {
+      border:2px dashed var(--rule); border-radius:6px; padding:20px;
+      text-align:center; cursor:pointer; transition:border-color .2s;
+      background:rgba(255,255,255,0.4); margin-bottom:6px;
+    }
+    .sig-upload-area:hover { border-color:var(--sienna); }
+    .sig-upload-area input[type="file"] { display:none; }
+    .sig-preview { max-height:60px; max-width:180px; display:block; margin:0 auto; }
+    .sig-label { font-size:12px; color:var(--grey); }
+
+    /* Generate button */
+    .generate-btn {
+      width:100%; background:var(--sienna); color:#fff; border:none; border-radius:4px;
+      padding:15px 24px; margin-top:20px; font-family:'Work Sans',sans-serif;
+      font-size:13px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+      cursor:pointer; transition:background .2s;
+    }
+    .generate-btn:hover { background:var(--orange); }
+    .generate-btn:disabled { opacity:.5; cursor:not-allowed; }
+    .note-small { font-family:'Crimson Pro',serif; font-style:italic; font-size:12px; color:var(--grey); margin-top:8px; }
+
+    /* Preview */
+    .preview-panel { position:sticky; top:24px; }
+    .preview-label { font-size:10px; font-weight:600; letter-spacing:.16em; color:var(--sienna); text-transform:uppercase; padding-bottom:6px; border-bottom:1px solid var(--rule); margin-bottom:16px; }
+
+    .invoice-preview { background:#fff; border:1px solid var(--rule); border-radius:6px; overflow:hidden; font-size:10px; line-height:1.5; }
+    .inv-header { background:#0B0A09; color:#fff; padding:14px 18px; display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+    .inv-logo-placeholder { width:36px; height:28px; border:1px solid rgba(255,255,255,0.2); border-radius:2px; display:flex; align-items:center; justify-content:center; font-size:7px; color:rgba(255,255,255,0.4); flex-shrink:0; }
+    .inv-brand-block { flex:1; }
+    .inv-brand { font-family:'Italiana',serif; font-size:15px; }
+    .inv-brand-sub { font-size:8px; opacity:.5; letter-spacing:.1em; text-transform:uppercase; }
+    .inv-meta-block { text-align:right; font-size:9px; }
+    .inv-meta-row { display:flex; gap:8px; justify-content:flex-end; margin-bottom:2px; }
+    .inv-meta-lbl { color:rgba(255,255,255,0.45); }
+    .inv-meta-val { font-weight:600; }
+    .inv-accent { height:2px; background:#B34B1D; }
+    .inv-body { padding:14px 18px; }
+    .inv-title { font-size:18px; font-weight:700; color:#24211F; margin-bottom:2px; }
+    .inv-rule { height:1px; background:#24211F; margin:6px 0; }
+    .inv-billed-lbl { font-size:8px; letter-spacing:.12em; text-transform:uppercase; color:#75726C; }
+    .inv-billed-to { font-weight:600; font-size:11px; margin-bottom:10px; }
+    .inv-table { width:100%; border-collapse:collapse; margin-bottom:10px; }
+    .inv-table th { background:#0B0A09; color:#fff; padding:4px 6px; text-align:left; font-size:8px; letter-spacing:.08em; text-transform:uppercase; }
+    .inv-table th:nth-child(n+2) { text-align:right; }
+    .inv-table td { padding:4px 6px; border-bottom:1px solid #EDE3D6; font-size:9px; }
+    .inv-table td:nth-child(n+2) { text-align:right; white-space:nowrap; }
+    .inv-table tr:nth-child(even) td { background:#f7f0e6; }
+    .inv-totals { text-align:right; font-size:9px; color:#75726C; }
+    .inv-totals div { padding:1px 0; }
+    .inv-grand { display:inline-block; background:#0B0A09; color:#fff; padding:4px 8px; font-weight:700; font-size:10px; margin-top:4px; border-radius:2px; }
+
+    /* Footer */
+    footer { background:var(--black); margin-top:auto; }
+    footer::before { content:''; display:block; height:3px; background:var(--sienna); }
+    .footer-inner { max-width:1200px; margin:0 auto; padding:16px 40px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+    .footer-inner span, .footer-inner a { font-size:11px; color:var(--sand); opacity:.75; text-decoration:none; letter-spacing:.04em; }
+    .footer-inner a:hover { opacity:1; }
+    .footer-sep { opacity:.3; margin:0 8px; }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    main { animation:fadeUp 0.5s ease both; }
+
+    @media (max-width:900px) {
+      .builder-grid { grid-template-columns:1fr; }
+      .preview-panel { position:static; }
+      .header-inner { padding:24px 20px; gap:20px; }
+      .logo-wrap img { height:68px; }
+      .nav-inner { padding:0 20px; }
+      main { padding:36px 20px 60px; }
+      .footer-inner { padding:14px 20px; flex-direction:column; align-items:flex-start; }
+      .line-item { grid-template-columns:1fr 80px 80px 70px 24px; }
+      .line-item-header { grid-template-columns:1fr 80px 80px 70px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-wrap">
+      <img src="kvk_logo2.png" alt="KVK Logo" onerror="this.style.display='none'" />
+    </div>
+    <div class="header-text">
+      <div class="brand-name">Kaal Vellies Kollektief</div>
+      <div class="brand-sub">Photography · Videography · Stellenbosch</div>
+    </div>
+  </div>
+</header>
+<nav>
+  <div class="nav-inner">
+    <a href="index.html">Rates</a>
+    <a href="contact.html">Book</a>
+    <a href="projects.html">Projects</a>
+  </div>
+</nav>
+
+<main>
+  <div class="page-header">
+    <h1 class="page-title">Invoice builder.</h1>
+    <p class="page-sub">Fill in the details — PDF generates directly in your browser. Nothing is sent anywhere.</p>
+  </div>
+
+  <div class="builder-grid">
+    <!-- ══ LEFT FORM ══════════════════════════════════════════════════ -->
+    <div class="form-col">
+
+      <!-- Invoice Details -->
+      <div class="section-label">Invoice Details</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Invoice No.</label>
+          <input type="text" id="invoiceNo" value="KVK-2026-001" oninput="updatePreview()" />
+        </div>
+        <div class="form-group">
+          <label>Invoice Date</label>
+          <input type="date" id="invoiceDate" oninput="updatePreview()" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Due Date</label>
+          <input type="text" id="dueDate" value="After Delivery" oninput="updatePreview()" />
+        </div>
+        <div class="form-group">
+          <label>Link to Project</label>
+          <select id="projectLink" onchange="onProjectChange()">
+            <option value="">— None —</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Billed To -->
+      <div class="section-label">Billed To</div>
+      <div class="form-group">
+        <label>Client / Organisation</label>
+        <input type="text" id="clientName" placeholder="e.g. Stellumthombo" oninput="updatePreview()" />
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <input type="text" id="clientAddress" placeholder="2 Drostdy Street, Stellenbosch, 7600" oninput="updatePreview()" />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="clientEmail" placeholder="info@client.co.za" oninput="updatePreview()" />
+      </div>
+
+      <!-- Line Items -->
+      <div class="section-label">Line Items</div>
+      <div class="line-item-header">
+        <span>Description</span><span style="text-align:center">Qty / Hrs</span><span style="text-align:right">Rate (R)</span><span style="text-align:right">Amount</span><span></span>
+      </div>
+      <div class="line-items" id="lineItems"></div>
+      <button class="add-line-btn" onclick="addLineItem()">+ Add line item</button>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Discount (%)</label>
+          <input type="number" id="discount" value="0" min="0" max="100" step="1" oninput="recalc()" />
+        </div>
+      </div>
+
+      <div class="totals-area">
+        <div class="total-row"><span>Subtotal</span><span id="subtotalDisplay">R 0.00</span></div>
+        <div class="total-row"><span>Discount</span><span id="discountDisplay">— R 0.00</span></div>
+        <div class="total-row grand"><span>Total Due</span><span id="totalDisplay">R 0.00</span></div>
+      </div>
+
+      <!-- Scope of Work -->
+      <div class="section-label">Scope of Work — What They'll Receive</div>
+      <div class="scope-items" id="scopeReceive"></div>
+      <button class="add-line-btn" onclick="addScopeItem('receive')">+ Add deliverable</button>
+
+      <div class="section-label">Scope of Work — Production Commitments</div>
+      <div class="scope-items" id="scopeCommit"></div>
+      <button class="add-line-btn" onclick="addScopeItem('commit')">+ Add commitment</button>
+
+      <div class="section-label">Scope of Work — Not Included</div>
+      <div class="scope-items" id="scopeExclude"></div>
+      <button class="add-line-btn" onclick="addScopeItem('exclude')">+ Add exclusion</button>
+
+      <!-- Portfolio & Acceptance -->
+      <div class="section-label">Portfolio &amp; Credit</div>
+      <div class="form-group">
+        <textarea id="portfolioText" oninput="updatePreview()">While all final work remains the property of the client upon payment, Kaal Vellies Kollektief retains the right to feature this work in its portfolio, website, and social media channels for the purpose of showcasing creative work. Credit will reference the client by name where appropriate.</textarea>
+      </div>
+
+      <div class="section-label">Acceptance</div>
+      <div class="form-group">
+        <textarea id="acceptanceText" oninput="updatePreview()">By proceeding with payment, the client agrees to the scope and terms outlined above.</textarea>
+      </div>
+
+      <!-- Signature -->
+      <div class="section-label">Signature</div>
+      <div class="sig-upload-area" onclick="document.getElementById('sigFile').click()">
+        <input type="file" id="sigFile" accept="image/*" onchange="loadSignature(event)" />
+        <div id="sigPreviewWrap">
+          <div class="sig-label">Click to upload your signature image (PNG with transparent background works best)</div>
+        </div>
+      </div>
+
+      <button class="generate-btn" id="generateBtn" onclick="generatePDF()">↓ &nbsp; Generate PDF</button>
+      <p class="note-small">Saves as [InvoiceNo].pdf — two pages: invoice + scope.</p>
+
+    </div>
+
+    <!-- ══ RIGHT PREVIEW ════════════════════════════════════════════ -->
+    <div class="preview-panel">
+      <div class="preview-label">Live Preview — Page 1</div>
+      <div class="invoice-preview">
+        <div class="inv-header">
+          <div class="inv-logo-placeholder" id="prev-logo">KVK</div>
+          <div class="inv-brand-block">
+            <div class="inv-brand">Kaal Vellies Kollektief</div>
+            <div class="inv-brand-sub">Photography · Videography</div>
+          </div>
+          <div class="inv-meta-block">
+            <div class="inv-meta-row"><span class="inv-meta-lbl">INV NO.</span><span class="inv-meta-val" id="prev-no">KVK-2026-001</span></div>
+            <div class="inv-meta-row"><span class="inv-meta-lbl">DATE</span><span class="inv-meta-val" id="prev-date">—</span></div>
+            <div class="inv-meta-row"><span class="inv-meta-lbl">DUE</span><span class="inv-meta-val" id="prev-due">After Delivery</span></div>
+          </div>
+        </div>
+        <div class="inv-accent"></div>
+        <div class="inv-body">
+          <div class="inv-title">INVOICE</div>
+          <div class="inv-rule"></div>
+          <div class="inv-billed-lbl">Billed To</div>
+          <div class="inv-billed-to" id="prev-client">—</div>
+          <table class="inv-table">
+            <thead><tr><th>Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead>
+            <tbody id="prev-lines"></tbody>
+          </table>
+          <div class="inv-totals">
+            <div id="prev-sub">Subtotal: R 0.00</div>
+            <div id="prev-disc">Discount: — R 0.00</div>
+            <div class="inv-grand" id="prev-total">TOTAL DUE: R 0.00</div>
+          </div>
+          <div style="margin-top:12px;font-size:9px;color:#4C433B;">
+            <strong style="color:#B34B1D;">PAYMENT DETAILS</strong><br/>
+            Bank: Investec &nbsp;·&nbsp; Acc: Cornelius Marthinus Prinsloo &nbsp;·&nbsp; No: 10012991243<br/>
+            Branch: 580105 &nbsp;·&nbsp; Ref: <span id="prev-ref">KVK-2026-001</span>
+          </div>
+        </div>
+      </div>
+      <p style="font-family:'Crimson Pro',serif;font-style:italic;font-size:12px;color:var(--grey);margin-top:10px;">Page 2 (scope, portfolio, acceptance, signature) generates in the PDF.</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <a href="https://kvk.myportfolio.com" target="_blank">kvk.myportfolio.com</a>
+      <span class="footer-sep">·</span>
+      <a href="mailto:corne.prinsloo@icloud.com">corne.prinsloo@icloud.com</a>
+      <span class="footer-sep">·</span>
+      <a href="https://wa.me/27796250814">+27 79 625 0814</a>
+    </div>
+    <span>@kaalvellies_kollektief</span>
+  </div>
+</footer>
+
+<script>
+const { PDFDocument, rgb, StandardFonts, degrees } = PDFLib;
+
+// ── Formatting ────────────────────────────────────────────────────────────
+const fmtR = n => 'R ' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+// ── Init ──────────────────────────────────────────────────────────────────
+document.getElementById('invoiceDate').value = new Date().toISOString().split('T')[0];
+
+// Load projects
+async function loadProjects() {
+  try {
+    const res = await fetch('projects.json');
+    const projects = await res.json();
+    const sel = document.getElementById('projectLink');
+    projects.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = `${p.service} — ${p.date}`;
+      sel.appendChild(opt);
+    });
+  } catch(e) {}
+}
+loadProjects();
+
+async function onProjectChange() {
+  const id = document.getElementById('projectLink').value;
+  if (!id) return;
+  try {
+    const res = await fetch('projects.json');
+    const projects = await res.json();
+    const p = projects.find(pr => pr.id === id);
+    if (p?.invoiceRef) document.getElementById('invoiceNo').value = p.invoiceRef;
+    if (p?.service)   document.getElementById('clientName').value = p.service;
+    updatePreview(); recalc();
+  } catch(e) {}
+}
+
+// ── Line items ────────────────────────────────────────────────────────────
+let lineId = 0;
+function addLineItem(desc='', qty='', rate='') {
+  lineId++;
+  const id = lineId;
+  const div = document.createElement('div');
+  div.className = 'line-item'; div.id = `line-${id}`;
+  div.innerHTML = `
+    <input type="text"   class="li-desc" placeholder="Description" value="${desc}" oninput="recalc()" />
+    <input type="text"   class="li-qty"  placeholder="e.g. 2 or 2 hrs" value="${qty}" oninput="recalc()" style="text-align:center" />
+    <input type="number" class="li-rate" placeholder="0.00" value="${rate}" oninput="recalc()" step="0.01" min="0" style="text-align:right" />
+    <div class="amount-display" id="amt-${id}">R 0.00</div>
+    <button class="remove-btn" onclick="removeLine(${id})" title="Remove">×</button>
+  `;
+  document.getElementById('lineItems').appendChild(div);
+  recalc();
+}
+function removeLine(id) {
+  const el = document.getElementById(`line-${id}`);
+  if (el) { el.remove(); recalc(); }
+}
+
+// Default lines
+addLineItem('Shoot Day', '2 hrs', '200');
+addLineItem('Video Editing', '4 hrs', '200');
+addLineItem('Travel — 32 km @ R5/km', '', '160');
+
+// ── Scope items ───────────────────────────────────────────────────────────
+let scopeId = 0;
+const scopeDefaults = {
+  receive: [
+    'Long-form video (~5 min) — landscape (16:9), colour graded, licensed music and titles.',
+    'Short-form video (~1 min) — same format, cut for social media.',
+    'Bonus: Vertical Reels cut — portrait (9:16) for Instagram & Facebook Reels.',
+    'Up to 3 revision rounds across all videos.',
+  ],
+  commit: [
+    'Music will be fully royalty-free and licensed — safe on YouTube, Facebook, and Instagram.',
+    'No identifiable footage of children\'s faces. Filming uses over-the-shoulder, hands, and back-of-head shots.',
+    'First cut of all videos delivered within 1 week of the final shoot day.',
+    'Final files delivered as MP4 (H.264), ready for direct upload to all major platforms.',
+  ],
+  exclude: [
+    'Drone footage, additional crew, or lighting equipment.',
+    'More than 2 locations or 4 total shoot hours. Additional time billed at the hourly rate.',
+    'More than 3 revision rounds. Additional revisions billed at the hourly rate.',
+  ],
+};
+const scopeIcons = { receive: 'v', commit: 'v', exclude: 'x' };
+const scopeColors = { receive: '#4CAF79', commit: '#4CAF79', exclude: '#4C433B' };
+
+function addScopeItem(type, text='') {
+  scopeId++;
+  const id = scopeId;
+  const containerId = type === 'receive' ? 'scopeReceive' : type === 'commit' ? 'scopeCommit' : 'scopeExclude';
+  const icon = scopeIcons[type];
+  const color = scopeColors[type];
+  const div = document.createElement('div');
+  div.className = 'scope-item'; div.id = `scope-${id}`;
+  div.innerHTML = `
+    <div class="scope-num" style="background:${color}">${icon}</div>
+    <input type="text" placeholder="Enter item…" value="${text}" />
+    <button class="remove-btn" onclick="document.getElementById('scope-${id}').remove()" title="Remove">×</button>
+  `;
+  document.getElementById(containerId).appendChild(div);
+}
+
+// Load defaults
+scopeDefaults.receive.forEach(t => addScopeItem('receive', t));
+scopeDefaults.commit.forEach(t => addScopeItem('commit', t));
+scopeDefaults.exclude.forEach(t => addScopeItem('exclude', t));
+
+// ── Signature ─────────────────────────────────────────────────────────────
+let signatureDataUrl = null;
+function loadSignature(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    signatureDataUrl = e.target.result;
+    document.getElementById('sigPreviewWrap').innerHTML =
+      `<img src="${signatureDataUrl}" class="sig-preview" alt="Signature" />`;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Recalc ────────────────────────────────────────────────────────────────
+function getLineData() {
+  return Array.from(document.querySelectorAll('.line-item')).map(line => {
+    const desc   = line.querySelector('.li-desc').value || '';
+    const qty    = line.querySelector('.li-qty').value || '';
+    const rate   = parseFloat(line.querySelector('.li-rate').value) || 0;
+    const qtyNum = parseFloat(qty);
+    // Extract leading number from qty (e.g. "2 hrs" -> 2, "32 km" -> 32, "---" -> NaN)
+    const qtyExtracted = parseFloat(qty.trim());
+    const amount = (!isNaN(qtyExtracted) && qty.trim() !== '') ? qtyExtracted * rate : rate;
+    return { desc, qty, rate, amount, id: line.id.replace('line-','') };
+  });
+}
+
+function recalc() {
+  const lines = getLineData();
+  let subtotal = 0;
+  lines.forEach(l => {
+    subtotal += l.amount;
+    const el = document.getElementById(`amt-${l.id}`);
+    if (el) el.textContent = fmtR(l.amount);
+  });
+  const discPct = parseFloat(document.getElementById('discount').value) || 0;
+  const discAmt = subtotal * discPct / 100;
+  const total   = subtotal - discAmt;
+
+  document.getElementById('subtotalDisplay').textContent = fmtR(subtotal);
+  document.getElementById('discountDisplay').textContent = `— ${fmtR(discAmt)}`;
+  document.getElementById('totalDisplay').textContent    = fmtR(total);
+  updatePreview();
+}
+
+// ── Live preview ──────────────────────────────────────────────────────────
+function updatePreview() {
+  const no   = document.getElementById('invoiceNo').value || '—';
+  const date = document.getElementById('invoiceDate').value || '—';
+  const due  = document.getElementById('dueDate').value || '—';
+  document.getElementById('prev-no').textContent  = no;
+  document.getElementById('prev-date').textContent = date;
+  document.getElementById('prev-due').textContent  = due;
+  document.getElementById('prev-ref').textContent  = no;
+
+  const name  = document.getElementById('clientName').value;
+  const addr  = document.getElementById('clientAddress').value;
+  const email = document.getElementById('clientEmail').value;
+  document.getElementById('prev-client').textContent =
+    [name, addr, email].filter(Boolean).join(' · ') || '—';
+
+  const lines = getLineData();
+  let subtotal = 0;
+  document.getElementById('prev-lines').innerHTML = lines.map((l,i) => {
+    subtotal += l.amount;
+    return `<tr>
+      <td>${l.desc || '—'}</td>
+      <td style="text-align:right">${l.qty || '—'}</td>
+      <td style="text-align:right">${l.rate ? fmtR(l.rate) : '—'}</td>
+      <td style="text-align:right;white-space:nowrap">${fmtR(l.amount)}</td>
+    </tr>`;
+  }).join('');
+
+  const discPct = parseFloat(document.getElementById('discount').value) || 0;
+  const discAmt = subtotal * discPct / 100;
+  const total   = subtotal - discAmt;
+  document.getElementById('prev-sub').textContent   = `Subtotal: ${fmtR(subtotal)}`;
+  document.getElementById('prev-disc').textContent  = `Discount (${discPct}%): — ${fmtR(discAmt)}`;
+  document.getElementById('prev-total').textContent = `TOTAL DUE: ${fmtR(total)}`;
+}
+
+['invoiceNo','invoiceDate','dueDate','clientName','clientAddress','clientEmail']
+  .forEach(id => { const el = document.getElementById(id); if(el) el.addEventListener('input', updatePreview); });
+
+recalc();
+
+// ── PDF helpers ───────────────────────────────────────────────────────────
+function wrapText(text, maxChars) {
+  const words = text.split(' ');
+  const lines = [];
+  let cur = '';
+  words.forEach(w => {
+    if ((cur + ' ' + w).trim().length <= maxChars) {
+      cur = (cur + ' ' + w).trim();
+    } else {
+      if (cur) lines.push(cur);
+      cur = w;
+    }
+  });
+  if (cur) lines.push(cur);
+  return lines;
+}
+
+function drawSectionHead(page, text, x, y, font, color) {
+  page.drawText(text, { x, y, font, size: 8, color });
+  page.drawLine({ start:{x, y:y-3}, end:{x:x+80, y:y-3}, thickness:0.8, color });
+  return y - 14;
+}
+
+// ── GENERATE PDF ──────────────────────────────────────────────────────────
+async function generatePDF() {
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = true; btn.textContent = 'Generating…';
+
+  try {
+    const pdfDoc = await PDFDocument.create();
+    const W = 595, H = 842, M = 45, IW = W - M*2;
+
+    const fBold   = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const fReg    = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fObliq  = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
+
+    const cBlack  = rgb(0.043,0.039,0.035);
+    const cSienna = rgb(0.702,0.294,0.110);
+    const cWhite  = rgb(1,1,1);
+    const cGrey   = rgb(0.459,0.439,0.420);
+    const cMid    = rgb(0.298,0.263,0.231);
+    const cLight  = rgb(0.969,0.941,0.902);
+    const cGreen  = rgb(0.298,0.686,0.475);
+
+    const invNo   = document.getElementById('invoiceNo').value    || 'KVK-2026-001';
+    const invDate = document.getElementById('invoiceDate').value   || '';
+    const invDue  = document.getElementById('dueDate').value       || 'After Delivery';
+    const cName   = document.getElementById('clientName').value    || '';
+    const cAddr   = document.getElementById('clientAddress').value || '';
+    const cEmail  = document.getElementById('clientEmail').value   || '';
+    const discPct = parseFloat(document.getElementById('discount').value) || 0;
+
+    // Try load logo
+    let logoImg = null;
+    try {
+      const logoRes = await fetch('kvk_logo2.png');
+      if (logoRes.ok) {
+        const logoBytes = await logoRes.arrayBuffer();
+        logoImg = await pdfDoc.embedPng(logoBytes);
+      }
+    } catch(e) {}
+
+    // Try load signature
+    let sigImg = null;
+    if (signatureDataUrl) {
+      try {
+        const sigBytes = await fetch(signatureDataUrl).then(r => r.arrayBuffer());
+        sigImg = signatureDataUrl.includes('png')
+          ? await pdfDoc.embedPng(sigBytes)
+          : await pdfDoc.embedJpg(sigBytes);
+      } catch(e) {}
+    }
+
+    // ════════════════════════════════════════════════════════
+    // PAGE 1 — INVOICE
+    // ════════════════════════════════════════════════════════
+    const p1 = pdfDoc.addPage([W, H]);
+
+    // Header band
+    p1.drawRectangle({ x:0, y:H-90, width:W, height:90, color:cBlack });
+    p1.drawRectangle({ x:0, y:H-93, width:W, height:3,  color:cSienna });
+
+    // Logo
+    if (logoImg) {
+      const logoDims = logoImg.scaleToFit(38, 32);
+      p1.drawImage(logoImg, { x:M, y:H-12-logoDims.height, width:logoDims.width, height:logoDims.height });
+    }
+
+    // Brand name
+    p1.drawText('Kaal Vellies Kollektief', { x:M+46, y:H-34, font:fBold,  size:16, color:cWhite });
+    p1.drawText('Photography · Videography · Stellenbosch', { x:M+46, y:H-48, font:fReg, size:7.5, color:rgb(0.875,0.765,0.451) });
+
+    // Meta top-right
+    const metaLabels = ['INVOICE NO.','DATE','DUE DATE'];
+    const metaVals   = [invNo, invDate, invDue];
+    metaLabels.forEach((lbl,i) => {
+      const ry = H - 28 - i*18;
+      p1.drawText(lbl, { x:W-M-155, y:ry, font:fReg, size:7, color:rgb(0.55,0.55,0.55) });
+      p1.drawText(metaVals[i], { x:W-M-70, y:ry, font:fBold, size:8.5, color:cWhite });
+    });
+
+    let y = H - 105;
+
+    // INVOICE title + rule
+    p1.drawText('INVOICE', { x:M, y, font:fBold, size:22, color:cBlack });
+    y -= 10;
+    p1.drawLine({ start:{x:M,y}, end:{x:M+IW,y}, thickness:1.2, color:cBlack });
+    y -= 14;
+
+    // Billed to
+    p1.drawText('BILLED TO', { x:M, y, font:fReg, size:7, color:cGrey });
+    y -= 13;
+    if (cName)  { p1.drawText(cName,  { x:M, y, font:fBold, size:11, color:cBlack }); y -= 12; }
+    if (cAddr)  { p1.drawText(cAddr,  { x:M, y, font:fReg,  size:9,  color:cMid   }); y -= 12; }
+    if (cEmail) { p1.drawText(cEmail, { x:M, y, font:fReg,  size:9,  color:cMid   }); y -= 12; }
+    y -= 6;
+
+    // Table header
+    const cw = [IW*0.50, IW*0.14, IW*0.18, IW*0.18];
+    const cx = [M, M+cw[0], M+cw[0]+cw[1], M+cw[0]+cw[1]+cw[2]];
+    const rowH = 18;
+
+    p1.drawRectangle({ x:M, y:y-rowH+4, width:IW, height:rowH, color:cBlack });
+    ['DESCRIPTION','QTY','RATE (R)','AMOUNT (R)'].forEach((h,i) => {
+      const tx = i===0 ? cx[i]+4 : i===1 ? cx[i]+2 : cx[i]+cw[i]-fBold.widthOfTextAtSize(h,7.5)-2;
+      p1.drawText(h, { x:tx, y:y-11, font:fBold, size:7.5, color:cWhite });
+    });
+    y -= rowH;
+
+    // Line item rows
+    const lines = getLineData();
+    let subtotal = 0;
+    lines.forEach((l,idx) => {
+      if (idx%2===0) p1.drawRectangle({ x:M, y:y-rowH+4, width:IW, height:rowH, color:cLight });
+
+      // Truncate desc to fit column
+      let desc = l.desc;
+      while (desc.length > 0 && fReg.widthOfTextAtSize(desc, 8.5) > cw[0]-8) desc = desc.slice(0,-1);
+      if (desc.length < l.desc.length) desc = desc.slice(0,-1) + '…';
+
+      // Format rate & amount — never wrap, truncate if needed
+      const rateStr   = l.rate > 0 ? fmtR(l.rate) : 'Incl.';
+      const amountStr = l.amount > 0 ? fmtR(l.amount) : '—';
+
+      p1.drawText(desc, { x:cx[0]+4, y:y-11, font:fReg, size:8.5, color:cBlack });
+      p1.drawText(l.qty || '—', { x:cx[1]+2, y:y-11, font:fReg, size:8.5, color:cBlack });
+      // Right-align rate and amount
+      const rateX   = cx[2]+cw[2] - fReg.widthOfTextAtSize(rateStr,8.5)   - 4;
+      const amountX = cx[3]+cw[3] - fReg.widthOfTextAtSize(amountStr,8.5) - 4;
+      p1.drawText(rateStr,   { x:rateX,   y:y-11, font:fReg, size:8.5, color:cBlack });
+      p1.drawText(amountStr, { x:amountX, y:y-11, font:fReg, size:8.5, color:cBlack });
+
+      subtotal += l.amount;
+      y -= rowH;
+    });
+    y -= 6;
+
+    // Totals
+    const discAmt = subtotal * discPct / 100;
+    const total   = subtotal - discAmt;
+    const totX = M + IW*0.58, totW = IW*0.42;
+
+    p1.drawText('Subtotal',          { x:totX, y, font:fReg,  size:9, color:cGrey });
+    p1.drawText(fmtR(subtotal), { x:totX+totW - fReg.widthOfTextAtSize(fmtR(subtotal),9) - 2, y, font:fReg, size:9, color:cGrey });
+    y -= 14;
+    p1.drawText(`Discount (${discPct}%)`, { x:totX, y, font:fReg, size:9, color:cGrey });
+    const dStr = `— ${fmtR(discAmt)}`;
+    p1.drawText(dStr, { x:totX+totW - fReg.widthOfTextAtSize(dStr,9) - 2, y, font:fReg, size:9, color:cGrey });
+    y -= 6;
+
+    p1.drawRectangle({ x:totX-4, y:y-14, width:totW+4, height:22, color:cBlack });
+    p1.drawText('TOTAL DUE', { x:totX, y:y-7, font:fBold, size:9, color:cWhite });
+    const tStr = fmtR(total);
+    p1.drawText(tStr, { x:totX+totW - fBold.widthOfTextAtSize(tStr,9) - 6, y:y-7, font:fBold, size:9, color:cWhite });
+    y -= 30;
+
+    // Payment details
+    p1.drawText('PAYMENT DETAILS', { x:M, y, font:fBold, size:8, color:cSienna });
+    y -= 5;
+    p1.drawLine({ start:{x:M,y}, end:{x:M+80,y}, thickness:0.8, color:cSienna });
+    y -= 13;
+
+    const bank = [
+      ['Bank:','Investec Bank'],
+      ['Account Name:','Cornelius Marthinus Prinsloo'],
+      ['Account No.:','10012991243'],
+      ['Branch Code:','580105'],
+      ['Reference:',invNo],
+    ];
+    bank.forEach(([lbl,val]) => {
+      p1.drawText(lbl, { x:M,    y, font:fBold, size:8.5, color:cBlack });
+      p1.drawText(val, { x:M+76, y, font:fReg,  size:8.5, color:cBlack });
+      y -= 13;
+    });
+
+    // Footer p1
+    p1.drawRectangle({ x:0, y:0, width:W, height:28, color:cBlack });
+    p1.drawRectangle({ x:0, y:28, width:W, height:2, color:cSienna });
+    const footTxt = `Thank you for your support  ·  Kaal Vellies Kollektief  ·  kvk.myportfolio.com`;
+    const ftW = fReg.widthOfTextAtSize(footTxt, 8);
+    p1.drawText(footTxt, { x:(W-ftW)/2, y:10, font:fReg, size:8, color:rgb(0.875,0.765,0.451) });
+
+    // ════════════════════════════════════════════════════════
+    // PAGE 2 — SCOPE OF WORK
+    // ════════════════════════════════════════════════════════
+    const p2 = pdfDoc.addPage([W, H]);
+
+    // Footer p2
+    p2.drawRectangle({ x:0, y:0, width:W, height:28, color:cBlack });
+    p2.drawRectangle({ x:0, y:28, width:W, height:2, color:cSienna });
+    p2.drawText(footTxt, { x:(W-ftW)/2, y:10, font:fReg, size:8, color:rgb(0.875,0.765,0.451) });
+
+    y = H - 20;
+
+    // Scope title
+    p2.drawText('SCOPE OF WORK', { x:M, y, font:fBold, size:20, color:cBlack });
+    y -= 14;
+    p2.drawText(`Invoice ${invNo}  ·  ${cName || 'Client'}  ·  ${invDate}`, { x:M, y, font:fReg, size:8.5, color:cGrey });
+    y -= 8;
+    p2.drawLine({ start:{x:M,y}, end:{x:M+IW,y}, thickness:1.2, color:cBlack });
+    y -= 16;
+
+    // Helper: draw a scope section
+    function drawScopeSection(page, items, icon, iconColor, colText) {
+      items.forEach((text, idx) => {
+        const bx = M, bw = 18, bh = 18;
+        page.drawRectangle({ x:bx, y:y-bh+4, width:bw, height:bh, color:iconColor });
+        const iconW = fBold.widthOfTextAtSize(icon,9);
+        page.drawText(icon, { x:bx+(bw-iconW)/2, y:y-11, font:fBold, size:9, color:cWhite });
+
+        // Wrap text in remaining width
+        const textX = bx+bw+6;
+        const maxW  = IW - bw - 6;
+        const maxCh = Math.floor(maxW / 4.8);
+        const wrapped = wrapText(text, maxCh);
+        wrapped.forEach((line, li) => {
+          page.drawText(line, { x:textX, y:y-11-(li*12), font: li===0&&text.includes('—')?fBold:fReg, size:8.5, color:colText });
+        });
+        if (idx%2===0) page.drawRectangle({ x:M, y:y-bh+4, width:IW, height:bh, color:cLight });
+        // Redraw icon on top
+        page.drawRectangle({ x:bx, y:y-bh+4, width:bw, height:bh, color:iconColor });
+        page.drawText(icon, { x:bx+(bw-iconW)/2, y:y-11, font:fBold, size:9, color:cWhite });
+
+        const textLines = wrapText(text, maxCh);
+        textLines.forEach((line,li) => {
+          page.drawText(line, { x:textX, y:y-11-(li*12), font:fReg, size:8.5, color:colText });
+        });
+        y -= Math.max(bh, textLines.length * 12 + 4);
+      });
+      y -= 6;
+    }
+
+    // What they'll receive
+    y = drawSectionHead(p2, 'WHAT YOU WILL RECEIVE', M, y, fBold, cSienna);
+    const receiveItems = Array.from(document.querySelectorAll('#scopeReceive .scope-item input')).map(i => i.value).filter(Boolean);
+    drawScopeSection(p2, receiveItems, 'v', cGreen, cMid);
+
+    // Production commitments
+    y = drawSectionHead(p2, 'PRODUCTION COMMITMENTS', M, y, fBold, cSienna);
+    const commitItems = Array.from(document.querySelectorAll('#scopeCommit .scope-item input')).map(i => i.value).filter(Boolean);
+    drawScopeSection(p2, commitItems, 'v', cGreen, cMid);
+
+    // Not included
+    y = drawSectionHead(p2, 'NOT INCLUDED', M, y, fBold, cSienna);
+    const excludeItems = Array.from(document.querySelectorAll('#scopeExclude .scope-item input')).map(i => i.value).filter(Boolean);
+    drawScopeSection(p2, excludeItems, 'x', cMid, cMid);
+
+    y -= 6;
+
+    // Portfolio & credit
+    y = drawSectionHead(p2, 'PORTFOLIO & CREDIT', M, y, fBold, cSienna);
+    const portText = document.getElementById('portfolioText').value;
+    const portLines = wrapText(portText, 90);
+    portLines.forEach(line => {
+      p2.drawText(line, { x:M, y, font:fReg, size:8.5, color:cMid });
+      y -= 12;
+    });
+    y -= 8;
+
+    // Acceptance
+    y = drawSectionHead(p2, 'ACCEPTANCE', M, y, fBold, cSienna);
+    const accText = document.getElementById('acceptanceText').value;
+    const accLines = wrapText(accText, 90);
+    accLines.forEach(line => {
+      p2.drawText(line, { x:M, y, font:fReg, size:8.5, color:cMid });
+      y -= 12;
+    });
+    y -= 16;
+
+    // Signature block
+    p2.drawText('Corné Prinsloo', { x:M, y, font:fBold, size:9, color:cBlack });
+    y -= 6;
+    if (sigImg) {
+      const sigDims = sigImg.scaleToFit(80, 35);
+      p2.drawImage(sigImg, { x:M, y:y-sigDims.height, width:sigDims.width, height:sigDims.height });
+      y -= sigDims.height + 6;
+    } else {
+      y -= 24;
+    }
+    p2.drawLine({ start:{x:M, y}, end:{x:M+90, y}, thickness:0.8, color:cBlack });
+    y -= 11;
+    p2.drawText(`Signature  ·  ${invDate}`, { x:M, y, font:fReg, size:8, color:cGrey });
+
+    // ── Save ──────────────────────────────────────────────────────────
+    const bytes = await pdfDoc.save();
+    const blob  = new Blob([bytes], { type:'application/pdf' });
+    const url   = URL.createObjectURL(blob);
+    const a     = document.createElement('a');
+    a.href = url; a.download = `${invNo}.pdf`; a.click();
+    URL.revokeObjectURL(url);
+
+  } catch(err) {
+    console.error(err);
+    alert('Error generating PDF — check the browser console for details.');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '↓ &nbsp; Generate PDF';
+}
+</script>
+</body>
+</html>

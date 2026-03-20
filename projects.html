@@ -9,22 +9,24 @@
   <link href="https://fonts.googleapis.com/css2?family=Gloock&family=Italiana&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --black:  #0B0A09;
-      --dark:   #24211F;
-      --mid:    #4C433B;
-      --grey:   #75726C;
-      --sienna: #B34B1D;
-      --orange: #D37835;
-      --sand:   #DFB373;
-      --cream:  #FAE2B4;
-      --bg:     #F7F0E6;
-      --rule:   #D9C4A8;
-      --rule-light: #EDE3D6;
+      --black:       #0B0A09;
+      --dark:        #24211F;
+      --mid:         #4C433B;
+      --grey:        #75726C;
+      --sienna:      #B34B1D;
+      --orange:      #D37835;
+      --sand:        #DFB373;
+      --cream:       #FAE2B4;
+      --bg:          #F7F0E6;
+      --rule:        #D9C4A8;
+      --rule-light:  #EDE3D6;
+      --green:       #4CAF79;
+      --green-text:  #3a8f5e;
+      --red:         #e05050;
+      --red-text:    #c03838;
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-
     body {
       background: var(--bg);
       color: var(--dark);
@@ -35,382 +37,276 @@
       display: flex;
       flex-direction: column;
     }
-
     body::before {
       content: '';
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
-      opacity: 0.025;
-      pointer-events: none;
-      z-index: 1000;
+      opacity: 0.025; pointer-events: none; z-index: 1000;
     }
 
-    /* ── Header ── */
+    /* Header */
     header { background: var(--black); }
     header::after { content: ''; display: block; height: 3px; background: var(--sienna); }
     .header-inner {
-      max-width: 1100px;
-      margin: 0 auto;
+      max-width: 1100px; margin: 0 auto;
       padding: 32px 40px 28px;
-      display: flex;
-      align-items: center;
-      gap: 32px;
+      display: flex; align-items: center; gap: 32px;
     }
     .logo-wrap img {
-      height: 90px;
-      width: auto;
-      display: block;
+      height: 90px; width: auto; display: block;
       filter: drop-shadow(0 4px 24px rgba(179,75,29,0.25));
     }
     .header-text { flex: 1; }
     .brand-name {
       font-family: 'Italiana', serif;
       font-size: clamp(28px, 4vw, 42px);
-      color: #fff;
-      line-height: 1.1;
+      color: #fff; line-height: 1.1;
     }
     .brand-sub {
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.18em;
-      color: var(--sand);
-      text-transform: uppercase;
-      margin-top: 6px;
+      font-size: 10px; font-weight: 500;
+      letter-spacing: 0.18em; color: var(--sand);
+      text-transform: uppercase; margin-top: 6px;
     }
 
-    /* ── Nav ── */
+    /* Nav */
     nav { background: var(--black); border-top: 1px solid rgba(255,255,255,0.06); }
-    .nav-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 40px;
-      display: flex;
-    }
+    .nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 40px; display: flex; }
     nav a {
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--sand);
-      opacity: 0.6;
-      text-decoration: none;
-      padding: 12px 20px 12px 0;
-      transition: opacity 0.2s;
+      font-size: 11px; font-weight: 500; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--sand); opacity: 0.6;
+      text-decoration: none; padding: 12px 20px 12px 0; transition: opacity 0.2s;
     }
     nav a:hover { opacity: 1; }
     nav a.active { opacity: 1; color: var(--sienna); }
 
-    /* ── Main ── */
-    main {
-      flex: 1;
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 52px 40px 80px;
-      width: 100%;
-    }
+    /* Main */
+    main { flex: 1; max-width: 1100px; margin: 0 auto; padding: 52px 40px 80px; width: 100%; }
 
-    /* ── Public overview ── */
-    .overview-section { margin-bottom: 56px; }
-
+    /* Section label */
     .section-label {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.16em;
-      color: var(--sienna);
-      text-transform: uppercase;
-      padding-bottom: 6px;
-      border-bottom: 1px solid var(--rule);
-      margin-bottom: 24px;
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.16em; color: var(--sienna);
+      text-transform: uppercase; padding-bottom: 6px;
+      border-bottom: 1px solid var(--rule); margin-bottom: 24px;
     }
 
+    /* Stats */
     .stats-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 16px;
-      margin-bottom: 32px;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px; margin-bottom: 32px;
     }
-
     .stat-card {
       background: rgba(255,255,255,0.5);
       border: 1px solid var(--rule-light);
-      border-radius: 6px;
-      padding: 20px 24px;
+      border-radius: 6px; padding: 20px 24px;
     }
-
     .stat-num {
       font-family: 'Gloock', serif;
-      font-size: 40px;
-      color: var(--sienna);
-      line-height: 1;
-      margin-bottom: 4px;
+      font-size: 40px; color: var(--sienna); line-height: 1; margin-bottom: 4px;
     }
-
     .stat-label {
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.08em;
-      color: var(--grey);
-      text-transform: uppercase;
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.08em; color: var(--grey); text-transform: uppercase;
     }
 
-    /* Public project pills */
-    .project-pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
+    /* Pills */
+    .project-pills { display: flex; flex-wrap: wrap; gap: 10px; }
     .project-pill {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      display: flex; align-items: center; gap: 10px;
       background: rgba(255,255,255,0.5);
       border: 1px solid var(--rule-light);
-      border-radius: 100px;
-      padding: 8px 16px 8px 12px;
-      font-size: 12px;
-      color: var(--dark);
+      border-radius: 100px; padding: 8px 16px 8px 12px;
+      font-size: 12px; color: var(--dark);
     }
-
-    .pill-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
+    .pill-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .pill-dot.not-started { background: var(--rule); }
     .pill-dot.in-progress { background: var(--orange); }
-    .pill-dot.delivered   { background: #4CAF79; }
-
+    .pill-dot.done        { background: var(--green); }
     .pill-service { font-weight: 500; }
     .pill-date { color: var(--grey); }
 
-    /* ── Divider ── */
+    /* Divider */
     .thick-rule {
       height: 2px;
       background: linear-gradient(90deg, var(--orange), transparent);
-      border: none;
-      margin: 48px 0;
+      border: none; margin: 48px 0;
     }
 
-    /* ── Private lookup ── */
+    /* Lookup */
     .lookup-section { max-width: 560px; }
-
     .page-title {
       font-family: 'Gloock', serif;
       font-size: clamp(28px, 4vw, 44px);
-      color: var(--dark);
-      line-height: 1.1;
-      margin-bottom: 10px;
+      color: var(--dark); line-height: 1.1; margin-bottom: 10px;
     }
-
     .page-sub {
-      font-family: 'Crimson Pro', serif;
-      font-style: italic;
-      font-size: 16px;
-      color: var(--grey);
-      margin-bottom: 28px;
+      font-family: 'Crimson Pro', serif; font-style: italic;
+      font-size: 16px; color: var(--grey); margin-bottom: 28px;
     }
-
-    .lookup-form {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 32px;
-    }
-
+    .lookup-form { display: flex; gap: 10px; margin-bottom: 32px; }
     .lookup-input {
       flex: 1;
       background: rgba(255,255,255,0.6);
-      border: 1px solid var(--rule);
-      border-radius: 4px;
+      border: 1px solid var(--rule); border-radius: 4px;
       padding: 12px 14px;
-      font-family: 'Work Sans', sans-serif;
-      font-size: 14px;
-      color: var(--dark);
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: 'Work Sans', sans-serif; font-size: 14px; color: var(--dark);
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
     }
     .lookup-input:focus {
       border-color: var(--sienna);
       box-shadow: 0 0 0 3px rgba(179,75,29,0.1);
     }
-
     .lookup-btn {
-      background: var(--sienna);
-      color: #fff;
-      border: none;
-      border-radius: 4px;
+      background: var(--sienna); color: #fff; border: none; border-radius: 4px;
       padding: 12px 20px;
-      font-family: 'Work Sans', sans-serif;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background 0.2s;
-      white-space: nowrap;
+      font-family: 'Work Sans', sans-serif; font-size: 12px; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.2s; white-space: nowrap;
     }
     .lookup-btn:hover { background: var(--orange); }
 
-    /* ── Project card ── */
+    /* Project card */
     .project-card {
       display: none;
       background: rgba(255,255,255,0.6);
-      border: 1px solid var(--rule);
-      border-radius: 8px;
-      overflow: hidden;
-      animation: fadeUp 0.4s ease both;
+      border: 1px solid var(--rule); border-radius: 8px;
+      overflow: hidden; animation: fadeUp 0.4s ease both;
     }
-
     .project-card.visible { display: block; }
 
     .card-header {
-      background: var(--black);
-      padding: 20px 24px;
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
+      background: var(--black); padding: 20px 24px;
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 16px;
     }
-
     .card-service {
-      font-family: 'Gloock', serif;
-      font-size: 22px;
-      color: #fff;
-      line-height: 1.2;
+      font-family: 'Gloock', serif; font-size: 22px;
+      color: #fff; line-height: 1.2;
     }
-
-    .card-date {
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      color: var(--sand);
-      opacity: 0.7;
-      text-transform: uppercase;
-      margin-top: 4px;
+    .card-dates {
+      display: flex; gap: 20px; margin-top: 6px; flex-wrap: wrap;
     }
-
+    .card-date-item { }
+    .card-date-label {
+      font-size: 9px; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--sand); opacity: 0.6;
+      display: block;
+    }
+    .card-date-value {
+      font-size: 12px; color: var(--sand); letter-spacing: 0.02em;
+    }
     .card-type-badge {
-      font-size: 9px;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      background: var(--sienna);
-      color: #fff;
-      padding: 4px 10px;
-      border-radius: 100px;
-      flex-shrink: 0;
-      margin-top: 4px;
+      font-size: 9px; font-weight: 600; letter-spacing: 0.14em;
+      text-transform: uppercase; background: var(--sienna); color: #fff;
+      padding: 4px 10px; border-radius: 100px; flex-shrink: 0; margin-top: 4px;
     }
 
     .card-body { padding: 24px; }
 
-    .status-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 20px;
+    /* Milestone timeline */
+    .milestone-label {
+      font-size: 9px; font-weight: 600; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--grey); margin-bottom: 14px;
+    }
+    .milestones { display: flex; flex-direction: column; gap: 0; margin-bottom: 24px; }
+
+    .milestone-row {
+      display: flex; align-items: flex-start; gap: 14px; position: relative;
+    }
+    .milestone-row:not(:last-child)::before {
+      content: '';
+      position: absolute; left: 11px; top: 22px;
+      width: 2px; height: calc(100% + 2px);
+      background: var(--rule-light);
+    }
+    .milestone-dot-wrap {
+      flex-shrink: 0; width: 24px; display: flex;
+      justify-content: center; padding-top: 3px;
+    }
+    .milestone-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      border: 2px solid var(--rule);
+      background: var(--bg); flex-shrink: 0;
+      position: relative; z-index: 1;
+      transition: all 0.2s;
+    }
+    .milestone-dot.done        { background: var(--green); border-color: var(--green); }
+    .milestone-dot.in-progress { background: var(--orange); border-color: var(--orange); }
+    .milestone-dot.not-started { background: var(--bg); border-color: var(--rule); }
+
+    .milestone-content { flex: 1; padding-bottom: 16px; }
+    .milestone-name {
+      font-size: 13px; font-weight: 500; color: var(--dark); line-height: 1.3;
+    }
+    .milestone-name.done        { color: var(--green-text); }
+    .milestone-name.in-progress { color: var(--orange); }
+    .milestone-name.not-started { color: var(--grey); }
+    .milestone-time {
+      font-family: 'Crimson Pro', serif; font-style: italic;
+      font-size: 12px; color: var(--grey); margin-top: 1px;
     }
 
-    .status-item {}
-
-    .status-label {
-      font-size: 9px;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--grey);
-      margin-bottom: 8px;
+    /* Payment section */
+    .payment-label {
+      font-size: 9px; font-weight: 600; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--grey); margin-bottom: 12px;
     }
-
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--dark);
+    .payment-rows { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .payment-row {
+      display: flex; align-items: baseline;
+      justify-content: space-between; gap: 12px;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.5);
+      border: 1px solid var(--rule-light); border-radius: 4px;
     }
-
-    .status-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      flex-shrink: 0;
+    .payment-row-left { }
+    .payment-row-name { font-size: 13px; font-weight: 500; color: var(--dark); }
+    .payment-row-time {
+      font-family: 'Crimson Pro', serif; font-style: italic;
+      font-size: 12px; color: var(--grey); margin-top: 1px;
     }
+    .pay-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 500; flex-shrink: 0;
+    }
+    .pay-badge-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .pay-badge.paid        .pay-badge-dot { background: var(--green); }
+    .pay-badge.paid        { color: var(--green-text); }
+    .pay-badge.outstanding .pay-badge-dot { background: var(--red); }
+    .pay-badge.outstanding { color: var(--red-text); }
 
-    /* Edit statuses */
-    .edit-not-started .status-dot { background: var(--rule); }
-    .edit-not-started .status-text { color: var(--grey); }
-    .edit-in-progress .status-dot { background: var(--orange); }
-    .edit-in-progress .status-text { color: var(--orange); }
-    .edit-delivered .status-dot { background: #4CAF79; }
-    .edit-delivered .status-text { color: #3a8f5e; }
-
-    /* Payment statuses */
-    .pay-outstanding .status-dot { background: #e05050; }
-    .pay-outstanding .status-text { color: #c03838; }
-    .pay-deposit-paid .status-dot { background: var(--orange); }
-    .pay-deposit-paid .status-text { color: var(--orange); }
-    .pay-paid .status-dot { background: #4CAF79; }
-    .pay-paid .status-text { color: #3a8f5e; }
-
+    /* Delivery */
     .delivery-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--sienna);
-      color: #fff;
-      text-decoration: none;
-      border-radius: 4px;
-      padding: 10px 18px;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      transition: background 0.2s;
-      margin-top: 4px;
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--sienna); color: #fff; text-decoration: none;
+      border-radius: 4px; padding: 10px 18px;
+      font-size: 13px; font-weight: 600; letter-spacing: 0.06em;
+      transition: background 0.2s; margin-top: 4px;
     }
     .delivery-link:hover { background: var(--orange); }
-
     .delivery-pending {
-      font-family: 'Crimson Pro', serif;
-      font-style: italic;
-      font-size: 14px;
-      color: var(--grey);
-      margin-top: 4px;
+      font-family: 'Crimson Pro', serif; font-style: italic;
+      font-size: 14px; color: var(--grey); margin-top: 4px;
     }
 
-    /* Not found */
     .not-found {
-      display: none;
-      font-family: 'Crimson Pro', serif;
-      font-style: italic;
-      font-size: 15px;
-      color: var(--grey);
-      padding: 16px 0;
+      display: none; font-family: 'Crimson Pro', serif; font-style: italic;
+      font-size: 15px; color: var(--grey); padding: 16px 0;
     }
     .not-found.visible { display: block; }
 
-    /* ── Footer ── */
+    /* Footer */
     footer { background: var(--black); margin-top: auto; }
     footer::before { content: ''; display: block; height: 3px; background: var(--sienna); }
     .footer-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 16px 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
+      max-width: 1100px; margin: 0 auto; padding: 16px 40px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 8px;
     }
     .footer-inner span, .footer-inner a {
-      font-size: 11px;
-      color: var(--sand);
-      opacity: 0.75;
-      text-decoration: none;
-      letter-spacing: 0.04em;
+      font-size: 11px; color: var(--sand); opacity: 0.75;
+      text-decoration: none; letter-spacing: 0.04em;
     }
     .footer-inner a:hover { opacity: 1; }
     .footer-sep { opacity: 0.3; margin: 0 8px; }
@@ -426,9 +322,8 @@
       .logo-wrap img { height: 68px; }
       .nav-inner { padding: 0 20px; }
       main { padding: 36px 20px 60px; }
-      .status-grid { grid-template-columns: 1fr; }
-      .lookup-form { flex-direction: column; }
       .footer-inner { padding: 14px 20px; flex-direction: column; align-items: flex-start; }
+      .lookup-form { flex-direction: column; }
     }
   </style>
 </head>
@@ -456,14 +351,10 @@
 <main>
 
   <!-- PUBLIC OVERVIEW -->
-  <div class="overview-section">
+  <div class="overview-section" style="margin-bottom:56px;">
     <div class="section-label">Currently Active</div>
-    <div class="stats-row" id="statsRow">
-      <!-- Populated by JS -->
-    </div>
-    <div class="project-pills" id="projectPills">
-      <!-- Populated by JS -->
-    </div>
+    <div class="stats-row" id="statsRow"></div>
+    <div class="project-pills" id="projectPills"></div>
   </div>
 
   <hr class="thick-rule" />
@@ -471,19 +362,12 @@
   <!-- PRIVATE LOOKUP -->
   <div class="lookup-section">
     <h1 class="page-title">Your project.</h1>
-    <p class="page-sub">Got a private link from me? Paste your project ID below to see your status and delivery.</p>
+    <p class="page-sub">Got a private link from me? Paste your project ID below to check your status and pick up your files.</p>
 
     <div class="lookup-form">
-      <input
-        type="text"
-        class="lookup-input"
-        id="lookupInput"
-        placeholder="Project ID  (e.g. xk92j)"
-        autocomplete="off"
-        autocorrect="off"
-        autocapitalize="off"
-        spellcheck="false"
-      />
+      <input type="text" class="lookup-input" id="lookupInput"
+        placeholder="Project ID  (e.g. demo1)"
+        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
       <button class="lookup-btn" onclick="lookupProject()">Look up →</button>
     </div>
 
@@ -495,23 +379,11 @@
       <div class="card-header">
         <div>
           <div class="card-service" id="cardService"></div>
-          <div class="card-date" id="cardDate"></div>
+          <div class="card-dates" id="cardDates"></div>
         </div>
         <div class="card-type-badge" id="cardType"></div>
       </div>
-      <div class="card-body">
-        <div class="status-grid">
-          <div class="status-item">
-            <div class="status-label">Edit Status</div>
-            <div class="status-badge" id="editStatus"></div>
-          </div>
-          <div class="status-item">
-            <div class="status-label">Payment</div>
-            <div class="status-badge" id="payStatus"></div>
-          </div>
-        </div>
-        <div id="deliverySection"></div>
-      </div>
+      <div class="card-body" id="cardBody"></div>
     </div>
   </div>
 
@@ -531,22 +403,31 @@
 </footer>
 
 <script>
-  // ── Config maps ──────────────────────────────────────────────────────────
-  const EDIT_CONFIG = {
-    'not-started': { label: 'Not started yet',  cls: 'edit-not-started' },
-    'in-progress':  { label: 'Currently editing', cls: 'edit-in-progress' },
-    'delivered':    { label: 'Delivered',         cls: 'edit-delivered'   },
-  };
-
-  const PAY_CONFIG = {
-    'outstanding':   { label: 'Outstanding',  cls: 'pay-outstanding'   },
-    'deposit-paid':  { label: 'Deposit paid', cls: 'pay-deposit-paid'  },
-    'paid':          { label: 'Fully paid',   cls: 'pay-paid'          },
-  };
-
   const TYPE_LABEL = { photo: 'Photography', video: 'Videography', combo: 'Photo + Video' };
 
-  // ── Load projects.json ───────────────────────────────────────────────────
+  const MILESTONE_NAMES = {
+    storyboard: 'Storyboard',
+    shoot:      'Shoot Day',
+    edit:       'Editing',
+    delivery:   'Delivery'
+  };
+
+  // Overall edit status for pills — derived from milestones
+  function overallStatus(milestones) {
+    const vals = Object.values(milestones).map(m => m.status);
+    if (vals.every(s => s === 'done'))        return 'done';
+    if (vals.some(s => s === 'in-progress'))  return 'in-progress';
+    if (vals.some(s => s === 'done'))         return 'in-progress';
+    return 'not-started';
+  }
+
+  function formatDateTime(str) {
+    if (!str) return null;
+    const d = new Date(str.replace(' ', 'T'));
+    return d.toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })
+      + ' at ' + d.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
+  }
+
   let projects = [];
 
   async function loadProjects() {
@@ -555,93 +436,116 @@
       projects = await res.json();
       renderOverview();
       checkURLParam();
-    } catch (e) {
-      console.warn('Could not load projects.json:', e);
+    } catch(e) {
+      console.warn('Could not load projects.json', e);
     }
   }
 
-  // ── Public overview ──────────────────────────────────────────────────────
   function renderOverview() {
-    const active     = projects.filter(p => p.editStatus !== 'delivered');
-    const editing    = projects.filter(p => p.editStatus === 'in-progress');
-    const delivered  = projects.filter(p => p.editStatus === 'delivered');
+    const active    = projects.filter(p => overallStatus(p.milestones) !== 'done');
+    const editing   = projects.filter(p => overallStatus(p.milestones) === 'in-progress');
+    const delivered = projects.filter(p => overallStatus(p.milestones) === 'done');
 
-    // Stats
-    const statsRow = document.getElementById('statsRow');
-    statsRow.innerHTML = `
-      <div class="stat-card">
-        <div class="stat-num">${active.length}</div>
-        <div class="stat-label">Active projects</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">${editing.length}</div>
-        <div class="stat-label">In editing</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">${delivered.length}</div>
-        <div class="stat-label">Delivered</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">${projects.length}</div>
-        <div class="stat-label">Total this year</div>
-      </div>
+    document.getElementById('statsRow').innerHTML = `
+      <div class="stat-card"><div class="stat-num">${active.length}</div><div class="stat-label">Active projects</div></div>
+      <div class="stat-card"><div class="stat-num">${editing.length}</div><div class="stat-label">In progress</div></div>
+      <div class="stat-card"><div class="stat-num">${delivered.length}</div><div class="stat-label">Delivered</div></div>
+      <div class="stat-card"><div class="stat-num">${projects.length}</div><div class="stat-label">Total this year</div></div>
     `;
 
-    // Pills — show all projects (no private info)
-    const pills = document.getElementById('projectPills');
-    pills.innerHTML = projects.map(p => {
-      const dotCls = p.editStatus === 'delivered' ? 'delivered'
-                   : p.editStatus === 'in-progress' ? 'in-progress' : 'not-started';
+    document.getElementById('projectPills').innerHTML = projects.map(p => {
+      const st = overallStatus(p.milestones);
       return `
         <div class="project-pill">
-          <span class="pill-dot ${dotCls}"></span>
+          <span class="pill-dot ${st}"></span>
           <span class="pill-service">${p.service}</span>
           <span class="pill-date">${p.date}</span>
-        </div>
-      `;
+        </div>`;
     }).join('');
   }
 
-  // ── Private lookup ───────────────────────────────────────────────────────
   function lookupProject() {
     const id = document.getElementById('lookupInput').value.trim().toLowerCase();
-    const project = projects.find(p => p.id.toLowerCase() === id);
+    const p  = projects.find(p => p.id.toLowerCase() === id);
 
     document.getElementById('projectCard').classList.remove('visible');
     document.getElementById('notFound').classList.remove('visible');
 
-    if (!project) {
-      document.getElementById('notFound').classList.add('visible');
-      return;
+    if (!p) { document.getElementById('notFound').classList.add('visible'); return; }
+
+    // Header
+    document.getElementById('cardService').textContent = p.service;
+    document.getElementById('cardType').textContent = TYPE_LABEL[p.type] || p.type;
+    document.getElementById('cardDates').innerHTML = `
+      <div class="card-date-item">
+        <span class="card-date-label">Shoot / Event</span>
+        <span class="card-date-value">${p.date}</span>
+      </div>
+      <div class="card-date-item">
+        <span class="card-date-label">Deadline</span>
+        <span class="card-date-value">${p.deadline}</span>
+      </div>
+    `;
+
+    // Body
+    let html = '';
+
+    // Milestones
+    html += `<div class="milestone-label">Progress</div><div class="milestones">`;
+    for (const [key, val] of Object.entries(p.milestones)) {
+      const name = MILESTONE_NAMES[key] || key;
+      const st   = val.status;
+      const time = val.completedAt ? formatDateTime(val.completedAt) : null;
+      const timeHtml = st === 'done' && time
+        ? `<div class="milestone-time">Completed ${time}</div>`
+        : st === 'in-progress'
+        ? `<div class="milestone-time">Currently in progress</div>`
+        : `<div class="milestone-time">Not started yet</div>`;
+      html += `
+        <div class="milestone-row">
+          <div class="milestone-dot-wrap"><div class="milestone-dot ${st}"></div></div>
+          <div class="milestone-content">
+            <div class="milestone-name ${st}">${name}</div>
+            ${timeHtml}
+          </div>
+        </div>`;
     }
+    html += `</div>`;
 
-    // Populate card
-    document.getElementById('cardService').textContent = project.service;
-    document.getElementById('cardDate').textContent = project.date;
-    document.getElementById('cardType').textContent = TYPE_LABEL[project.type] || project.type;
+    // Payment
+    html += `<div class="payment-label">Payment</div><div class="payment-rows">`;
+    const payLabels = { deposit: 'Deposit (50%)', final: 'Final Payment' };
+    for (const [key, val] of Object.entries(p.payment)) {
+      const label = payLabels[key] || key;
+      const st    = val.status;
+      const time  = val.paidAt ? formatDateTime(val.paidAt) : null;
+      html += `
+        <div class="payment-row">
+          <div class="payment-row-left">
+            <div class="payment-row-name">${label}</div>
+            ${time ? `<div class="payment-row-time">Received ${time}</div>` : ''}
+          </div>
+          <div class="pay-badge ${st}">
+            <span class="pay-badge-dot"></span>
+            <span>${st === 'paid' ? 'Paid' : 'Outstanding'}</span>
+          </div>
+        </div>`;
+    }
+    html += `</div>`;
 
-    const editCfg = EDIT_CONFIG[project.editStatus] || { label: project.editStatus, cls: '' };
-    document.getElementById('editStatus').className = `status-badge ${editCfg.cls}`;
-    document.getElementById('editStatus').innerHTML = `<span class="status-dot"></span><span class="status-text">${editCfg.label}</span>`;
-
-    const payCfg = PAY_CONFIG[project.paymentStatus] || { label: project.paymentStatus, cls: '' };
-    document.getElementById('payStatus').className = `status-badge ${payCfg.cls}`;
-    document.getElementById('payStatus').innerHTML = `<span class="status-dot"></span><span class="status-text">${payCfg.label}</span>`;
-
-    const delSection = document.getElementById('deliverySection');
-    if (project.deliveryLink) {
-      delSection.innerHTML = `<a class="delivery-link" href="${project.deliveryLink}" target="_blank">↓ &nbsp; Download your files</a>`;
+    // Delivery
+    if (p.deliveryLink) {
+      html += `<a class="delivery-link" href="${p.deliveryLink}" target="_blank">↓ &nbsp; Download your files</a>`;
     } else {
-      delSection.innerHTML = `<p class="delivery-pending">Delivery link will appear here once your files are ready.</p>`;
+      html += `<p class="delivery-pending">Your delivery link will appear here once files are ready.</p>`;
     }
 
+    document.getElementById('cardBody').innerHTML = html;
     document.getElementById('projectCard').classList.add('visible');
   }
 
-  // ── Check if URL has ?id=xxx ─────────────────────────────────────────────
   function checkURLParam() {
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('id');
+    const id = new URLSearchParams(window.location.search).get('id');
     if (id) {
       document.getElementById('lookupInput').value = id;
       lookupProject();
@@ -649,14 +553,11 @@
     }
   }
 
-  // ── Enter key on input ───────────────────────────────────────────────────
-  document.getElementById('lookupInput').addEventListener('keydown', function(e) {
+  document.getElementById('lookupInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') lookupProject();
   });
 
-  // ── Init ─────────────────────────────────────────────────────────────────
   loadProjects();
 </script>
-
 </body>
 </html>
