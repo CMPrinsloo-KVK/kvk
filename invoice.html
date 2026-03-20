@@ -196,13 +196,18 @@
 
       <div class="btn-row">
         <button class="action-btn btn-preview" id="previewBtn">&#8594; Open PDF Preview</button>
-        <button class="action-btn btn-save" id="saveBtn">&#123;&#125; Copy Invoice JSON</button>
+        <button class="action-btn btn-save" id="saveBtn">&#123;&#125; Get Filename</button>
       </div>
       <p class="note-small">PDF opens in a new tab. Copy the JSON and paste it into the "invoice" field of your project in projects.json.</p>
 
       <div class="json-output" id="jsonOutput">
-        <div class="json-label">Paste this as the "invoice" value in your project in projects.json:</div>
-        <textarea id="jsonText" readonly onclick="this.select()"></textarea>
+        <div class="json-label">
+          1. Save your compiled PDF with this exact filename:
+          <strong id="filenameHint" style="display:block;font-size:14px;color:var(--dark);font-family:monospace;margin:6px 0;font-style:normal"></strong>
+          2. Drop it in your <code style="font-family:monospace;background:rgba(0,0,0,.06);padding:1px 4px;border-radius:2px">/invoices/</code> folder on GitHub.<br/>
+          3. Add this line to your project in <code style="font-family:monospace;background:rgba(0,0,0,.06);padding:1px 4px;border-radius:2px">projects.json</code>:
+        </div>
+        <textarea id="jsonText" readonly onclick="this.select()" style="margin-top:8px;height:48px"></textarea>
       </div>
 
     </div>
@@ -435,17 +440,45 @@
   }
 
   // ── Copy JSON button ──────────────────────────────────────────────────────
+  // Generate a short random code for the filename
+  function randCode() {
+    var chars = 'abcdefghjkmnpqrstuvwxyz23456789';
+    var code = '';
+    for (var i = 0; i < 5; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    return code;
+  }
+
+  // Build the suggested PDF filename
+  function buildFilename() {
+    var invNo = document.getElementById('invoiceNo').value || 'KVK-2026-001';
+    // Use stored code if already generated this session, else make a new one
+    if (!window._invoiceCode) window._invoiceCode = randCode();
+    return invNo + '-' + window._invoiceCode + '.pdf';
+  }
+
+  // Regenerate code if invoice number changes
+  document.getElementById('invoiceNo').addEventListener('change', function() {
+    window._invoiceCode = randCode();
+    updateFilenameHint();
+  });
+
+  function updateFilenameHint() {
+    var hint = document.getElementById('filenameHint');
+    if (hint) hint.textContent = buildFilename();
+  }
+
   document.getElementById('saveBtn').addEventListener('click', function() {
-    var data = buildInvoiceData();
-    var json = JSON.stringify(data, null, 2);
-    document.getElementById('jsonText').value = json;
+    var filename = buildFilename();
+    var jsonField = '"invoicePDF": "' + filename + '"';
+    document.getElementById('jsonText').value = jsonField;
+    document.getElementById('filenameHint').textContent = filename;
     var out = document.getElementById('jsonOutput');
     out.style.display = 'block';
     document.getElementById('jsonText').select();
     try { document.execCommand('copy'); } catch(e) {}
     this.textContent = 'Copied!';
     var btn = this;
-    setTimeout(function(){ btn.innerHTML = '&#123;&#125; Copy Invoice JSON'; }, 2000);
+    setTimeout(function(){ btn.innerHTML = '&#123;&#125; Get Filename'; }, 2000);
     out.scrollIntoView({behavior:'smooth'});
   });
 
