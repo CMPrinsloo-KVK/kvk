@@ -38,26 +38,6 @@
     "invoiceLink": ""
   },
   {
-    "id": "DemiDemi",
-    "service": "Stellumthombo Film",
-    "type": "video",
-    "date": "11 March 2026",
-    "deadline": "30 March 2026",
-    "milestones": {
-      "storyboard": { "status": "done",        "completedAt": "2026-03-01 14:30" },
-      "shoot":      { "status": "95% done", "completedAt": "2026-03-23 12:00" },
-      "edit":       { "status": "not-started", "completedAt": null },
-      "delivery":   { "status": "not-started", "completedAt": null }
-    },
-    "payment": {
-      "deposit": { "status": "not applicable",        "paidAt": null },
-      "final":   { "status": "outstanding", "paidAt": null }
-    },
-    "deliveryLink": "https://kaalvellieskollektief.pixieset.com/stellumthombofotos/",
-    "invoiceRef": "KVK-2026-001"
-    "invoiceLink": ""
-  },
-  {
     "id": "demo2",
     "service": "Brand Shoot",
     "type": "photo",
