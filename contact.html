@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KVK — Book a Shoot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Gloock&family=Italiana&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --black:  #0B0A09;
+      --dark:   #24211F;
+      --mid:    #4C433B;
+      --grey:   #75726C;
+      --sienna: #B34B1D;
+      --orange: #D37835;
+      --sand:   #DFB373;
+      --cream:  #FAE2B4;
+      --bg:     #F7F0E6;
+      --rule:   #D9C4A8;
+      --rule-light: #EDE3D6;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--dark);
+      font-family: 'Work Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--black);
+    }
+    header::after {
+      content: '';
+      display: block;
+      height: 3px;
+      background: var(--sienna);
+    }
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 40px 28px;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+    .logo-wrap img {
+      height: 90px;
+      width: auto;
+      display: block;
+      filter: drop-shadow(0 4px 24px rgba(179,75,29,0.25));
+    }
+    .header-text { flex: 1; }
+    .brand-name {
+      font-family: 'Italiana', serif;
+      font-size: clamp(28px, 4vw, 42px);
+      color: #fff;
+      line-height: 1.1;
+    }
+    .brand-sub {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      color: var(--sand);
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    /* ── Nav ── */
+    nav {
+      background: var(--black);
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 40px;
+      display: flex;
+      gap: 0;
+    }
+    nav a {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--sand);
+      opacity: 0.6;
+      text-decoration: none;
+      padding: 12px 20px 12px 0;
+      transition: opacity 0.2s;
+    }
+    nav a:hover { opacity: 1; }
+    nav a.active { opacity: 1; color: var(--sienna); }
+
+    /* ── Main ── */
+    main {
+      flex: 1;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 52px 40px 80px;
+      width: 100%;
+    }
+
+    .page-title {
+      font-family: 'Gloock', serif;
+      font-size: clamp(32px, 5vw, 52px);
+      color: var(--dark);
+      line-height: 1.1;
+      margin-bottom: 10px;
+    }
+
+    .page-sub {
+      font-family: 'Crimson Pro', serif;
+      font-style: italic;
+      font-size: 16px;
+      color: var(--grey);
+      margin-bottom: 40px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    /* ── Form ── */
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--sienna);
+      margin-bottom: 8px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      background: rgba(255,255,255,0.6);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      padding: 12px 14px;
+      font-family: 'Work Sans', sans-serif;
+      font-size: 14px;
+      color: var(--dark);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      appearance: none;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--sienna);
+      box-shadow: 0 0 0 3px rgba(179,75,29,0.1);
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2375726C' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+
+    textarea { resize: vertical; min-height: 100px; }
+
+    /* Service chips */
+    .chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip input[type="checkbox"] { display: none; }
+
+    .chip label {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: none;
+      color: var(--mid);
+      background: rgba(255,255,255,0.6);
+      border: 1px solid var(--rule);
+      border-radius: 100px;
+      padding: 7px 16px;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin: 0;
+    }
+
+    .chip input[type="checkbox"]:checked + label {
+      background: var(--sienna);
+      border-color: var(--sienna);
+      color: #fff;
+    }
+
+    .chip label:hover {
+      border-color: var(--sienna);
+      color: var(--sienna);
+    }
+
+    /* Two col row */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* Submit */
+    .submit-btn {
+      width: 100%;
+      background: var(--sienna);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 15px 24px;
+      font-family: 'Work Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 8px;
+    }
+
+    .submit-btn:hover { background: var(--orange); }
+    .submit-btn:active { transform: scale(0.99); }
+
+    /* Success state */
+    .success-msg {
+      display: none;
+      background: rgba(179,75,29,0.08);
+      border: 1px solid var(--rule);
+      border-left: 3px solid var(--sienna);
+      border-radius: 4px;
+      padding: 20px 24px;
+      margin-top: 24px;
+      font-family: 'Crimson Pro', serif;
+      font-size: 16px;
+      color: var(--dark);
+    }
+
+    .note {
+      font-family: 'Crimson Pro', serif;
+      font-style: italic;
+      font-size: 13px;
+      color: var(--grey);
+      margin-top: 12px;
+    }
+
+    /* ── Footer ── */
+    footer { background: var(--black); margin-top: auto; }
+    footer::before { content: ''; display: block; height: 3px; background: var(--sienna); }
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .footer-inner span, .footer-inner a {
+      font-size: 11px;
+      color: var(--sand);
+      opacity: 0.75;
+      text-decoration: none;
+      letter-spacing: 0.04em;
+    }
+    .footer-inner a:hover { opacity: 1; }
+    .footer-sep { opacity: 0.3; margin: 0 8px; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    main { animation: fadeUp 0.5s ease both; }
+
+    @media (max-width: 600px) {
+      .header-inner { padding: 24px 20px 20px; gap: 20px; }
+      .logo-wrap img { height: 68px; }
+      .nav-inner { padding: 0 20px; }
+      main { padding: 36px 20px 60px; }
+      .form-row { grid-template-columns: 1fr; }
+      .footer-inner { padding: 14px 20px; flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-wrap">
+      <img src="kvk_logo2.png" alt="KVK Logo" onerror="this.style.display='none'" />
+    </div>
+    <div class="header-text">
+      <div class="brand-name">Kaal Vellies Kollektief</div>
+      <div class="brand-sub">Photography · Videography · Stellenbosch</div>
+    </div>
+  </div>
+</header>
+<nav>
+  <div class="nav-inner">
+    <a href="index.html">Rates</a>
+    <a href="contact.html" class="active">Book</a>
+    <a href="projects.html">Projects</a>
+  </div>
+</nav>
+
+<main>
+  <h1 class="page-title">Let's make<br>something.</h1>
+  <p class="page-sub">Fill in what you can — even rough details help. I'll get back to you within 24 hours.</p>
+
+  <!--
+    FORMSPREE SETUP (takes 2 min):
+    1. Go to formspree.io and sign up free
+    2. Click "New Form", name it "KVK Booking"
+    3. Copy your form endpoint — looks like https://formspree.io/f/xxxxxxxx
+    4. Replace the action URL below with your endpoint
+  -->
+  <form
+    action="https://formspree.io/f/xdawjarz"
+    method="POST"
+    id="bookingForm"
+  >
+
+    <div class="form-group">
+      <label>What are you looking for?</label>
+      <div class="chip-group">
+        <div class="chip"><input type="checkbox" id="s1" name="service" value="Photography"><label for="s1">Photography</label></div>
+        <div class="chip"><input type="checkbox" id="s2" name="service" value="Videography"><label for="s2">Videography</label></div>
+        <div class="chip"><input type="checkbox" id="s3" name="service" value="Photo + Video Combo"><label for="s3">Photo + Video Combo</label></div>
+        <div class="chip"><input type="checkbox" id="s4" name="service" value="Wedding"><label for="s4">Wedding</label></div>
+        <div class="chip"><input type="checkbox" id="s5" name="service" value="Dance / Pre"><label for="s5">Dance / Pre</label></div>
+        <div class="chip"><input type="checkbox" id="s6" name="service" value="Graduation"><label for="s6">Graduation</label></div>
+        <div class="chip"><input type="checkbox" id="s7" name="service" value="Event / Function"><label for="s7">Event / Function</label></div>
+        <div class="chip"><input type="checkbox" id="s8" name="service" value="Brand / Business"><label for="s8">Brand / Business</label></div>
+        <div class="chip"><input type="checkbox" id="s9" name="service" value="Not sure yet"><label for="s9">Not sure yet</label></div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="name">Your name</label>
+        <input type="text" id="name" name="name" placeholder="Corné Prinsloo" required />
+      </div>
+      <div class="form-group">
+        <label for="email">Email address</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="phone">WhatsApp / phone <span style="font-weight:400;opacity:0.6">(optional)</span></label>
+        <input type="tel" id="phone" name="phone" placeholder="+27 00 000 0000" />
+      </div>
+      <div class="form-group">
+        <label for="date">Date in mind <span style="font-weight:400;opacity:0.6">(optional)</span></label>
+        <input type="date" id="date" name="date" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="location">Location / venue <span style="font-weight:400;opacity:0.6">(optional)</span></label>
+      <input type="text" id="location" name="location" placeholder="e.g. Spier Wine Farm, Stellenbosch" />
+    </div>
+
+    <div class="form-group">
+      <label for="message">Anything else I should know</label>
+      <textarea id="message" name="message" placeholder="Tell me about the vibe, how many people, any specific shots you have in mind..."></textarea>
+    </div>
+
+    <!-- Hidden field so you know which page it came from -->
+    <input type="hidden" name="_subject" value="New KVK Booking Request" />
+    <input type="hidden" name="_next" value="contact.html?sent=true" />
+
+    <button type="submit" class="submit-btn">Send Enquiry →</button>
+    <p class="note">No commitment — this just starts the conversation.</p>
+
+  </form>
+
+  <div class="success-msg" id="successMsg">
+    ✓ &nbsp; Got it — I'll be in touch within 24 hours. Check your inbox (and spam, just in case).
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <a href="https://kvk.myportfolio.com" target="_blank">kvk.myportfolio.com</a>
+      <span class="footer-sep">·</span>
+      <a href="mailto:corne.prinsloo@icloud.com">corne.prinsloo@icloud.com</a>
+      <span class="footer-sep">·</span>
+      <a href="https://wa.me/27796250814">+27 79 625 0814</a>
+    </div>
+    <span>@kaalvellies_kollektief</span>
+  </div>
+</footer>
+
+<script>
+  // Show success message if redirected back after submission
+  if (window.location.search.includes('sent=true')) {
+    document.getElementById('bookingForm').style.display = 'none';
+    document.getElementById('successMsg').style.display = 'block';
+  }
+
+  // Also handle Formspree AJAX if preferred (no page reload)
+  const form = document.getElementById('bookingForm');
+  form.addEventListener('submit', async function(e) {
+    const action = form.getAttribute('action');
+    if (action.includes('YOUR_FORM_ID')) return; // fallback to normal submit if not set up yet
+
+    e.preventDefault();
+    const data = new FormData(form);
+    const res = await fetch(action, {
+      method: 'POST',
+      body: data,
+      headers: { 'Accept': 'application/json' }
+    });
+    if (res.ok) {
+      form.style.display = 'none';
+      document.getElementById('successMsg').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
+</script>
+
+</body>
+</html>
