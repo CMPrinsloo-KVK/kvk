@@ -199,15 +199,24 @@
     return 'R ' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,' ');
   }
 
+  // Supabase config — swap with your values
+  var SUPABASE_URL  = 'YOUR_SUPABASE_URL';
+  var SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
+
   function loadProjects() {
-    fetch('projects.json')
+    fetch(SUPABASE_URL + '/rest/v1/projects?select=*&order=created_at.desc', {
+      headers: {
+        'apikey': SUPABASE_ANON,
+        'Authorization': 'Bearer ' + SUPABASE_ANON
+      }
+    })
       .then(function(r){return r.json()})
       .then(function(data){
-        projects = data;
+        projects = Array.isArray(data) ? data : [];
         renderOverview();
         checkURLParam();
       })
-      .catch(function(e){console.warn('Could not load projects.json',e)});
+      .catch(function(e){console.warn('Could not load projects',e)});
   }
 
   function renderOverview() {
@@ -286,13 +295,13 @@
 
     // Action buttons
     html += '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">';
-    if (p.deliveryLink) {
-      html += '<a class="action-btn btn-delivery" href="'+p.deliveryLink+'" target="_blank">&darr; &nbsp;Download your files</a>';
+    if (p.delivery_link) {
+      html += '<a class="action-btn btn-delivery" href="'+p.delivery_link+'" target="_blank">&darr; &nbsp;Download your files</a>';
     } else {
       html += '<p class="delivery-pending">Your delivery link will appear here once files are ready.</p>';
     }
-    if (p.invoicePDF) {
-      html += '<a class="action-btn btn-invoice" href="invoices/'+p.invoicePDF+'" target="_blank">View Invoice</a>';
+    if (p.invoice_pdf) {
+      html += '<a class="action-btn btn-invoice" href="invoices/'+p.invoice_pdf+'" target="_blank">View Invoice</a>';
     }
     html += '</div>';
 

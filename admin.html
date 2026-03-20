@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KVK Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Gloock&family=Italiana&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{--black:#0B0A09;--dark:#24211F;--mid:#4C433B;--grey:#75726C;--sienna:#B34B1D;--orange:#D37835;--sand:#DFB373;--bg:#F7F0E6;--rule:#D9C4A8;--rule-light:#EDE3D6;--green:#4CAF79;--red:#e05050}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--dark);font-family:'Work Sans',sans-serif;font-size:14px;line-height:1.5;min-height:100vh}
+
+    /* Lock screen */
+    #lockScreen{position:fixed;inset:0;background:var(--black);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:20px}
+    #lockScreen h1{font-family:'Italiana',serif;font-size:32px;color:#fff}
+    #lockScreen input{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:4px;padding:12px 16px;color:#fff;font-family:'Work Sans',sans-serif;font-size:14px;width:280px;outline:none;text-align:center;letter-spacing:.2em}
+    #lockScreen button{background:var(--sienna);color:#fff;border:none;border-radius:4px;padding:11px 28px;font-family:'Work Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+    #lockScreen .err{color:var(--orange);font-size:12px;display:none}
+
+    /* Main layout */
+    #app{display:none}
+    header{background:var(--black);padding:0}
+    header::after{content:'';display:block;height:3px;background:var(--sienna)}
+    .header-inner{max-width:1300px;margin:0 auto;padding:20px 32px;display:flex;align-items:center;gap:24px}
+    .brand{font-family:'Italiana',serif;font-size:28px;color:#fff}
+    .admin-badge{font-size:9px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;background:var(--sienna);color:#fff;padding:3px 8px;border-radius:2px}
+
+    /* Tabs */
+    .tabs{background:var(--black);border-top:1px solid rgba(255,255,255,.06)}
+    .tabs-inner{max-width:1300px;margin:0 auto;padding:0 32px;display:flex;gap:0}
+    .tab{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--sand);opacity:.5;padding:12px 20px 12px 0;cursor:pointer;border:none;background:none;transition:opacity .2s;font-family:'Work Sans',sans-serif}
+    .tab:hover{opacity:.8}
+    .tab.active{opacity:1;color:var(--sienna)}
+
+    /* Content */
+    .content{max-width:1300px;margin:0 auto;padding:36px 32px 80px}
+
+    /* Tab panels */
+    .panel{display:none}
+    .panel.active{display:block}
+
+    /* Section label */
+    .section-label{font-size:10px;font-weight:600;letter-spacing:.16em;color:var(--sienna);text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid var(--rule);margin-bottom:20px;margin-top:32px}
+    .section-label:first-child{margin-top:0}
+
+    /* Cards grid */
+    .projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:32px}
+    .project-card{background:#fff;border:1px solid var(--rule-light);border-radius:8px;overflow:hidden;cursor:pointer;transition:box-shadow .2s}
+    .project-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.1)}
+    .pc-header{background:var(--black);padding:14px 18px;display:flex;justify-content:space-between;align-items:flex-start}
+    .pc-service{font-family:'Gloock',serif;font-size:16px;color:#fff;line-height:1.2}
+    .pc-date{font-size:10px;color:var(--sand);opacity:.7;margin-top:3px}
+    .pc-badge{font-size:8px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;background:var(--sienna);color:#fff;padding:3px 8px;border-radius:100px;flex-shrink:0}
+    .pc-body{padding:14px 18px}
+    .pc-status-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+    .status-pip{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:500;color:var(--mid);background:var(--bg);border:1px solid var(--rule-light);border-radius:100px;padding:3px 9px}
+    .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+    .dot.done{background:var(--green)}
+    .dot.in-progress{background:var(--orange)}
+    .dot.not-started{background:var(--rule)}
+    .dot.paid{background:var(--green)}
+    .dot.outstanding{background:var(--red)}
+    .pc-actions{display:flex;gap:8px}
+    .pc-btn{font-size:11px;font-weight:600;letter-spacing:.06em;border:none;border-radius:4px;padding:7px 14px;cursor:pointer;font-family:'Work Sans',sans-serif;transition:background .2s}
+    .pc-btn-edit{background:var(--sienna);color:#fff}
+    .pc-btn-edit:hover{background:var(--orange)}
+    .pc-btn-del{background:transparent;color:var(--grey);border:1px solid var(--rule)}
+    .pc-btn-del:hover{background:var(--red);color:#fff;border-color:var(--red)}
+
+    /* Form */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+    .form-group{margin-bottom:14px}
+    .form-full{grid-column:1/-1}
+    label{display:block;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--sienna);margin-bottom:5px}
+    input,textarea,select{width:100%;background:rgba(255,255,255,.8);border:1px solid var(--rule);border-radius:4px;padding:9px 11px;font-family:'Work Sans',sans-serif;font-size:13px;color:var(--dark);outline:none;transition:border-color .2s;appearance:none}
+    input:focus,textarea:focus,select:focus{border-color:var(--sienna);box-shadow:0 0 0 3px rgba(179,75,29,.1)}
+    select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2375726C' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;cursor:pointer}
+    textarea{resize:vertical;min-height:70px;font-size:12px}
+
+    /* Milestone grid */
+    .milestone-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .milestone-item{background:rgba(255,255,255,.6);border:1px solid var(--rule-light);border-radius:6px;padding:12px}
+    .milestone-title{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);margin-bottom:8px}
+    .milestone-item select{margin-bottom:6px}
+
+    /* Buttons */
+    .btn-row{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+    .btn{padding:11px 22px;border:none;border-radius:4px;font-family:'Work Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background .2s}
+    .btn-primary{background:var(--sienna);color:#fff}
+    .btn-primary:hover{background:var(--orange)}
+    .btn-secondary{background:var(--mid);color:#fff}
+    .btn-secondary:hover{background:var(--dark)}
+    .btn-ghost{background:transparent;color:var(--grey);border:1px solid var(--rule)}
+    .btn-ghost:hover{border-color:var(--sienna);color:var(--sienna)}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+
+    /* Toast */
+    .toast{position:fixed;bottom:24px;right:24px;background:var(--dark);color:#fff;padding:12px 20px;border-radius:6px;font-size:13px;transform:translateY(80px);opacity:0;transition:all .3s;z-index:9999;border-left:3px solid var(--sienna)}
+    .toast.show{transform:translateY(0);opacity:1}
+    .toast.error{border-left-color:var(--red)}
+
+    /* Reviews */
+    .review-card{background:#fff;border:1px solid var(--rule-light);border-radius:6px;padding:16px 20px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+    .review-text{font-family:'Crimson Pro',serif;font-style:italic;font-size:14px;color:var(--dark);margin-bottom:6px}
+    .review-meta{font-size:11px;color:var(--grey)}
+    .review-actions{display:flex;gap:8px;flex-shrink:0}
+    .rev-btn{font-size:11px;font-weight:600;border:none;border-radius:4px;padding:6px 12px;cursor:pointer;font-family:'Work Sans',sans-serif}
+    .rev-approve{background:var(--green);color:#fff}
+    .rev-reject{background:var(--red);color:#fff}
+    .rev-delete{background:transparent;border:1px solid var(--rule);color:var(--grey)}
+    .approved-badge{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:rgba(76,175,121,.15);color:var(--green);padding:3px 8px;border-radius:100px;flex-shrink:0}
+
+    /* Invoice section within admin */
+    .line-item-header{display:grid;grid-template-columns:1fr 100px 100px 90px 24px;gap:8px;margin-bottom:4px}
+    .line-item-header span{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)}
+    .line-items{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+    .line-item{display:grid;grid-template-columns:1fr 100px 100px 90px 24px;gap:8px;align-items:center}
+    .line-item input{margin:0}
+    .amount-display{background:rgba(255,255,255,.4);border:1px solid var(--rule-light);border-radius:4px;padding:9px 11px;font-size:13px;color:var(--mid);text-align:right;white-space:nowrap}
+    .remove-btn{width:24px;height:24px;border-radius:50%;background:transparent;border:1px solid var(--rule);color:var(--grey);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+    .remove-btn:hover{background:var(--red);border-color:var(--red);color:#fff}
+    .add-line-btn{background:transparent;border:1px dashed var(--rule);border-radius:4px;color:var(--sienna);font-family:'Work Sans',sans-serif;font-size:12px;font-weight:500;padding:8px;width:100%;cursor:pointer;transition:all .2s;margin-bottom:12px}
+    .add-line-btn:hover{border-color:var(--sienna);background:rgba(179,75,29,.04)}
+    .totals-area{background:rgba(255,255,255,.5);border:1px solid var(--rule-light);border-radius:6px;padding:14px 16px}
+    .total-row{display:flex;justify-content:space-between;padding:3px 0;font-size:13px;color:var(--mid)}
+    .total-row.grand{border-top:2px solid var(--sienna);margin-top:8px;padding-top:8px;font-size:15px;font-weight:600;color:var(--dark)}
+    .total-row.grand span:last-child{color:var(--sienna)}
+    .scope-items{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+    .scope-item{display:grid;grid-template-columns:28px 1fr 24px;gap:8px;align-items:center}
+    .scope-badge{width:28px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+
+    /* Output box */
+    .output-box{display:none;margin-top:20px;background:rgba(255,255,255,.7);border:1px solid var(--rule);border-radius:6px;padding:20px}
+    .output-box h3{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--sienna);margin-bottom:12px}
+    .step{font-size:13px;color:var(--dark);margin-bottom:8px;padding:10px 14px;background:rgba(255,255,255,.6);border-radius:4px;border-left:3px solid var(--sienna)}
+    .step code{font-family:monospace;font-size:13px;font-weight:600;color:var(--dark);background:rgba(0,0,0,.06);padding:2px 6px;border-radius:3px}
+
+    @media(max-width:768px){
+      .content{padding:24px 20px 60px}
+      .header-inner{padding:16px 20px}
+      .tabs-inner{padding:0 20px}
+      .projects-grid{grid-template-columns:1fr}
+      .form-grid,.form-grid-3,.milestone-grid{grid-template-columns:1fr}
+      .line-item,.line-item-header{grid-template-columns:1fr 80px 80px 70px 24px}
+    }
+  </style>
+</head>
+<body>
+
+<!-- Lock screen -->
+<div id="lockScreen">
+  <h1>KVK Admin</h1>
+  <input type="password" id="pwInput" placeholder="Password" />
+  <button id="pwBtn">Enter</button>
+  <div class="err" id="pwErr">Wrong password</div>
+</div>
+
+<!-- Main app -->
+<div id="app">
+  <header>
+    <div class="header-inner">
+      <div style="flex:1">
+        <div class="brand">Kaal Vellies Kollektief</div>
+      </div>
+      <span class="admin-badge">Admin</span>
+    </div>
+  </header>
+  <div class="tabs">
+    <div class="tabs-inner">
+      <button class="tab active" data-panel="projects">Projects</button>
+      <button class="tab" data-panel="newproject">New Project</button>
+      <button class="tab" data-panel="invoice">Invoice Builder</button>
+      <button class="tab" data-panel="reviews">Reviews</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── PROJECTS PANEL ─────────────────────────────────────────────── -->
+    <div class="panel active" id="panel-projects">
+      <div class="section-label">All Projects</div>
+      <div class="projects-grid" id="projectsGrid">
+        <div style="color:var(--grey);font-style:italic;font-family:'Crimson Pro',serif">Loading...</div>
+      </div>
+    </div>
+
+    <!-- ── NEW / EDIT PROJECT PANEL ──────────────────────────────────── -->
+    <div class="panel" id="panel-newproject">
+      <div class="section-label" id="projectFormTitle">New Project</div>
+      <input type="hidden" id="editProjectId" value="" />
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Project ID <span style="font-weight:400;opacity:.6">(unique, no spaces, e.g. jones26)</span></label>
+          <input type="text" id="pId" placeholder="jones26" />
+        </div>
+        <div class="form-group">
+          <label>Service</label>
+          <input type="text" id="pService" placeholder="Wedding Highlight Film" />
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select id="pType">
+            <option value="video">Videography</option>
+            <option value="photo">Photography</option>
+            <option value="combo">Photo + Video</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Shoot / Event Date</label>
+          <input type="text" id="pDate" placeholder="14 June 2026" />
+        </div>
+        <div class="form-group">
+          <label>Deadline</label>
+          <input type="text" id="pDeadline" placeholder="28 June 2026" />
+        </div>
+        <div class="form-group">
+          <label>Invoice PDF Filename <span style="font-weight:400;opacity:.6">(optional)</span></label>
+          <input type="text" id="pInvoicePDF" placeholder="KVK-2026-001-xk92j.pdf" />
+        </div>
+        <div class="form-group">
+          <label>Delivery Link <span style="font-weight:400;opacity:.6">(optional)</span></label>
+          <input type="text" id="pDeliveryLink" placeholder="https://drive.google.com/..." />
+        </div>
+      </div>
+
+      <div class="section-label">Milestones</div>
+      <div class="milestone-grid" id="milestoneGrid">
+        <!-- populated by JS based on type -->
+      </div>
+
+      <div class="section-label">Payment</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Deposit Status</label>
+          <select id="payDeposit">
+            <option value="outstanding">Outstanding</option>
+            <option value="paid">Paid</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Deposit Paid At <span style="font-weight:400;opacity:.6">(optional)</span></label>
+          <input type="datetime-local" id="payDepositAt" />
+        </div>
+        <div class="form-group">
+          <label>Final Payment Status</label>
+          <select id="payFinal">
+            <option value="outstanding">Outstanding</option>
+            <option value="paid">Paid</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Final Paid At <span style="font-weight:400;opacity:.6">(optional)</span></label>
+          <input type="datetime-local" id="payFinalAt" />
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="saveProjectBtn">Save Project</button>
+        <button class="btn btn-ghost" id="cancelEditBtn" style="display:none">Cancel Edit</button>
+      </div>
+    </div>
+
+    <!-- ── INVOICE BUILDER PANEL ──────────────────────────────────────── -->
+    <div class="panel" id="panel-invoice">
+      <div class="section-label">Invoice Builder</div>
+
+      <div class="form-group" style="max-width:320px">
+        <label>Load from Project <span style="font-weight:400;opacity:.6">(pre-fills client details)</span></label>
+        <select id="invProjectLink">
+          <option value="">-- None --</option>
+        </select>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Invoice No.</label>
+          <input type="text" id="invNo" value="KVK-2026-001" />
+        </div>
+        <div class="form-group">
+          <label>Invoice Date</label>
+          <input type="date" id="invDate" />
+        </div>
+        <div class="form-group">
+          <label>Due Date</label>
+          <input type="text" id="invDue" value="After Delivery" />
+        </div>
+        <div class="form-group">
+          <label>Discount (%)</label>
+          <input type="number" id="invDiscount" value="0" min="0" max="100" />
+        </div>
+      </div>
+
+      <div class="section-label">Billed To</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Client / Organisation</label>
+          <input type="text" id="invClient" placeholder="Stellumthombo" />
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <input type="text" id="invAddr" placeholder="2 Drostdy Street, Stellenbosch" />
+        </div>
+        <div class="form-group form-full">
+          <label>Email</label>
+          <input type="text" id="invEmail" placeholder="info@client.co.za" />
+        </div>
+      </div>
+
+      <div class="section-label">Line Items</div>
+      <div class="line-item-header">
+        <span>Description</span><span style="text-align:center">Qty</span><span style="text-align:right">Rate (R)</span><span style="text-align:right">Amount</span><span></span>
+      </div>
+      <div class="line-items" id="invLineItems"></div>
+      <button class="add-line-btn" id="invAddLine">+ Add line item</button>
+
+      <div class="totals-area">
+        <div class="total-row"><span>Subtotal</span><span id="invSubtotal">R 0.00</span></div>
+        <div class="total-row"><span>Discount</span><span id="invDiscDisplay">-R 0.00</span></div>
+        <div class="total-row grand"><span>Total Due</span><span id="invTotal">R 0.00</span></div>
+      </div>
+
+      <div class="section-label">Scope &mdash; What They&apos;ll Receive</div>
+      <div class="scope-items" id="invScopeReceive"></div>
+      <button class="add-line-btn" id="invAddReceive">+ Add deliverable</button>
+
+      <div class="section-label">Scope &mdash; Production Commitments</div>
+      <div class="scope-items" id="invScopeCommit"></div>
+      <button class="add-line-btn" id="invAddCommit">+ Add commitment</button>
+
+      <div class="section-label">Scope &mdash; Not Included</div>
+      <div class="scope-items" id="invScopeExclude"></div>
+      <button class="add-line-btn" id="invAddExclude">+ Add exclusion</button>
+
+      <div class="section-label">Portfolio &amp; Credit</div>
+      <div class="form-group"><textarea id="invPortfolio">While all final work remains the property of the client upon payment, Kaal Vellies Kollektief retains the right to feature this work in its portfolio, website, and social media channels. Credit will reference the client by name where appropriate.</textarea></div>
+
+      <div class="section-label">Acceptance</div>
+      <div class="form-group"><textarea id="invAcceptance">By proceeding with payment, the client agrees to the scope and terms outlined above.</textarea></div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="invDownloadTex">&darr; Download .tex</button>
+        <button class="btn btn-secondary" id="invSaveToProject">Save Invoice to Project</button>
+        <button class="btn btn-ghost" id="invGetFilename">&#123;&#125; Get Filename</button>
+      </div>
+
+      <div class="output-box" id="invOutputBox">
+        <h3>Next Steps</h3>
+        <div class="step">1. Compile: <code>xelatex <span id="invTexName"></span></code></div>
+        <div class="step">2. Rename PDF to: <code id="invPDFName"></code></div>
+        <div class="step">3. Upload to <code>/invoices/</code> on GitHub &mdash; it will appear on the client&apos;s project page automatically</div>
+      </div>
+    </div>
+
+    <!-- ── REVIEWS PANEL ──────────────────────────────────────────────── -->
+    <div class="panel" id="panel-reviews">
+      <div class="section-label">Pending Approval</div>
+      <div id="reviewsPending"><div style="color:var(--grey);font-style:italic;font-family:'Crimson Pro',serif">Loading...</div></div>
+      <div class="section-label">Approved &amp; Live</div>
+      <div id="reviewsApproved"><div style="color:var(--grey);font-style:italic;font-family:'Crimson Pro',serif">Loading...</div></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  // ── CONFIG — swap these with your Supabase project values ──────────────
+  var SUPABASE_URL  = 'YOUR_SUPABASE_URL';
+  var SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
+  // ── Admin password — change this ───────────────────────────────────────
+  var ADMIN_PASS = 'kvk2026';
+  // ──────────────────────────────────────────────────────────────────────
+
+  // ── Lock screen ────────────────────────────────────────────────────────
+  var unlocked = sessionStorage.getItem('kvk_admin') === '1';
+  if (unlocked) { unlock(); }
+
+  function unlock() {
+    document.getElementById('lockScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    sessionStorage.setItem('kvk_admin','1');
+    initApp();
+  }
+
+  document.getElementById('pwBtn').addEventListener('click', function() {
+    if (document.getElementById('pwInput').value === ADMIN_PASS) {
+      unlock();
+    } else {
+      document.getElementById('pwErr').style.display = 'block';
+    }
+  });
+  document.getElementById('pwInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') document.getElementById('pwBtn').click();
+  });
+
+  // ── Supabase helper ────────────────────────────────────────────────────
+  function sbFetch(path, opts) {
+    opts = opts || {};
+    var headers = Object.assign({
+      'apikey': SUPABASE_ANON,
+      'Authorization': 'Bearer ' + SUPABASE_ANON,
+      'Content-Type': 'application/json',
+      'Prefer': opts.prefer || ''
+    }, opts.headers || {});
+    return fetch(SUPABASE_URL + '/rest/v1/' + path, {
+      method: opts.method || 'GET',
+      headers: headers,
+      body: opts.body ? JSON.stringify(opts.body) : undefined
+    }).then(function(r) {
+      if (opts.method === 'DELETE' || r.status === 204) return {};
+      return r.json();
+    });
+  }
+
+  // ── Toast ──────────────────────────────────────────────────────────────
+  function toast(msg, isError) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (isError ? ' error' : '');
+    setTimeout(function() { t.className = 'toast'; }, 3000);
+  }
+
+  // ── Tabs ───────────────────────────────────────────────────────────────
+  document.querySelectorAll('.tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.panel).classList.add('active');
+    });
+  });
+
+  // ── Milestone config ───────────────────────────────────────────────────
+  var MILESTONE_KEYS = {
+    video: ['storyboard','shoot','edit','delivery'],
+    photo: ['shoot','edit','delivery'],
+    combo: ['storyboard','shoot','edit','delivery']
+  };
+  var MILESTONE_LABELS = {storyboard:'Storyboard',shoot:'Shoot Day',edit:'Editing',delivery:'Delivery'};
+  var STATUS_OPTS = ['not-started','in-progress','done'];
+
+  function renderMilestoneGrid(type, existing) {
+    existing = existing || {};
+    var keys = MILESTONE_KEYS[type] || MILESTONE_KEYS.video;
+    var grid = document.getElementById('milestoneGrid');
+    grid.innerHTML = '';
+    keys.forEach(function(k) {
+      var cur = existing[k] || {};
+      var div = document.createElement('div');
+      div.className = 'milestone-item';
+      div.innerHTML =
+        '<div class="milestone-title">'+MILESTONE_LABELS[k]+'</div>'+
+        '<select id="ms_'+k+'_status">'+
+          STATUS_OPTS.map(function(s){ return '<option value="'+s+'"'+(cur.status===s?' selected':'')+'>'+s+'</option>'; }).join('')+
+        '</select>'+
+        '<input type="datetime-local" id="ms_'+k+'_at" value="'+(cur.completedAt?cur.completedAt.replace(' ','T'):'')+'" placeholder="Completed at" />';
+      grid.appendChild(div);
+    });
+  }
+
+  function getMilestones(type) {
+    var keys = MILESTONE_KEYS[type] || MILESTONE_KEYS.video;
+    var obj = {};
+    keys.forEach(function(k) {
+      var st = document.getElementById('ms_'+k+'_status');
+      var at = document.getElementById('ms_'+k+'_at');
+      if (st) obj[k] = {
+        status: st.value,
+        completedAt: at && at.value ? at.value.replace('T',' ') : null
+      };
+    });
+    return obj;
+  }
+
+  document.getElementById('pType').addEventListener('change', function() {
+    renderMilestoneGrid(this.value, {});
+  });
+
+  // ── Projects panel ─────────────────────────────────────────────────────
+  var allProjects = [];
+
+  function loadProjects() {
+    sbFetch('projects?select=*&order=created_at.desc').then(function(data) {
+      allProjects = Array.isArray(data) ? data : [];
+      renderProjectsGrid(allProjects);
+      populateInvProjectDropdown(allProjects);
+    }).catch(function(e) {
+      console.error(e);
+      document.getElementById('projectsGrid').innerHTML =
+        '<div style="color:var(--red)">Could not load projects. Check Supabase config.</div>';
+    });
+  }
+
+  function overallStatus(milestones) {
+    if (!milestones || !Object.keys(milestones).length) return 'not-started';
+    var vals = Object.values(milestones).map(function(m){ return m.status; });
+    if (vals.every(function(s){ return s==='done'; })) return 'done';
+    if (vals.some(function(s){ return s==='in-progress'||s==='done'; })) return 'in-progress';
+    return 'not-started';
+  }
+
+  var TYPE_LABELS = {photo:'Photography',video:'Videography',combo:'Photo+Video'};
+
+  function renderProjectsGrid(projects) {
+    var grid = document.getElementById('projectsGrid');
+    if (!projects.length) {
+      grid.innerHTML = '<div style="color:var(--grey);font-style:italic;font-family:\'Crimson Pro\',serif">No projects yet. Click New Project to create one.</div>';
+      return;
+    }
+    grid.innerHTML = '';
+    projects.forEach(function(p) {
+      var ms  = p.milestones || {};
+      var pay = p.payment    || {};
+      var st  = overallStatus(ms);
+      var card = document.createElement('div');
+      card.className = 'project-card';
+
+      var pips = '';
+      Object.entries(ms).forEach(function(e) {
+        pips += '<span class="status-pip"><span class="dot '+e[1].status+'"></span>'+MILESTONE_LABELS[e[0]]+'</span>';
+      });
+      if (pay.deposit)
+        pips += '<span class="status-pip"><span class="dot '+(pay.deposit.status||'outstanding')+'"></span>Deposit</span>';
+      if (pay.final)
+        pips += '<span class="status-pip"><span class="dot '+(pay.final.status||'outstanding')+'"></span>Final</span>';
+
+      card.innerHTML =
+        '<div class="pc-header">'+
+          '<div><div class="pc-service">'+p.service+'</div><div class="pc-date">'+p.date+'</div></div>'+
+          '<div class="pc-badge">'+( TYPE_LABELS[p.type]||p.type )+'</div>'+
+        '</div>'+
+        '<div class="pc-body">'+
+          '<div class="pc-status-row">'+pips+'</div>'+
+          '<div class="pc-actions">'+
+            '<button class="pc-btn pc-btn-edit" data-id="'+p.id+'">Edit</button>'+
+            '<button class="pc-btn pc-btn-del" data-id="'+p.id+'">Delete</button>'+
+          '</div>'+
+        '</div>';
+
+      card.querySelector('.pc-btn-edit').addEventListener('click', function(e) {
+        e.stopPropagation(); openEditProject(p);
+      });
+      card.querySelector('.pc-btn-del').addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (confirm('Delete project "'+p.service+'"? This cannot be undone.')) {
+          sbFetch('projects?id=eq.'+p.id, {method:'DELETE'}).then(function() {
+            toast('Project deleted'); loadProjects();
+          });
+        }
+      });
+      grid.appendChild(card);
+    });
+  }
+
+  function openEditProject(p) {
+    // Switch to new project tab
+    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.panel').forEach(function(pl) { pl.classList.remove('active'); });
+    document.querySelector('[data-panel="newproject"]').classList.add('active');
+    document.getElementById('panel-newproject').classList.add('active');
+
+    document.getElementById('projectFormTitle').textContent = 'Edit Project';
+    document.getElementById('editProjectId').value = p.id;
+    document.getElementById('pId').value = p.id;
+    document.getElementById('pId').disabled = true;
+    document.getElementById('pService').value = p.service || '';
+    document.getElementById('pType').value = p.type || 'video';
+    document.getElementById('pDate').value = p.date || '';
+    document.getElementById('pDeadline').value = p.deadline || '';
+    document.getElementById('pInvoicePDF').value = p.invoice_pdf || '';
+    document.getElementById('pDeliveryLink').value = p.delivery_link || '';
+    var pay = p.payment || {};
+    document.getElementById('payDeposit').value = (pay.deposit && pay.deposit.status) || 'outstanding';
+    document.getElementById('payDepositAt').value = (pay.deposit && pay.deposit.paidAt ? pay.deposit.paidAt.replace(' ','T') : '');
+    document.getElementById('payFinal').value = (pay.final && pay.final.status) || 'outstanding';
+    document.getElementById('payFinalAt').value = (pay.final && pay.final.paidAt ? pay.final.paidAt.replace(' ','T') : '');
+    renderMilestoneGrid(p.type || 'video', p.milestones || {});
+    document.getElementById('cancelEditBtn').style.display = 'inline-block';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  document.getElementById('cancelEditBtn').addEventListener('click', function() {
+    resetProjectForm();
+  });
+
+  function resetProjectForm() {
+    document.getElementById('projectFormTitle').textContent = 'New Project';
+    document.getElementById('editProjectId').value = '';
+    document.getElementById('pId').value = '';
+    document.getElementById('pId').disabled = false;
+    ['pService','pDate','pDeadline','pInvoicePDF','pDeliveryLink'].forEach(function(id) {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('pType').value = 'video';
+    document.getElementById('payDeposit').value = 'outstanding';
+    document.getElementById('payDepositAt').value = '';
+    document.getElementById('payFinal').value = 'outstanding';
+    document.getElementById('payFinalAt').value = '';
+    renderMilestoneGrid('video', {});
+    document.getElementById('cancelEditBtn').style.display = 'none';
+  }
+
+  document.getElementById('saveProjectBtn').addEventListener('click', function() {
+    var editId = document.getElementById('editProjectId').value;
+    var id     = document.getElementById('pId').value.trim();
+    var type   = document.getElementById('pType').value;
+    if (!id || !document.getElementById('pService').value.trim()) {
+      toast('Project ID and Service are required', true); return;
+    }
+    var depAt = document.getElementById('payDepositAt').value;
+    var finAt = document.getElementById('payFinalAt').value;
+    var data = {
+      id:            id,
+      service:       document.getElementById('pService').value.trim(),
+      type:          type,
+      date:          document.getElementById('pDate').value,
+      deadline:      document.getElementById('pDeadline').value,
+      invoice_pdf:   document.getElementById('pInvoicePDF').value,
+      delivery_link: document.getElementById('pDeliveryLink').value,
+      milestones:    getMilestones(type),
+      payment: {
+        deposit: { status: document.getElementById('payDeposit').value, paidAt: depAt ? depAt.replace('T',' ') : null },
+        final:   { status: document.getElementById('payFinal').value,   paidAt: finAt ? finAt.replace('T',' ') : null }
+      }
+    };
+    var method = editId ? 'PATCH' : 'POST';
+    var path   = editId ? 'projects?id=eq.'+editId : 'projects';
+    var prefer = editId ? 'return=minimal' : 'return=representation';
+    sbFetch(path, {method:method, body:data, prefer:prefer}).then(function() {
+      toast(editId ? 'Project updated' : 'Project created');
+      resetProjectForm(); loadProjects();
+    }).catch(function(e) { toast('Error saving: '+e.message, true); });
+  });
+
+  // ── Invoice builder ────────────────────────────────────────────────────
+  var invLineId = 0, invScopeId = 0;
+
+  document.getElementById('invDate').value = new Date().toISOString().split('T')[0];
+
+  function invFmtDisp(n) { return 'R '+Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,' '); }
+
+  function invAddLine(desc, qty, rate) {
+    desc=desc||''; qty=qty||''; rate=rate||'';
+    invLineId++;
+    var id=invLineId;
+    var div=document.createElement('div');
+    div.className='line-item'; div.id='inv-li-'+id;
+    div.innerHTML=
+      '<input class="li-desc" type="text" placeholder="Description" value="'+desc.replace(/"/g,'&quot;')+'" />'+
+      '<input class="li-qty" type="text" placeholder="e.g. 2 hrs" value="'+qty+'" style="text-align:center" />'+
+      '<input class="li-rate" type="number" placeholder="0.00" value="'+rate+'" step="0.01" min="0" style="text-align:right" />'+
+      '<div class="amount-display" id="inv-amt-'+id+'">R 0.00</div>'+
+      '<button class="remove-btn" data-id="'+id+'">x</button>';
+    div.querySelector('.li-desc').addEventListener('input',invRecalc);
+    div.querySelector('.li-qty').addEventListener('input',invRecalc);
+    div.querySelector('.li-rate').addEventListener('input',invRecalc);
+    div.querySelector('.remove-btn').addEventListener('click',function(){
+      var el=document.getElementById('inv-li-'+this.dataset.id);
+      if(el){el.remove();invRecalc();}
+    });
+    document.getElementById('invLineItems').appendChild(div);
+    invRecalc();
+  }
+  document.getElementById('invAddLine').addEventListener('click',function(){invAddLine();});
+
+  function invAddScope(containerId, text, color) {
+    text=text||''; invScopeId++;
+    var id=invScopeId;
+    var div=document.createElement('div');
+    div.className='scope-item'; div.id='inv-sc-'+id;
+    div.innerHTML=
+      '<div class="scope-badge" style="background:'+color+'">'+(color==='#4C433B'?'x':'v')+'</div>'+
+      '<input type="text" placeholder="Enter item..." value="'+text.replace(/"/g,'&quot;')+'" />'+
+      '<button class="remove-btn" data-id="'+id+'">x</button>';
+    div.querySelector('.remove-btn').addEventListener('click',function(){
+      var el=document.getElementById('inv-sc-'+this.dataset.id);
+      if(el) el.remove();
+    });
+    document.getElementById(containerId).appendChild(div);
+  }
+  document.getElementById('invAddReceive').addEventListener('click',function(){invAddScope('invScopeReceive','','#4CAF79');});
+  document.getElementById('invAddCommit').addEventListener('click',function(){invAddScope('invScopeCommit','','#4CAF79');});
+  document.getElementById('invAddExclude').addEventListener('click',function(){invAddScope('invScopeExclude','','#4C433B');});
+
+  // Default scope items
+  [
+    'Long-form video (~5 min) -- landscape (16:9), colour graded, licensed music and titles.',
+    'Short-form video (~1 min) -- same format, cut for social media.',
+    'Bonus: Vertical Reels cut -- portrait (9:16) for Instagram and Facebook Reels.',
+    'Up to 3 revision rounds across all videos.'
+  ].forEach(function(t){invAddScope('invScopeReceive',t,'#4CAF79');});
+  [
+    'Music will be fully royalty-free and licensed.',
+    'No identifiable footage of children\'s faces.',
+    'First cut delivered within 1 week of the final shoot day.',
+    'Final files delivered as MP4 (H.264).'
+  ].forEach(function(t){invAddScope('invScopeCommit',t,'#4CAF79');});
+  [
+    'Drone footage, additional crew, or lighting equipment.',
+    'More than 2 locations or 4 total shoot hours.',
+    'More than 3 revision rounds.'
+  ].forEach(function(t){invAddScope('invScopeExclude',t,'#4C433B');});
+
+  function invGetLines() {
+    return Array.from(document.querySelectorAll('#invLineItems .line-item')).map(function(li){
+      var desc=li.querySelector('.li-desc').value||'';
+      var qty=li.querySelector('.li-qty').value||'';
+      var rate=parseFloat(li.querySelector('.li-rate').value)||0;
+      var qn=parseFloat(qty);
+      var amt=(!isNaN(qn)&&qty.trim()!=='')?qn*rate:rate;
+      return {desc:desc,qty:qty,rate:rate,amount:amt,id:li.id.replace('inv-li-','')};
+    });
+  }
+
+  function invRecalc() {
+    var lines=invGetLines(), sub=0;
+    lines.forEach(function(l){
+      sub+=l.amount;
+      var el=document.getElementById('inv-amt-'+l.id);
+      if(el) el.textContent=invFmtDisp(l.amount);
+    });
+    var dp=parseFloat(document.getElementById('invDiscount').value)||0;
+    var da=sub*dp/100, tot=sub-da;
+    document.getElementById('invSubtotal').textContent=invFmtDisp(sub);
+    document.getElementById('invDiscDisplay').textContent='-'+invFmtDisp(da);
+    document.getElementById('invTotal').textContent=invFmtDisp(tot);
+  }
+
+  ['invNo','invDate','invDue','invDiscount','invClient','invAddr','invEmail'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.addEventListener('input',invRecalc);
+  });
+
+  function populateInvProjectDropdown(projects) {
+    var sel=document.getElementById('invProjectLink');
+    sel.innerHTML='<option value="">-- None --</option>';
+    projects.forEach(function(p){
+      var o=document.createElement('option');
+      o.value=p.id; o.textContent=p.service+' -- '+p.date;
+      sel.appendChild(o);
+    });
+  }
+
+  document.getElementById('invProjectLink').addEventListener('change',function(){
+    var id=this.value;
+    var p=allProjects.find(function(pr){return pr.id===id;});
+    if(!p) return;
+    document.getElementById('invNo').value=p.invoice_pdf
+      ? p.invoice_pdf.replace(/-[a-z0-9]{5}\.pdf$/,'.pdf').replace('.pdf','')
+      : 'KVK-2026-001';
+    // Load existing invoice data if saved
+    if(p.invoice_data && Object.keys(p.invoice_data).length) {
+      loadInvoiceData(p.invoice_data);
+      toast('Invoice data loaded from project');
+    }
+    invRecalc();
+  });
+
+  function loadInvoiceData(inv) {
+    if(inv.invoiceNo)  document.getElementById('invNo').value=inv.invoiceNo;
+    if(inv.date)       document.getElementById('invDate').value=inv.date;
+    if(inv.dueDate)    document.getElementById('invDue').value=inv.dueDate;
+    if(inv.discount!=null) document.getElementById('invDiscount').value=inv.discount;
+    if(inv.clientName) document.getElementById('invClient').value=inv.clientName;
+    if(inv.clientAddress) document.getElementById('invAddr').value=inv.clientAddress;
+    if(inv.clientEmail)   document.getElementById('invEmail').value=inv.clientEmail;
+    if(inv.lines && inv.lines.length) {
+      document.getElementById('invLineItems').innerHTML='';
+      invLineId=0;
+      inv.lines.forEach(function(l){invAddLine(l.desc,l.qty,l.rate);});
+    }
+    if(inv.scopeReceive){
+      document.getElementById('invScopeReceive').innerHTML=''; invScopeId=0;
+      inv.scopeReceive.forEach(function(t){invAddScope('invScopeReceive',t,'#4CAF79');});
+    }
+    if(inv.scopeCommit){
+      document.getElementById('invScopeCommit').innerHTML='';
+      inv.scopeCommit.forEach(function(t){invAddScope('invScopeCommit',t,'#4CAF79');});
+    }
+    if(inv.scopeExclude){
+      document.getElementById('invScopeExclude').innerHTML='';
+      inv.scopeExclude.forEach(function(t){invAddScope('invScopeExclude',t,'#4C433B');});
+    }
+    if(inv.portfolioText)  document.getElementById('invPortfolio').value=inv.portfolioText;
+    if(inv.acceptanceText) document.getElementById('invAcceptance').value=inv.acceptanceText;
+    invRecalc();
+  }
+
+  function buildInvData() {
+    return {
+      invoiceNo:      document.getElementById('invNo').value,
+      date:           document.getElementById('invDate').value,
+      dueDate:        document.getElementById('invDue').value,
+      discount:       parseFloat(document.getElementById('invDiscount').value)||0,
+      clientName:     document.getElementById('invClient').value,
+      clientAddress:  document.getElementById('invAddr').value,
+      clientEmail:    document.getElementById('invEmail').value,
+      lines:          invGetLines().map(function(l){return{desc:l.desc,qty:l.qty,rate:l.rate};}),
+      scopeReceive:   Array.from(document.querySelectorAll('#invScopeReceive input[type=text]')).map(function(i){return i.value;}).filter(Boolean),
+      scopeCommit:    Array.from(document.querySelectorAll('#invScopeCommit input[type=text]')).map(function(i){return i.value;}).filter(Boolean),
+      scopeExclude:   Array.from(document.querySelectorAll('#invScopeExclude input[type=text]')).map(function(i){return i.value;}).filter(Boolean),
+      portfolioText:  document.getElementById('invPortfolio').value,
+      acceptanceText: document.getElementById('invAcceptance').value
+    };
+  }
+
+  // Save invoice data back to project in Supabase
+  document.getElementById('invSaveToProject').addEventListener('click',function(){
+    var pid=document.getElementById('invProjectLink').value;
+    if(!pid){toast('Select a project first',true);return;}
+    var data=buildInvData();
+    sbFetch('projects?id=eq.'+pid,{method:'PATCH',body:{invoice_data:data},prefer:'return=minimal'})
+      .then(function(){toast('Invoice saved to project');loadProjects();})
+      .catch(function(e){toast('Error: '+e.message,true);});
+  });
+
+  // Random code for PDF filename
+  if(!window._invCode) window._invCode=(function(){
+    var c='abcdefghjkmnpqrstuvwxyz23456789',s='';
+    for(var i=0;i<5;i++) s+=c[Math.floor(Math.random()*c.length)];
+    return s;
+  })();
+
+  function getPDFFilename(){
+    return (document.getElementById('invNo').value||'KVK-2026-001')+'-'+window._invCode+'.pdf';
+  }
+
+  document.getElementById('invGetFilename').addEventListener('click',function(){
+    var pdf=getPDFFilename();
+    var tex=(document.getElementById('invNo').value||'KVK-2026-001')+'.tex';
+    document.getElementById('invTexName').textContent=tex;
+    document.getElementById('invPDFName').textContent=pdf;
+    // Also update the project's invoice_pdf field if a project is selected
+    var pid=document.getElementById('invProjectLink').value;
+    if(pid){
+      sbFetch('projects?id=eq.'+pid,{method:'PATCH',body:{invoice_pdf:pdf},prefer:'return=minimal'})
+        .then(function(){toast('PDF filename saved to project');loadProjects();});
+    }
+    document.getElementById('invOutputBox').style.display='block';
+    document.getElementById('invOutputBox').scrollIntoView({behavior:'smooth'});
+  });
+
+  // LaTeX generator
+  document.getElementById('invDownloadTex').addEventListener('click',function(){
+    var inv=buildInvData();
+    function esc(s){
+      return (s||'')
+        .replace(/\\/g,'\\textbackslash{}').replace(/&/g,'\\&').replace(/%/g,'\\%')
+        .replace(/\$/g,'\\$').replace(/#/g,'\\#').replace(/_/g,'\\_')
+        .replace(/\{/g,'\\{').replace(/\}/g,'\\}')
+        .replace(/~/g,'\\textasciitilde{}').replace(/\^/g,'\\textasciicircum{}');
+    }
+    var lines=invGetLines();
+    var sub=lines.reduce(function(a,l){return a+l.amount;},0);
+    var da=sub*(inv.discount/100), tot=sub-da;
+    var lineRows='';
+    lines.forEach(function(l,i){
+      var bg=i%2===0?'  \\rowcolor{lightgrey}\n':'';
+      var qty=esc(l.qty)||'---';
+      var rate=l.rate>0?l.rate.toFixed(2):'Incl.';
+      var amt=l.amount>0?l.amount.toFixed(2):'---';
+      lineRows+=bg+'  \\small '+esc(l.desc)+' & \\small '+qty+' & \\small '+rate+' & \\small '+amt+' \\\\\n\n';
+    });
+    function scopeRows(items, icon){
+      return items.map(function(t,i){
+        return (i%2===0?'  \\rowcolor{lightgrey}\n':'')+
+          '  {\\color{accent}'+icon+'} &\n  \\small '+esc(t)+' \\\\\n';
+      }).join('');
+    }
+    var tex='%% KVK Invoice -- generated by admin\n'+
+      '%% Compile: xelatex '+inv.invoiceNo+'.tex\n\n'+
+      '\\documentclass[a4paper,9pt]{article}\n'+
+      '\\usepackage[a4paper,top=0mm,bottom=0mm,left=0mm,right=0mm]{geometry}\n'+
+      '\\usepackage{xcolor,tabularx,fontenc,helvet,graphicx,array,colortbl,tikz,multirow,amssymb}\n'+
+      '\\renewcommand{\\familydefault}{\\sfdefault}\n'+
+      '\\definecolor{accent}{HTML}{B34B1D}\n'+
+      '\\definecolor{accentdark}{HTML}{0B0A09}\n'+
+      '\\definecolor{darktext}{HTML}{24211F}\n'+
+      '\\definecolor{lightgrey}{HTML}{F7F0E6}\n'+
+      '\\definecolor{midgrey}{HTML}{75726C}\n'+
+      '\\definecolor{sand}{HTML}{DFB373}\n'+
+      '\\pagestyle{empty}\\setlength{\\parindent}{0pt}\n'+
+      '\\newcolumntype{M}[1]{>{\\centering\\arraybackslash}m{#1}}\n'+
+      '\\newcolumntype{L}{{\\raggedright\\arraybackslash}m{\\dimexpr\\linewidth-8mm\\relax}}\n'+
+      '\\begin{document}\n\n'+
+      '% PAGE 1\n'+
+      '\\begin{tikzpicture}[remember picture,overlay]\n'+
+      '  \\fill[accentdark](current page.north west)rectangle([yshift=-40mm]current page.north east);\n'+
+      '  \\fill[accent]([yshift=-40mm]current page.north west)rectangle([yshift=-43mm]current page.north east);\n'+
+      '  \\IfFileExists{kvk_logo2.png}{\\node[anchor=north west]at([xshift=12mm,yshift=-3mm]current page.north west){\\includegraphics[height=32mm,keepaspectratio]{kvk_logo2.png}};}{}\n'+
+      '  \\node[white,font=\\bfseries\\large,anchor=east]at([xshift=-18mm,yshift=-16mm]current page.north east){Kaal Vellies Kollektief};\n'+
+      '  \\node[anchor=north east,inner sep=0pt]at([xshift=-18mm,yshift=-28mm]current page.north east){\n'+
+      '    \\begin{tabular}{@{}rl@{}}\n'+
+      '      {\\color{midgrey}\\scriptsize INVOICE NO.}&\\textbf{'+esc(inv.invoiceNo)+'}\\\\\n'+
+      '      {\\color{midgrey}\\scriptsize DATE}&\\textbf{'+esc(inv.date)+'}\\\\\n'+
+      '      {\\color{midgrey}\\scriptsize DUE DATE}&\\textbf{'+esc(inv.dueDate)+'}\\\\\n'+
+      '    \\end{tabular}};\n'+
+      '\\end{tikzpicture}\n'+
+      '\\vspace{43mm}\n\\hspace{18mm}%\n\\begin{minipage}[t]{170mm}\n\\vspace{3mm}\n'+
+      '{\\color{accentdark}\\rule{\\linewidth}{1.2pt}}\\vspace{3mm}\n'+
+      '{\\color{darktext}\\fontsize{22}{26}\\selectfont\\textbf{INVOICE}}\n\\vspace{4mm}\n\n'+
+      '{\\color{midgrey}\\scriptsize BILLED TO}\\\\[0.8mm]\n'+
+      '{\\normalsize\\textbf{'+esc(inv.clientName)+'}}\\\\[0.5mm]\n'+
+      (inv.clientAddress?'{\\small '+esc(inv.clientAddress)+'}\\\\[0.3mm]\n':'')+
+      (inv.clientEmail?'{\\small '+inv.clientEmail+'}\\\\[0.3mm]\n':'')+
+      '\\vspace{4mm}\n\\renewcommand{\\arraystretch}{1.5}\n'+
+      '\\begin{tabularx}{\\linewidth}{>{\\raggedright\\arraybackslash}X>{\\centering\\arraybackslash}p{16mm}>{\\centering\\arraybackslash}p{20mm}>{\\raggedleft\\arraybackslash}p{22mm}}\n'+
+      '  \\rowcolor{accentdark}\\color{white}\\textbf{\\small DESCRIPTION}&\\color{white}\\textbf{\\small QTY}&\\color{white}\\textbf{\\small RATE (R)}&\\color{white}\\textbf{\\small AMOUNT (R)}\\\\\n\n'+
+      lineRows+
+      '\\end{tabularx}\n\\vspace{3mm}\n'+
+      '\\begin{flushright}\\begin{tabular}{@{}lr@{}}\n'+
+      '  \\small Subtotal&\\small R\\ '+sub.toFixed(2)+'\\\\\n'+
+      '  \\small Discount ('+inv.discount+'\\%)&\\small -R\\ '+da.toFixed(2)+'\\\\[1.5mm]\n'+
+      '  \\rowcolor{accentdark}\\color{white}\\textbf{\\small TOTAL DUE}&\\color{white}\\textbf{\\small R\\ '+tot.toFixed(2)+'}\\\\\n'+
+      '\\end{tabular}\\end{flushright}\n\\vspace{4mm}\n'+
+      '{\\color{accent}\\textbf{\\small PAYMENT DETAILS}}\\\\[0.8mm]\n'+
+      '{\\color{accent}\\rule{48mm}{0.8pt}}\\\\[1.5mm]\n'+
+      '{\\small\\begin{tabular}{@{}ll@{}}Bank:&Investec Bank\\\\Account Name:&Cornelius Marthinus Prinsloo\\\\Account No.:&10012991243\\\\Branch Code:&580105\\\\Reference:&'+esc(inv.invoiceNo)+'\\\\\\end{tabular}}\n'+
+      '\\end{minipage}\\vspace*{\\fill}\\vspace{10mm}\n\n'+
+      '% PAGE 2\n\\newpage\n'+
+      '\\begin{tikzpicture}[remember picture,overlay]\n'+
+      '  \\fill[accentdark](current page.south west)rectangle([yshift=12mm]current page.south east);\n'+
+      '  \\fill[accent]([yshift=12mm]current page.south west)rectangle([yshift=14mm]current page.south east);\n'+
+      '  \\node[white,font=\\small]at([yshift=6mm]current page.south){Thank you for your support\\ $\\bullet$\\ Kaal Vellies Kollektief\\ $\\bullet$\\ kvk.myportfolio.com};\n'+
+      '\\end{tikzpicture}\n'+
+      '\\vspace{10mm}\\hspace{18mm}%\n\\begin{minipage}[t]{170mm}\n\\vspace{3mm}\n'+
+      '{\\color{darktext}\\fontsize{22}{26}\\selectfont\\textbf{SCOPE OF WORK}}\\\\[1mm]\n'+
+      '{\\color{midgrey}\\small Invoice '+esc(inv.invoiceNo)+'\\ $\\bullet$\\ '+esc(inv.clientName)+'\\ $\\bullet$\\ '+esc(inv.date)+'}\n'+
+      '\\vspace{1mm}{\\color{accent}\\rule{\\linewidth}{1.2pt}}\\vspace{3mm}\n\n'+
+      '{\\color{accent}\\textbf{\\small WHAT YOU WILL RECEIVE}}\\\\[0.5mm]{\\color{accent}\\rule{60mm}{0.8pt}}\\vspace{1.5mm}\n'+
+      '\\renewcommand{\\arraystretch}{1.5}\n\\begin{tabularx}{\\linewidth}{M{6mm}L}\n'+
+      scopeRows(inv.scopeReceive,'\\textbf{\\checkmark}')+
+      '\\end{tabularx}\\vspace{3.5mm}\n\n'+
+      '{\\color{accent}\\textbf{\\small PRODUCTION COMMITMENTS}}\\\\[0.5mm]{\\color{accent}\\rule{60mm}{0.8pt}}\\vspace{1.5mm}\n'+
+      '\\begin{tabularx}{\\linewidth}{M{6mm}L}\n'+
+      scopeRows(inv.scopeCommit,'$\\checkmark$')+
+      '\\end{tabularx}\\vspace{3.5mm}\n\n'+
+      '{\\color{accent}\\textbf{\\small NOT INCLUDED}}\\\\[0.5mm]{\\color{accent}\\rule{60mm}{0.8pt}}\\vspace{1.5mm}\n'+
+      '\\begin{tabularx}{\\linewidth}{M{6mm}L}\n'+
+      scopeRows(inv.scopeExclude,'$\\times$')+
+      '\\end{tabularx}\\vspace{4mm}\n\n'+
+      '{\\color{accent}\\textbf{\\small PORTFOLIO \\& CREDIT}}\\\\[0.5mm]{\\color{accent}\\rule{60mm}{0.8pt}}\\\\[1.5mm]\n'+
+      '{\\small '+esc(inv.portfolioText)+'}\n\\vspace{4mm}\n'+
+      '{\\color{accent}\\textbf{\\small ACCEPTANCE}}\\\\[0.5mm]{\\color{accent}\\rule{60mm}{0.8pt}}\\\\[1.5mm]\n'+
+      '{\\small '+esc(inv.acceptanceText)+'}\n\\vspace{5mm}\n'+
+      '\\begin{tabular}{@{}p{70mm}@{}}\\small\\textbf{Corn\\\'e Prinsloo}\\\\[8mm]\\hrule\\\\[1mm]\\small Signature\\\\'+esc(inv.date)+'\\\\\\end{tabular}\n'+
+      '\\end{minipage}\\vspace*{\\fill}\n\\end{document}\n';
+
+    var blob=new Blob([tex],{type:'text/plain'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url; a.download=inv.invoiceNo+'.tex'; a.click();
+    URL.revokeObjectURL(url);
+    document.getElementById('invGetFilename').click();
+  });
+
+  invAddLine('Shoot Day 1','2 hrs','200');
+  invAddLine('Video Editing','4 hrs','200');
+  invAddLine('Travel -- 32 km @ R5.00/km','32 km','5');
+
+  // ── Reviews panel ──────────────────────────────────────────────────────
+  function loadReviews() {
+    sbFetch('reviews?select=*&order=created_at.desc').then(function(data) {
+      var all = Array.isArray(data) ? data : [];
+      var pending  = all.filter(function(r){return !r.approved;});
+      var approved = all.filter(function(r){return r.approved;});
+      renderReviews('reviewsPending',  pending,  false);
+      renderReviews('reviewsApproved', approved, true);
+    });
+  }
+
+  function renderReviews(containerId, reviews, isApproved) {
+    var el=document.getElementById(containerId);
+    if(!reviews.length){
+      el.innerHTML='<div style="color:var(--grey);font-style:italic;font-family:\'Crimson Pro\',serif;padding:8px 0">None yet.</div>';
+      return;
+    }
+    el.innerHTML='';
+    reviews.forEach(function(r){
+      var div=document.createElement('div');
+      div.className='review-card';
+      div.innerHTML=
+        '<div style="flex:1">'+
+          '<div class="review-text">&#8220;'+r.text+'&#8221;</div>'+
+          '<div class="review-meta">'+r.author+(r.role?' &mdash; '+r.role:'')+' &middot; '+new Date(r.created_at).toLocaleDateString('en-ZA')+'</div>'+
+        '</div>'+
+        '<div class="review-actions">'+
+          (isApproved?'<span class="approved-badge">Live</span>':
+            '<button class="rev-btn rev-approve" data-id="'+r.id+'">Approve</button>')+
+          '<button class="rev-btn rev-delete" data-id="'+r.id+'">Delete</button>'+
+        '</div>';
+      if(!isApproved){
+        div.querySelector('.rev-approve').addEventListener('click',function(){
+          sbFetch('reviews?id=eq.'+this.dataset.id,{method:'PATCH',body:{approved:true},prefer:'return=minimal'})
+            .then(function(){toast('Review approved');loadReviews();});
+        });
+      }
+      div.querySelector('.rev-delete').addEventListener('click',function(){
+        if(confirm('Delete this review?')){
+          sbFetch('reviews?id=eq.'+this.dataset.id,{method:'DELETE'})
+            .then(function(){toast('Review deleted');loadReviews();});
+        }
+      });
+      el.appendChild(div);
+    });
+  }
+
+  // ── Init ───────────────────────────────────────────────────────────────
+  function initApp() {
+    renderMilestoneGrid('video', {});
+    loadProjects();
+    loadReviews();
+  }
+
+  invRecalc();
+})();
+</script>
+</body>
+</html>
