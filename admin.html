@@ -371,11 +371,20 @@
 <script>
 (function () {
   // ── CONFIG — swap these with your Supabase project values ──────────────
-  var SUPABASE_URL  = 'https://jqwdzkxcspuzbvismjhl.supabase.co';
-  var SUPABASE_ANON = 'sb_publishable_cZlEmuWU3aFxkGIv75AA5A_qhKxzeOU';
+  var SUPABASE_URL  = 'YOUR_SUPABASE_URL';
+  var SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
   // ── Admin password — change this ───────────────────────────────────────
   var ADMIN_PASS = 'kvk2026';
   // ──────────────────────────────────────────────────────────────────────
+
+  // ── Milestone config ───────────────────────────────────────────────────
+  var MILESTONE_KEYS = {
+    video: ['storyboard','shoot','edit','delivery'],
+    photo: ['shoot','edit','delivery'],
+    combo: ['storyboard','shoot','edit','delivery']
+  };
+  var MILESTONE_LABELS = {storyboard:'Storyboard',shoot:'Shoot Day',edit:'Editing',delivery:'Delivery'};
+  var STATUS_OPTS = ['not-started','in-progress','done'];
 
   // ── Lock screen ────────────────────────────────────────────────────────
   var unlocked = sessionStorage.getItem('kvk_admin') === '1';
@@ -445,14 +454,6 @@
     });
   });
 
-  // ── Milestone config ───────────────────────────────────────────────────
-  var MILESTONE_KEYS = {
-    video: ['storyboard','shoot','edit','delivery'],
-    photo: ['shoot','edit','delivery'],
-    combo: ['storyboard','shoot','edit','delivery']
-  };
-  var MILESTONE_LABELS = {storyboard:'Storyboard',shoot:'Shoot Day',edit:'Editing',delivery:'Delivery'};
-  var STATUS_OPTS = ['not-started','in-progress','done'];
 
   function renderMilestoneGrid(type, existing) {
     existing = existing || {};
