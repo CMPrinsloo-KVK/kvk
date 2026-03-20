@@ -377,7 +377,7 @@
     <div>
       <a href="https://kvk.myportfolio.com" target="_blank">kvk.myportfolio.com</a>
       <span class="footer-sep">·</span>
-      <a href="mailto:corne.prinsloo@icloud.com">corne.prinsloo@icloud.com</a>
+      <a href="/cdn-cgi/l/email-protection#c5a6aab7aba0ebb5b7acabb6a9aaaa85aca6a9aab0a1eba6aaa8"><span class="__cf_email__" data-cfemail="90f3ffe2fef5bee0e2f9fee3fcffffd0f9f3fcffe5f4bef3fffd">[email&#160;protected]</span></a>
       <span class="footer-sep">·</span>
       <a href="https://wa.me/27796250814">+27 79 625 0814</a>
     </div>
@@ -385,7 +385,7 @@
   </div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const { PDFDocument, rgb, StandardFonts, degrees } = PDFLib;
 
 // ── Formatting ────────────────────────────────────────────────────────────
@@ -806,32 +806,40 @@ async function generatePDF() {
 
     // Helper: draw a scope section
     function drawScopeSection(page, items, icon, iconColor, colText) {
+      const bw = 18, bh = 18, bx = M;
+      const textX = bx + bw + 8;
+      const maxCh = 88; // characters per line — tuned to column width
+
       items.forEach((text, idx) => {
-        const bx = M, bw = 18, bh = 18;
-        page.drawRectangle({ x:bx, y:y-bh+4, width:bw, height:bh, color:iconColor });
-        const iconW = fBold.widthOfTextAtSize(icon,9);
-        page.drawText(icon, { x:bx+(bw-iconW)/2, y:y-11, font:fBold, size:9, color:cWhite });
+        const lines = wrapText(text, maxCh);
+        const rowH  = Math.max(bh, lines.length * 13 + 6);
 
-        // Wrap text in remaining width
-        const textX = bx+bw+6;
-        const maxW  = IW - bw - 6;
-        const maxCh = Math.floor(maxW / 4.8);
-        const wrapped = wrapText(text, maxCh);
-        wrapped.forEach((line, li) => {
-          page.drawText(line, { x:textX, y:y-11-(li*12), font: li===0&&text.includes('—')?fBold:fReg, size:8.5, color:colText });
-        });
-        if (idx%2===0) page.drawRectangle({ x:M, y:y-bh+4, width:IW, height:bh, color:cLight });
-        // Redraw icon on top
-        page.drawRectangle({ x:bx, y:y-bh+4, width:bw, height:bh, color:iconColor });
-        page.drawText(icon, { x:bx+(bw-iconW)/2, y:y-11, font:fBold, size:9, color:cWhite });
+        // Alternating row background (drawn first, underneath everything)
+        if (idx % 2 === 0) {
+          page.drawRectangle({ x:M, y:y - rowH + 4, width:IW, height:rowH, color:cLight });
+        }
 
-        const textLines = wrapText(text, maxCh);
-        textLines.forEach((line,li) => {
-          page.drawText(line, { x:textX, y:y-11-(li*12), font:fReg, size:8.5, color:colText });
+        // Icon badge
+        page.drawRectangle({ x:bx, y:y - rowH + 4, width:bw, height:rowH, color:iconColor });
+        const iconW = fBold.widthOfTextAtSize(icon, 9);
+        page.drawText(icon, {
+          x: bx + (bw - iconW) / 2,
+          y: y - (rowH / 2) - 3,
+          font: fBold, size: 9, color: cWhite
         });
-        y -= Math.max(bh, textLines.length * 12 + 4);
+
+        // Text lines — all regular weight, no bold
+        lines.forEach((line, li) => {
+          page.drawText(line, {
+            x: textX,
+            y: y - 11 - (li * 13),
+            font: fReg, size: 8.5, color: colText
+          });
+        });
+
+        y -= rowH;
       });
-      y -= 6;
+      y -= 8;
     }
 
     // What they'll receive
@@ -890,17 +898,4 @@ async function generatePDF() {
     const blob  = new Blob([bytes], { type:'application/pdf' });
     const url   = URL.createObjectURL(blob);
     const a     = document.createElement('a');
-    a.href = url; a.download = `${invNo}.pdf`; a.click();
-    URL.revokeObjectURL(url);
-
-  } catch(err) {
-    console.error(err);
-    alert('Error generating PDF — check the browser console for details.');
-  }
-
-  btn.disabled = false;
-  btn.innerHTML = '↓ &nbsp; Generate PDF';
-}
-</script>
-</body>
-</html>
+    a.href = url; a.download = `${invNo}.pdf`; a.click(

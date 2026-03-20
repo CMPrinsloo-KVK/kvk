@@ -394,7 +394,7 @@
     <div>
       <a href="https://kvk.myportfolio.com" target="_blank">kvk.myportfolio.com</a>
       <span class="footer-sep">·</span>
-      <a href="mailto:corne.prinsloo@icloud.com">corne.prinsloo@icloud.com</a>
+      <a href="/cdn-cgi/l/email-protection#71121e031f145f0103181f021d1e1e3118121d1e04155f121e1c"><span class="__cf_email__" data-cfemail="f1929e839f94df8183989f829d9e9eb198929d9e8495df929e9c">[email&#160;protected]</span></a>
       <span class="footer-sep">·</span>
       <a href="https://wa.me/27796250814">+27 79 625 0814</a>
     </div>
@@ -402,7 +402,7 @@
   </div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   const TYPE_LABEL = { photo: 'Photography', video: 'Videography', combo: 'Photo + Video' };
 
   const MILESTONE_NAMES = {
@@ -533,12 +533,21 @@
     }
     html += `</div>`;
 
-    // Delivery
+    // Delivery + Invoice buttons
+    html += `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">`;
+
     if (p.deliveryLink) {
       html += `<a class="delivery-link" href="${p.deliveryLink}" target="_blank">↓ &nbsp; Download your files</a>`;
     } else {
-      html += `<p class="delivery-pending">Your delivery link will appear here once files are ready.</p>`;
+      html += `<p class="delivery-pending" style="margin-top:0">Your delivery link will appear here once files are ready.</p>`;
     }
+
+    if (p.invoiceLink) {
+      html += `<a class="delivery-link" href="${p.invoiceLink}" target="_blank"
+        style="background:var(--mid);">🧾 &nbsp; View Invoice</a>`;
+    }
+
+    html += `</div>`;
 
     document.getElementById('cardBody').innerHTML = html;
     document.getElementById('projectCard').classList.add('visible');
@@ -549,15 +558,4 @@
     if (id) {
       document.getElementById('lookupInput').value = id;
       lookupProject();
-      document.querySelector('.lookup-section').scrollIntoView({ behavior: 'smooth' });
-    }
-  }
-
-  document.getElementById('lookupInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') lookupProject();
-  });
-
-  loadProjects();
-</script>
-</body>
-</html>
+      document.
