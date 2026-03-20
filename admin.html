@@ -371,10 +371,10 @@
 <script>
 (function () {
   // ── CONFIG — swap these with your Supabase project values ──────────────
-  var SUPABASE_URL  = 'https://jqwdzkxcspuzbvismjhl.supabase.co';
-  var SUPABASE_ANON = 'sb_publishable_cZlEmuWU3aFxkGIv75AA5A_qhKxzeOU';
+  var SUPABASE_URL  = 'YOUR_SUPABASE_URL';
+  var SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
   // ── Admin password — change this ───────────────────────────────────────
-  var ADMIN_PASS = 'Bentley@10';
+  var ADMIN_PASS = 'kvk2026';
   // ──────────────────────────────────────────────────────────────────────
 
   // ── Lock screen ────────────────────────────────────────────────────────
@@ -414,7 +414,16 @@
       body: opts.body ? JSON.stringify(opts.body) : undefined
     }).then(function(r) {
       if (opts.method === 'DELETE' || r.status === 204) return {};
+      if (!r.ok) {
+        return r.text().then(function(txt) {
+          console.error('Supabase error', r.status, txt);
+          throw new Error('Supabase ' + r.status + ': ' + txt);
+        });
+      }
       return r.json();
+    }).catch(function(e) {
+      console.error('sbFetch error:', path, e.message);
+      throw e;
     });
   }
 
@@ -486,6 +495,8 @@
   var allProjects = [];
 
   function loadProjects() {
+    document.getElementById('projectsGrid').innerHTML =
+      '<div style="color:var(--grey);font-style:italic;font-family:'Crimson Pro',serif">Loading...</div>';
     sbFetch('projects?select=*&order=created_at.desc').then(function(data) {
       allProjects = Array.isArray(data) ? data : [];
       renderProjectsGrid(allProjects);
@@ -493,7 +504,8 @@
     }).catch(function(e) {
       console.error(e);
       document.getElementById('projectsGrid').innerHTML =
-        '<div style="color:var(--red)">Could not load projects. Check Supabase config.</div>';
+        '<div style="color:var(--red);font-family:'Crimson Pro',serif;font-style:italic">'+
+        'Could not load projects: ' + e.message + '</div>';
     });
   }
 
@@ -1014,8 +1026,17 @@
   // ── Init ───────────────────────────────────────────────────────────────
   function initApp() {
     renderMilestoneGrid('video', {});
-    loadProjects();
-    loadReviews();
+    // Validate Supabase config before trying to fetch
+    if (SUPABASE_URL.includes('YOUR_SUPABASE')) {
+      document.getElementById('projectsGrid').innerHTML =
+        '<div style="color:var(--red);font-family:'Crimson Pro',serif;font-style:italic">'+
+        'Supabase not configured yet. Open admin.html and replace YOUR_SUPABASE_URL and YOUR_SUPABASE_ANON_KEY.</div>';
+      document.getElementById('reviewsPending').innerHTML = '';
+      document.getElementById('reviewsApproved').innerHTML = '';
+      return;
+    }
+    try { loadProjects(); } catch(e) { console.error('loadProjects failed:', e); }
+    try { loadReviews();  } catch(e) { console.error('loadReviews failed:', e); }
   }
 
   invRecalc();
