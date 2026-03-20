@@ -35,7 +35,56 @@
     },
     "deliveryLink": "",
     "invoiceRef": "KVK-2026-001",
-    "invoiceLink": ""
+    "invoiceLink": "{
+  "invoiceNo": "KVK-2026-001",
+  "date": "2026-03-20",
+  "dueDate": "After Delivery",
+  "discount": 0,
+  "clientName": "",
+  "clientAddress": "",
+  "clientEmail": "",
+  "lines": [
+    {
+      "desc": "Shoot Day 1",
+      "qty": "2 hrs",
+      "rate": 180
+    },
+    {
+      "desc": "Shoot Day 2",
+      "qty": "2 hrs",
+      "rate": 180
+    },
+    {
+      "desc": "Video Editing",
+      "qty": "4 hrs",
+      "rate": 180
+    },
+    {
+      "desc": "Travel",
+      "qty": "32 km",
+      "rate": 5
+    }
+  ],
+  "scopeReceive": [
+    "Long-form video (~5 min) - landscape (16:9), colour graded, licensed music and titles.",
+    "Short-form video (~1 min) - same format, cut for social media.",
+    "Bonus: Vertical Reels cut - portrait (9:16) for Instagram and Facebook Reels.",
+    "Up to 3 revision rounds across all videos."
+  ],
+  "scopeCommit": [
+    "Music will be fully royalty-free and licensed - safe on YouTube, Facebook, and Instagram.",
+    "No identifiable footage of children's faces. Filming uses over-the-shoulder and back-of-head shots.",
+    "First cut of all videos delivered within 1 week of the final shoot day.",
+    "Final files delivered as MP4 (H.264), ready for direct upload to all major platforms."
+  ],
+  "scopeExclude": [
+    "Drone footage, additional crew, or lighting equipment.",
+    "More than 2 locations or 4 total shoot hours. Additional time billed at the hourly rate.",
+    "More than 3 revision rounds. Additional revisions billed at the hourly rate."
+  ],
+  "portfolioText": "While all final work remains the property of the client upon payment, Kaal Vellies Kollektief retains the right to feature this work in its portfolio, website, and social media channels. Credit will reference the client by name where appropriate.",
+  "acceptanceText": "By proceeding with payment, the client agrees to the scope and terms outlined above."
+}"
   },
   {
     "id": "demo2",
