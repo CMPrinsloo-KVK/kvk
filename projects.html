@@ -7,336 +7,119 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Gloock&family=Italiana&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
   <style>
     :root {
-      --black:       #0B0A09;
-      --dark:        #24211F;
-      --mid:         #4C433B;
-      --grey:        #75726C;
-      --sienna:      #B34B1D;
-      --orange:      #D37835;
-      --sand:        #DFB373;
-      --cream:       #FAE2B4;
-      --bg:          #F7F0E6;
-      --rule:        #D9C4A8;
-      --rule-light:  #EDE3D6;
-      --green:       #4CAF79;
-      --green-text:  #3a8f5e;
-      --red:         #e05050;
-      --red-text:    #c03838;
+      --black:#0B0A09;--dark:#24211F;--mid:#4C433B;--grey:#75726C;
+      --sienna:#B34B1D;--orange:#D37835;--sand:#DFB373;--cream:#FAE2B4;
+      --bg:#F7F0E6;--rule:#D9C4A8;--rule-light:#EDE3D6;
+      --green:#4CAF79;--green-text:#3a8f5e;--red:#e05050;--red-text:#c03838;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body {
-      background: var(--bg);
-      color: var(--dark);
-      font-family: 'Work Sans', sans-serif;
-      font-size: 15px;
-      line-height: 1.5;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
-      opacity: 0.025; pointer-events: none; z-index: 1000;
-    }
-
-    /* Header */
-    header { background: var(--black); }
-    header::after { content: ''; display: block; height: 3px; background: var(--sienna); }
-    .header-inner {
-      max-width: 1100px; margin: 0 auto;
-      padding: 32px 40px 28px;
-      display: flex; align-items: center; gap: 32px;
-    }
-    .logo-wrap img {
-      height: 90px; width: auto; display: block;
-      filter: drop-shadow(0 4px 24px rgba(179,75,29,0.25));
-    }
-    .header-text { flex: 1; }
-    .brand-name {
-      font-family: 'Italiana', serif;
-      font-size: clamp(28px, 4vw, 42px);
-      color: #fff; line-height: 1.1;
-    }
-    .brand-sub {
-      font-size: 10px; font-weight: 500;
-      letter-spacing: 0.18em; color: var(--sand);
-      text-transform: uppercase; margin-top: 6px;
-    }
-
-    /* Nav */
-    nav { background: var(--black); border-top: 1px solid rgba(255,255,255,0.06); }
-    .nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 40px; display: flex; }
-    nav a {
-      font-size: 11px; font-weight: 500; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--sand); opacity: 0.6;
-      text-decoration: none; padding: 12px 20px 12px 0; transition: opacity 0.2s;
-    }
-    nav a:hover { opacity: 1; }
-    nav a.active { opacity: 1; color: var(--sienna); }
-
-    /* Main */
-    main { flex: 1; max-width: 1100px; margin: 0 auto; padding: 52px 40px 80px; width: 100%; }
-
-    /* Section label */
-    .section-label {
-      font-size: 10px; font-weight: 600;
-      letter-spacing: 0.16em; color: var(--sienna);
-      text-transform: uppercase; padding-bottom: 6px;
-      border-bottom: 1px solid var(--rule); margin-bottom: 24px;
-    }
-
-    /* Stats */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 16px; margin-bottom: 32px;
-    }
-    .stat-card {
-      background: rgba(255,255,255,0.5);
-      border: 1px solid var(--rule-light);
-      border-radius: 6px; padding: 20px 24px;
-    }
-    .stat-num {
-      font-family: 'Gloock', serif;
-      font-size: 40px; color: var(--sienna); line-height: 1; margin-bottom: 4px;
-    }
-    .stat-label {
-      font-size: 11px; font-weight: 500;
-      letter-spacing: 0.08em; color: var(--grey); text-transform: uppercase;
-    }
-
-    /* Pills */
-    .project-pills { display: flex; flex-wrap: wrap; gap: 10px; }
-    .project-pill {
-      display: flex; align-items: center; gap: 10px;
-      background: rgba(255,255,255,0.5);
-      border: 1px solid var(--rule-light);
-      border-radius: 100px; padding: 8px 16px 8px 12px;
-      font-size: 12px; color: var(--dark);
-    }
-    .pill-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .pill-dot.not-started { background: var(--rule); }
-    .pill-dot.in-progress { background: var(--orange); }
-    .pill-dot.done        { background: var(--green); }
-    .pill-service { font-weight: 500; }
-    .pill-date { color: var(--grey); }
-
-    /* Divider */
-    .thick-rule {
-      height: 2px;
-      background: linear-gradient(90deg, var(--orange), transparent);
-      border: none; margin: 48px 0;
-    }
-
-    /* Lookup */
-    .lookup-section { max-width: 560px; }
-    .page-title {
-      font-family: 'Gloock', serif;
-      font-size: clamp(28px, 4vw, 44px);
-      color: var(--dark); line-height: 1.1; margin-bottom: 10px;
-    }
-    .page-sub {
-      font-family: 'Crimson Pro', serif; font-style: italic;
-      font-size: 16px; color: var(--grey); margin-bottom: 28px;
-    }
-    .lookup-form { display: flex; gap: 10px; margin-bottom: 32px; }
-    .lookup-input {
-      flex: 1;
-      background: rgba(255,255,255,0.6);
-      border: 1px solid var(--rule); border-radius: 4px;
-      padding: 12px 14px;
-      font-family: 'Work Sans', sans-serif; font-size: 14px; color: var(--dark);
-      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .lookup-input:focus {
-      border-color: var(--sienna);
-      box-shadow: 0 0 0 3px rgba(179,75,29,0.1);
-    }
-    .lookup-btn {
-      background: var(--sienna); color: #fff; border: none; border-radius: 4px;
-      padding: 12px 20px;
-      font-family: 'Work Sans', sans-serif; font-size: 12px; font-weight: 600;
-      letter-spacing: 0.08em; text-transform: uppercase;
-      cursor: pointer; transition: background 0.2s; white-space: nowrap;
-    }
-    .lookup-btn:hover { background: var(--orange); }
-
-    /* Project card */
-    .project-card {
-      display: none;
-      background: rgba(255,255,255,0.6);
-      border: 1px solid var(--rule); border-radius: 8px;
-      overflow: hidden; animation: fadeUp 0.4s ease both;
-    }
-    .project-card.visible { display: block; }
-
-    .card-header {
-      background: var(--black); padding: 20px 24px;
-      display: flex; align-items: flex-start;
-      justify-content: space-between; gap: 16px;
-    }
-    .card-service {
-      font-family: 'Gloock', serif; font-size: 22px;
-      color: #fff; line-height: 1.2;
-    }
-    .card-dates {
-      display: flex; gap: 20px; margin-top: 6px; flex-wrap: wrap;
-    }
-    .card-date-item { }
-    .card-date-label {
-      font-size: 9px; font-weight: 600; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--sand); opacity: 0.6;
-      display: block;
-    }
-    .card-date-value {
-      font-size: 12px; color: var(--sand); letter-spacing: 0.02em;
-    }
-    .card-type-badge {
-      font-size: 9px; font-weight: 600; letter-spacing: 0.14em;
-      text-transform: uppercase; background: var(--sienna); color: #fff;
-      padding: 4px 10px; border-radius: 100px; flex-shrink: 0; margin-top: 4px;
-    }
-
-    .card-body { padding: 24px; }
-
-    /* Milestone timeline */
-    .milestone-label {
-      font-size: 9px; font-weight: 600; letter-spacing: 0.14em;
-      text-transform: uppercase; color: var(--grey); margin-bottom: 14px;
-    }
-    .milestones { display: flex; flex-direction: column; gap: 0; margin-bottom: 24px; }
-
-    .milestone-row {
-      display: flex; align-items: flex-start; gap: 14px; position: relative;
-    }
-    .milestone-row:not(:last-child)::before {
-      content: '';
-      position: absolute; left: 11px; top: 22px;
-      width: 2px; height: calc(100% + 2px);
-      background: var(--rule-light);
-    }
-    .milestone-dot-wrap {
-      flex-shrink: 0; width: 24px; display: flex;
-      justify-content: center; padding-top: 3px;
-    }
-    .milestone-dot {
-      width: 12px; height: 12px; border-radius: 50%;
-      border: 2px solid var(--rule);
-      background: var(--bg); flex-shrink: 0;
-      position: relative; z-index: 1;
-      transition: all 0.2s;
-    }
-    .milestone-dot.done        { background: var(--green); border-color: var(--green); }
-    .milestone-dot.in-progress { background: var(--orange); border-color: var(--orange); }
-    .milestone-dot.not-started { background: var(--bg); border-color: var(--rule); }
-
-    .milestone-content { flex: 1; padding-bottom: 16px; }
-    .milestone-name {
-      font-size: 13px; font-weight: 500; color: var(--dark); line-height: 1.3;
-    }
-    .milestone-name.done        { color: var(--green-text); }
-    .milestone-name.in-progress { color: var(--orange); }
-    .milestone-name.not-started { color: var(--grey); }
-    .milestone-time {
-      font-family: 'Crimson Pro', serif; font-style: italic;
-      font-size: 12px; color: var(--grey); margin-top: 1px;
-    }
-
-    /* Payment section */
-    .payment-label {
-      font-size: 9px; font-weight: 600; letter-spacing: 0.14em;
-      text-transform: uppercase; color: var(--grey); margin-bottom: 12px;
-    }
-    .payment-rows { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
-    .payment-row {
-      display: flex; align-items: baseline;
-      justify-content: space-between; gap: 12px;
-      padding: 10px 14px;
-      background: rgba(255,255,255,0.5);
-      border: 1px solid var(--rule-light); border-radius: 4px;
-    }
-    .payment-row-left { }
-    .payment-row-name { font-size: 13px; font-weight: 500; color: var(--dark); }
-    .payment-row-time {
-      font-family: 'Crimson Pro', serif; font-style: italic;
-      font-size: 12px; color: var(--grey); margin-top: 1px;
-    }
-    .pay-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 12px; font-weight: 500; flex-shrink: 0;
-    }
-    .pay-badge-dot { width: 8px; height: 8px; border-radius: 50%; }
-    .pay-badge.paid        .pay-badge-dot { background: var(--green); }
-    .pay-badge.paid        { color: var(--green-text); }
-    .pay-badge.outstanding .pay-badge-dot { background: var(--red); }
-    .pay-badge.outstanding { color: var(--red-text); }
-
-    /* Delivery */
-    .delivery-link {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: var(--sienna); color: #fff; text-decoration: none;
-      border-radius: 4px; padding: 10px 18px;
-      font-size: 13px; font-weight: 600; letter-spacing: 0.06em;
-      transition: background 0.2s; margin-top: 4px;
-    }
-    .delivery-link:hover { background: var(--orange); }
-    .delivery-pending {
-      font-family: 'Crimson Pro', serif; font-style: italic;
-      font-size: 14px; color: var(--grey); margin-top: 4px;
-    }
-
-    .not-found {
-      display: none; font-family: 'Crimson Pro', serif; font-style: italic;
-      font-size: 15px; color: var(--grey); padding: 16px 0;
-    }
-    .not-found.visible { display: block; }
-
-    /* Footer */
-    footer { background: var(--black); margin-top: auto; }
-    footer::before { content: ''; display: block; height: 3px; background: var(--sienna); }
-    .footer-inner {
-      max-width: 1100px; margin: 0 auto; padding: 16px 40px;
-      display: flex; justify-content: space-between; align-items: center;
-      flex-wrap: wrap; gap: 8px;
-    }
-    .footer-inner span, .footer-inner a {
-      font-size: 11px; color: var(--sand); opacity: 0.75;
-      text-decoration: none; letter-spacing: 0.04em;
-    }
-    .footer-inner a:hover { opacity: 1; }
-    .footer-sep { opacity: 0.3; margin: 0 8px; }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    main { animation: fadeUp 0.5s ease both; }
-
-    @media (max-width: 600px) {
-      .header-inner { padding: 24px 20px 20px; gap: 20px; }
-      .logo-wrap img { height: 68px; }
-      .nav-inner { padding: 0 20px; }
-      main { padding: 36px 20px 60px; }
-      .footer-inner { padding: 14px 20px; flex-direction: column; align-items: flex-start; }
-      .lookup-form { flex-direction: column; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--dark);font-family:'Work Sans',sans-serif;font-size:15px;line-height:1.5;min-height:100vh;display:flex;flex-direction:column}
+    body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");opacity:.025;pointer-events:none;z-index:1000}
+    header{background:var(--black)}
+    header::after{content:'';display:block;height:3px;background:var(--sienna)}
+    .header-inner{max-width:1100px;margin:0 auto;padding:32px 40px 28px;display:flex;align-items:center;gap:32px}
+    .logo-wrap img{height:90px;width:auto;display:block;filter:drop-shadow(0 4px 24px rgba(179,75,29,.25))}
+    .header-text{flex:1}
+    .brand-name{font-family:'Italiana',serif;font-size:clamp(28px,4vw,42px);color:#fff;line-height:1.1}
+    .brand-sub{font-size:10px;font-weight:500;letter-spacing:.18em;color:var(--sand);text-transform:uppercase;margin-top:6px}
+    nav{background:var(--black);border-top:1px solid rgba(255,255,255,.06)}
+    .nav-inner{max-width:1100px;margin:0 auto;padding:0 40px;display:flex}
+    nav a{font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--sand);opacity:.6;text-decoration:none;padding:12px 20px 12px 0;transition:opacity .2s}
+    nav a:hover{opacity:1}
+    nav a.active{opacity:1;color:var(--sienna)}
+    main{flex:1;max-width:1100px;margin:0 auto;padding:52px 40px 80px;width:100%}
+    .section-label{font-size:10px;font-weight:600;letter-spacing:.16em;color:var(--sienna);text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid var(--rule);margin-bottom:24px}
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin-bottom:32px}
+    .stat-card{background:rgba(255,255,255,.5);border:1px solid var(--rule-light);border-radius:6px;padding:20px 24px}
+    .stat-num{font-family:'Gloock',serif;font-size:40px;color:var(--sienna);line-height:1;margin-bottom:4px}
+    .stat-label{font-size:11px;font-weight:500;letter-spacing:.08em;color:var(--grey);text-transform:uppercase}
+    .project-pills{display:flex;flex-wrap:wrap;gap:10px}
+    .project-pill{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.5);border:1px solid var(--rule-light);border-radius:100px;padding:8px 16px 8px 12px;font-size:12px;color:var(--dark)}
+    .pill-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .pill-dot.not-started{background:var(--rule)}
+    .pill-dot.in-progress{background:var(--orange)}
+    .pill-dot.done{background:var(--green)}
+    .pill-service{font-weight:500}
+    .pill-date{color:var(--grey)}
+    .thick-rule{height:2px;background:linear-gradient(90deg,var(--orange),transparent);border:none;margin:48px 0}
+    .lookup-section{max-width:560px}
+    .page-title{font-family:'Gloock',serif;font-size:clamp(28px,4vw,44px);color:var(--dark);line-height:1.1;margin-bottom:10px}
+    .page-sub{font-family:'Crimson Pro',serif;font-style:italic;font-size:16px;color:var(--grey);margin-bottom:28px}
+    .lookup-form{display:flex;gap:10px;margin-bottom:32px}
+    .lookup-input{flex:1;background:rgba(255,255,255,.6);border:1px solid var(--rule);border-radius:4px;padding:12px 14px;font-family:'Work Sans',sans-serif;font-size:14px;color:var(--dark);outline:none;transition:border-color .2s,box-shadow .2s}
+    .lookup-input:focus{border-color:var(--sienna);box-shadow:0 0 0 3px rgba(179,75,29,.1)}
+    .lookup-btn{background:var(--sienna);color:#fff;border:none;border-radius:4px;padding:12px 20px;font-family:'Work Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background .2s;white-space:nowrap}
+    .lookup-btn:hover{background:var(--orange)}
+    .project-card{display:none;background:rgba(255,255,255,.6);border:1px solid var(--rule);border-radius:8px;overflow:hidden;animation:fadeUp .4s ease both}
+    .project-card.visible{display:block}
+    .card-header{background:var(--black);padding:20px 24px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+    .card-service{font-family:'Gloock',serif;font-size:22px;color:#fff;line-height:1.2}
+    .card-dates{display:flex;gap:20px;margin-top:6px;flex-wrap:wrap}
+    .card-date-label{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--sand);opacity:.6;display:block}
+    .card-date-value{font-size:12px;color:var(--sand);letter-spacing:.02em}
+    .card-type-badge{font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;background:var(--sienna);color:#fff;padding:4px 10px;border-radius:100px;flex-shrink:0;margin-top:4px}
+    .card-body{padding:24px}
+    .milestone-label,.payment-label{font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);margin-bottom:14px}
+    .milestones{display:flex;flex-direction:column;gap:0;margin-bottom:24px}
+    .milestone-row{display:flex;align-items:flex-start;gap:14px;position:relative}
+    .milestone-row:not(:last-child)::before{content:'';position:absolute;left:11px;top:22px;width:2px;height:calc(100% + 2px);background:var(--rule-light)}
+    .milestone-dot-wrap{flex-shrink:0;width:24px;display:flex;justify-content:center;padding-top:3px}
+    .milestone-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--rule);background:var(--bg);flex-shrink:0;position:relative;z-index:1}
+    .milestone-dot.done{background:var(--green);border-color:var(--green)}
+    .milestone-dot.in-progress{background:var(--orange);border-color:var(--orange)}
+    .milestone-content{flex:1;padding-bottom:16px}
+    .milestone-name{font-size:13px;font-weight:500;color:var(--dark);line-height:1.3}
+    .milestone-name.done{color:var(--green-text)}
+    .milestone-name.in-progress{color:var(--orange)}
+    .milestone-name.not-started{color:var(--grey)}
+    .milestone-time{font-family:'Crimson Pro',serif;font-style:italic;font-size:12px;color:var(--grey);margin-top:1px}
+    .payment-rows{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+    .payment-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:10px 14px;background:rgba(255,255,255,.5);border:1px solid var(--rule-light);border-radius:4px}
+    .payment-row-name{font-size:13px;font-weight:500;color:var(--dark)}
+    .payment-row-time{font-family:'Crimson Pro',serif;font-style:italic;font-size:12px;color:var(--grey);margin-top:1px}
+    .pay-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;flex-shrink:0}
+    .pay-badge-dot{width:8px;height:8px;border-radius:50%}
+    .pay-badge.paid .pay-badge-dot{background:var(--green)}
+    .pay-badge.paid{color:var(--green-text)}
+    .pay-badge.outstanding .pay-badge-dot{background:var(--red)}
+    .pay-badge.outstanding{color:var(--red-text)}
+    .action-btn{display:inline-flex;align-items:center;gap:8px;color:#fff;text-decoration:none;border-radius:4px;padding:10px 18px;font-size:13px;font-weight:600;letter-spacing:.06em;transition:background .2s;margin-top:4px;border:none;cursor:pointer;font-family:'Work Sans',sans-serif}
+    .btn-delivery{background:var(--sienna)}
+    .btn-delivery:hover{background:var(--orange)}
+    .btn-invoice{background:var(--mid)}
+    .btn-invoice:hover{background:var(--dark)}
+    .delivery-pending{font-family:'Crimson Pro',serif;font-style:italic;font-size:14px;color:var(--grey);margin-top:4px}
+    .not-found{display:none;font-family:'Crimson Pro',serif;font-style:italic;font-size:15px;color:var(--grey);padding:16px 0}
+    .not-found.visible{display:block}
+    footer{background:var(--black);margin-top:auto}
+    footer::before{content:'';display:block;height:3px;background:var(--sienna)}
+    .footer-inner{max-width:1100px;margin:0 auto;padding:16px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+    .footer-inner span,.footer-inner a{font-size:11px;color:var(--sand);opacity:.75;text-decoration:none;letter-spacing:.04em}
+    .footer-inner a:hover{opacity:1}
+    .footer-sep{opacity:.3;margin:0 8px}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    main{animation:fadeUp .5s ease both}
+    @media(max-width:600px){
+      .header-inner{padding:24px 20px 20px;gap:20px}
+      .logo-wrap img{height:68px}
+      .nav-inner{padding:0 20px}
+      main{padding:36px 20px 60px}
+      .footer-inner{padding:14px 20px;flex-direction:column;align-items:flex-start}
+      .lookup-form{flex-direction:column}
     }
   </style>
 </head>
 <body>
-
 <header>
   <div class="header-inner">
-    <div class="logo-wrap">
-      <img src="kvk_logo2.png" alt="KVK Logo" onerror="this.style.display='none'" />
-    </div>
+    <div class="logo-wrap"><img src="kvk_logo2.png" alt="KVK Logo" onerror="this.style.display='none'" /></div>
     <div class="header-text">
       <div class="brand-name">Kaal Vellies Kollektief</div>
-      <div class="brand-sub">Photography · Videography · Stellenbosch</div>
+      <div class="brand-sub">Photography &middot; Videography &middot; Stellenbosch</div>
     </div>
   </div>
 </header>
@@ -347,34 +130,21 @@
     <a href="projects.html" class="active">Projects</a>
   </div>
 </nav>
-
 <main>
-
-  <!-- PUBLIC OVERVIEW -->
-  <div class="overview-section" style="margin-bottom:56px;">
+  <div style="margin-bottom:56px">
     <div class="section-label">Currently Active</div>
     <div class="stats-row" id="statsRow"></div>
     <div class="project-pills" id="projectPills"></div>
   </div>
-
   <hr class="thick-rule" />
-
-  <!-- PRIVATE LOOKUP -->
   <div class="lookup-section">
     <h1 class="page-title">Your project.</h1>
-    <p class="page-sub">Got a private link from me? Paste your project ID below to check your status and pick up your files.</p>
-
+    <p class="page-sub">Got a private link from me? Paste your project ID below to check your status and files.</p>
     <div class="lookup-form">
-      <input type="text" class="lookup-input" id="lookupInput"
-        placeholder="Project ID  (e.g. demo1)"
-        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-      <button class="lookup-btn" onclick="lookupProject()">Look up →</button>
+      <input type="text" class="lookup-input" id="lookupInput" placeholder="Project ID (e.g. demo1)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+      <button class="lookup-btn" id="lookupBtn">Look up &rarr;</button>
     </div>
-
-    <div class="not-found" id="notFound">
-      No project found with that ID. Double-check the link I sent you, or <a href="contact.html" style="color:var(--sienna)">get in touch</a>.
-    </div>
-
+    <div class="not-found" id="notFound">No project found with that ID. Double-check the link, or get in touch.</div>
     <div class="project-card" id="projectCard">
       <div class="card-header">
         <div>
@@ -386,176 +156,396 @@
       <div class="card-body" id="cardBody"></div>
     </div>
   </div>
-
 </main>
-
 <footer>
   <div class="footer-inner">
-    <div>
-      <a href="https://kvk.myportfolio.com" target="_blank">kvk.myportfolio.com</a>
-      <span class="footer-sep">·</span>
-      <a href="/cdn-cgi/l/email-protection#71121e031f145f0103181f021d1e1e3118121d1e04155f121e1c"><span class="__cf_email__" data-cfemail="f1929e839f94df8183989f829d9e9eb198929d9e8495df929e9c">[email&#160;protected]</span></a>
-      <span class="footer-sep">·</span>
-      <a href="https://wa.me/27796250814">+27 79 625 0814</a>
-    </div>
+    <div id="footerContact"></div>
     <span>@kaalvellies_kollektief</span>
   </div>
 </footer>
+<script>
+(function() {
+  // Contact info assembled at runtime — never in raw HTML
+  var em = ['corne.prinsloo','icloud.com'].join('@');
+  var wa = 'https://wa.me/27796250814';
+  var portfolio = 'https://kvk.myportfolio.com';
+  var fc = document.getElementById('footerContact');
+  if (fc) fc.innerHTML =
+    '<a href="' + portfolio + '" target="_blank">kvk.myportfolio.com</a>' +
+    '<span class="footer-sep">&middot;</span>' +
+    '<a href="mailto:' + em + '">' + em + '</a>' +
+    '<span class="footer-sep">&middot;</span>' +
+    '<a href="' + wa + '">+27 79 625 0814</a>';
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-  const TYPE_LABEL = { photo: 'Photography', video: 'Videography', combo: 'Photo + Video' };
+  var TYPE_LABEL = {photo:'Photography',video:'Videography',combo:'Photo + Video'};
+  var MILESTONE_NAMES = {storyboard:'Storyboard',shoot:'Shoot Day',edit:'Editing',delivery:'Delivery'};
+  var projects = [];
 
-  const MILESTONE_NAMES = {
-    storyboard: 'Storyboard',
-    shoot:      'Shoot Day',
-    edit:       'Editing',
-    delivery:   'Delivery'
-  };
-
-  // Overall edit status for pills — derived from milestones
   function overallStatus(milestones) {
-    const vals = Object.values(milestones).map(m => m.status);
-    if (vals.every(s => s === 'done'))        return 'done';
-    if (vals.some(s => s === 'in-progress'))  return 'in-progress';
-    if (vals.some(s => s === 'done'))         return 'in-progress';
+    var vals = Object.values(milestones).map(function(m){return m.status});
+    if (vals.every(function(s){return s==='done'})) return 'done';
+    if (vals.some(function(s){return s==='in-progress'||s==='done'})) return 'in-progress';
     return 'not-started';
   }
 
   function formatDateTime(str) {
     if (!str) return null;
-    const d = new Date(str.replace(' ', 'T'));
-    return d.toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })
-      + ' at ' + d.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
+    var d = new Date(str.replace(' ','T'));
+    return d.toLocaleDateString('en-ZA',{day:'numeric',month:'short',year:'numeric'}) +
+      ' at ' + d.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'});
   }
 
-  let projects = [];
+  function fmtR(n) {
+    return 'R ' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+  }
 
-  async function loadProjects() {
-    try {
-      const res = await fetch('projects.json');
-      projects = await res.json();
-      renderOverview();
-      checkURLParam();
-    } catch(e) {
-      console.warn('Could not load projects.json', e);
-    }
+  function loadProjects() {
+    fetch('projects.json')
+      .then(function(r){return r.json()})
+      .then(function(data){
+        projects = data;
+        renderOverview();
+        checkURLParam();
+      })
+      .catch(function(e){console.warn('Could not load projects.json',e)});
   }
 
   function renderOverview() {
-    const active    = projects.filter(p => overallStatus(p.milestones) !== 'done');
-    const editing   = projects.filter(p => overallStatus(p.milestones) === 'in-progress');
-    const delivered = projects.filter(p => overallStatus(p.milestones) === 'done');
-
-    document.getElementById('statsRow').innerHTML = `
-      <div class="stat-card"><div class="stat-num">${active.length}</div><div class="stat-label">Active projects</div></div>
-      <div class="stat-card"><div class="stat-num">${editing.length}</div><div class="stat-label">In progress</div></div>
-      <div class="stat-card"><div class="stat-num">${delivered.length}</div><div class="stat-label">Delivered</div></div>
-      <div class="stat-card"><div class="stat-num">${projects.length}</div><div class="stat-label">Total this year</div></div>
-    `;
-
-    document.getElementById('projectPills').innerHTML = projects.map(p => {
-      const st = overallStatus(p.milestones);
-      return `
-        <div class="project-pill">
-          <span class="pill-dot ${st}"></span>
-          <span class="pill-service">${p.service}</span>
-          <span class="pill-date">${p.date}</span>
-        </div>`;
+    var active   = projects.filter(function(p){return overallStatus(p.milestones)!=='done'});
+    var editing  = projects.filter(function(p){return overallStatus(p.milestones)==='in-progress'});
+    var delivered= projects.filter(function(p){return overallStatus(p.milestones)==='done'});
+    var sr = document.getElementById('statsRow');
+    sr.innerHTML =
+      stat(active.length,'Active projects') +
+      stat(editing.length,'In progress') +
+      stat(delivered.length,'Delivered') +
+      stat(projects.length,'Total this year');
+    var pp = document.getElementById('projectPills');
+    pp.innerHTML = projects.map(function(p){
+      var st = overallStatus(p.milestones);
+      return '<div class="project-pill"><span class="pill-dot '+st+'"></span>' +
+        '<span class="pill-service">'+p.service+'</span>' +
+        '<span class="pill-date">'+p.date+'</span></div>';
     }).join('');
   }
 
-  function lookupProject() {
-    const id = document.getElementById('lookupInput').value.trim().toLowerCase();
-    const p  = projects.find(p => p.id.toLowerCase() === id);
+  function stat(n,lbl){
+    return '<div class="stat-card"><div class="stat-num">'+n+'</div><div class="stat-label">'+lbl+'</div></div>';
+  }
 
+  function lookupProject() {
+    var id = document.getElementById('lookupInput').value.trim().toLowerCase();
+    var p  = projects.find(function(pr){return pr.id.toLowerCase()===id});
     document.getElementById('projectCard').classList.remove('visible');
     document.getElementById('notFound').classList.remove('visible');
-
     if (!p) { document.getElementById('notFound').classList.add('visible'); return; }
 
-    // Header
     document.getElementById('cardService').textContent = p.service;
-    document.getElementById('cardType').textContent = TYPE_LABEL[p.type] || p.type;
-    document.getElementById('cardDates').innerHTML = `
-      <div class="card-date-item">
-        <span class="card-date-label">Shoot / Event</span>
-        <span class="card-date-value">${p.date}</span>
-      </div>
-      <div class="card-date-item">
-        <span class="card-date-label">Deadline</span>
-        <span class="card-date-value">${p.deadline}</span>
-      </div>
-    `;
+    document.getElementById('cardType').textContent = TYPE_LABEL[p.type]||p.type;
+    document.getElementById('cardDates').innerHTML =
+      dateItem('Shoot / Event', p.date) + dateItem('Deadline', p.deadline);
 
-    // Body
-    let html = '';
+    var html = '';
 
     // Milestones
-    html += `<div class="milestone-label">Progress</div><div class="milestones">`;
-    for (const [key, val] of Object.entries(p.milestones)) {
-      const name = MILESTONE_NAMES[key] || key;
-      const st   = val.status;
-      const time = val.completedAt ? formatDateTime(val.completedAt) : null;
-      const timeHtml = st === 'done' && time
-        ? `<div class="milestone-time">Completed ${time}</div>`
-        : st === 'in-progress'
-        ? `<div class="milestone-time">Currently in progress</div>`
-        : `<div class="milestone-time">Not started yet</div>`;
-      html += `
-        <div class="milestone-row">
-          <div class="milestone-dot-wrap"><div class="milestone-dot ${st}"></div></div>
-          <div class="milestone-content">
-            <div class="milestone-name ${st}">${name}</div>
-            ${timeHtml}
-          </div>
-        </div>`;
-    }
-    html += `</div>`;
+    html += '<div class="milestone-label">Progress</div><div class="milestones">';
+    Object.entries(p.milestones).forEach(function(entry){
+      var key=entry[0], val=entry[1];
+      var name = MILESTONE_NAMES[key]||key;
+      var st   = val.status;
+      var time = val.completedAt ? formatDateTime(val.completedAt) : null;
+      var timeHtml = st==='done'&&time ? '<div class="milestone-time">Completed '+time+'</div>'
+        : st==='in-progress' ? '<div class="milestone-time">Currently in progress</div>'
+        : '<div class="milestone-time">Not started yet</div>';
+      html += '<div class="milestone-row">' +
+        '<div class="milestone-dot-wrap"><div class="milestone-dot '+st+'"></div></div>' +
+        '<div class="milestone-content">' +
+        '<div class="milestone-name '+st+'">'+name+'</div>'+timeHtml+
+        '</div></div>';
+    });
+    html += '</div>';
 
     // Payment
-    html += `<div class="payment-label">Payment</div><div class="payment-rows">`;
-    const payLabels = { deposit: 'Deposit (50%)', final: 'Final Payment' };
-    for (const [key, val] of Object.entries(p.payment)) {
-      const label = payLabels[key] || key;
-      const st    = val.status;
-      const time  = val.paidAt ? formatDateTime(val.paidAt) : null;
-      html += `
-        <div class="payment-row">
-          <div class="payment-row-left">
-            <div class="payment-row-name">${label}</div>
-            ${time ? `<div class="payment-row-time">Received ${time}</div>` : ''}
-          </div>
-          <div class="pay-badge ${st}">
-            <span class="pay-badge-dot"></span>
-            <span>${st === 'paid' ? 'Paid' : 'Outstanding'}</span>
-          </div>
-        </div>`;
-    }
-    html += `</div>`;
+    var payLabels = {deposit:'Deposit (50%)',final:'Final Payment'};
+    html += '<div class="payment-label">Payment</div><div class="payment-rows">';
+    Object.entries(p.payment).forEach(function(entry){
+      var key=entry[0], val=entry[1];
+      var lbl  = payLabels[key]||key;
+      var st   = val.status;
+      var time = val.paidAt ? formatDateTime(val.paidAt) : null;
+      html += '<div class="payment-row">' +
+        '<div><div class="payment-row-name">'+lbl+'</div>' +
+        (time?'<div class="payment-row-time">Received '+time+'</div>':'')+
+        '</div>' +
+        '<div class="pay-badge '+st+'">' +
+        '<span class="pay-badge-dot"></span>' +
+        '<span>'+(st==='paid'?'Paid':'Outstanding')+'</span>' +
+        '</div></div>';
+    });
+    html += '</div>';
 
-    // Delivery + Invoice buttons
-    html += `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">`;
-
+    // Action buttons
+    html += '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">';
     if (p.deliveryLink) {
-      html += `<a class="delivery-link" href="${p.deliveryLink}" target="_blank">↓ &nbsp; Download your files</a>`;
+      html += '<a class="action-btn btn-delivery" href="'+p.deliveryLink+'" target="_blank">&darr; &nbsp;Download your files</a>';
     } else {
-      html += `<p class="delivery-pending" style="margin-top:0">Your delivery link will appear here once files are ready.</p>`;
+      html += '<p class="delivery-pending">Your delivery link will appear here once files are ready.</p>';
     }
-
-    if (p.invoiceLink) {
-      html += `<a class="delivery-link" href="${p.invoiceLink}" target="_blank"
-        style="background:var(--mid);">🧾 &nbsp; View Invoice</a>`;
+    if (p.invoice && Object.keys(p.invoice).length > 0) {
+      html += '<button class="action-btn btn-invoice" onclick="generateInvoicePDF(\''+p.id+'\')">&#x1F9FE; &nbsp;View Invoice</button>';
     }
-
-    html += `</div>`;
+    html += '</div>';
 
     document.getElementById('cardBody').innerHTML = html;
     document.getElementById('projectCard').classList.add('visible');
   }
 
+  function dateItem(lbl, val) {
+    return '<div><span class="card-date-label">'+lbl+'</span><span class="card-date-value">'+(val||'—')+'</span></div>';
+  }
+
   function checkURLParam() {
-    const id = new URLSearchParams(window.location.search).get('id');
+    var id = new URLSearchParams(window.location.search).get('id');
     if (id) {
       document.getElementById('lookupInput').value = id;
       lookupProject();
-      document.
+      var ls = document.querySelector('.lookup-section');
+      if (ls) ls.scrollIntoView({behavior:'smooth'});
+    }
+  }
+
+  document.getElementById('lookupBtn').addEventListener('click', lookupProject);
+  document.getElementById('lookupInput').addEventListener('keydown', function(e){
+    if (e.key==='Enter') lookupProject();
+  });
+
+  // ── PDF generation from stored invoice data ───────────────────────────
+  window.generateInvoicePDF = function(projectId) {
+    var p = projects.find(function(pr){return pr.id===projectId});
+    if (!p || !p.invoice) return;
+    var inv = p.invoice;
+
+    var pdfLib = window.PDFLib;
+    if (!pdfLib) { alert('PDF library not loaded yet. Please wait a moment and try again.'); return; }
+    var PDFDocument=pdfLib.PDFDocument, rgb=pdfLib.rgb, StandardFonts=pdfLib.StandardFonts;
+
+    PDFDocument.create().then(function(pdfDoc) {
+      var W=595,H=842,M=45,IW=W-M*2;
+      return Promise.all([
+        pdfDoc.embedFont(StandardFonts.HelveticaBold),
+        pdfDoc.embedFont(StandardFonts.Helvetica),
+        fetch('kvk_logo2.png').then(function(r){return r.ok?r.arrayBuffer():null}).catch(function(){return null})
+      ]).then(function(fonts) {
+        var fBold=fonts[0], fReg=fonts[1], logoBytes=fonts[2];
+        var cBlack=rgb(.043,.039,.035), cSienna=rgb(.702,.294,.11), cWhite=rgb(1,1,1);
+        var cGrey=rgb(.459,.439,.42), cMid=rgb(.298,.263,.231), cLight=rgb(.969,.941,.902);
+
+        function fmtR(n){return 'R '+Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,' ')}
+        function wrapText(text,maxCh){
+          var words=text.split(' '),lines=[],cur='';
+          words.forEach(function(w){
+            if((cur+' '+w).trim().length<=maxCh){cur=(cur+' '+w).trim()}
+            else{if(cur)lines.push(cur);cur=w}
+          });
+          if(cur)lines.push(cur);
+          return lines;
+        }
+
+        var logoEmbedPromise = logoBytes
+          ? pdfDoc.embedPng(logoBytes).catch(function(){return null})
+          : Promise.resolve(null);
+
+        return logoEmbedPromise.then(function(logoImg) {
+          // PAGE 1
+          var p1 = pdfDoc.addPage([W,H]);
+          p1.drawRectangle({x:0,y:H-90,width:W,height:90,color:cBlack});
+          p1.drawRectangle({x:0,y:H-93,width:W,height:3,color:cSienna});
+          if (logoImg) {
+            var ld=logoImg.scaleToFit(38,32);
+            p1.drawImage(logoImg,{x:M,y:H-12-ld.height,width:ld.width,height:ld.height});
+          }
+          p1.drawText('Kaal Vellies Kollektief',{x:M+46,y:H-34,font:fBold,size:16,color:cWhite});
+          p1.drawText('Photography \u00b7 Videography \u00b7 Stellenbosch',{x:M+46,y:H-48,font:fReg,size:7.5,color:rgb(.875,.765,.451)});
+
+          var invNo  = inv.invoiceNo  || p.invoiceRef || 'KVK-2026-001';
+          var invDate= inv.date       || '';
+          var invDue = inv.dueDate    || 'After Delivery';
+          var cName  = inv.clientName || p.service || '';
+          var cAddr  = inv.clientAddress || '';
+          var cEmail = inv.clientEmail   || '';
+          var discPct= inv.discount || 0;
+
+          [['INVOICE NO.',invNo],['DATE',invDate],['DUE DATE',invDue]].forEach(function(pair,i){
+            var ry=H-28-i*18;
+            p1.drawText(pair[0],{x:W-M-155,y:ry,font:fReg,size:7,color:rgb(.55,.55,.55)});
+            p1.drawText(pair[1],{x:W-M-70,y:ry,font:fBold,size:8.5,color:cWhite});
+          });
+
+          var y=H-105;
+          p1.drawText('INVOICE',{x:M,y:y,font:fBold,size:22,color:cBlack});
+          y-=10;
+          p1.drawLine({start:{x:M,y:y},end:{x:M+IW,y:y},thickness:1.2,color:cBlack});
+          y-=14;
+          p1.drawText('BILLED TO',{x:M,y:y,font:fReg,size:7,color:cGrey});
+          y-=13;
+          if(cName) {p1.drawText(cName,{x:M,y:y,font:fBold,size:11,color:cBlack});y-=12}
+          if(cAddr) {p1.drawText(cAddr,{x:M,y:y,font:fReg,size:9,color:cMid});y-=12}
+          if(cEmail){p1.drawText(cEmail,{x:M,y:y,font:fReg,size:9,color:cMid});y-=12}
+          y-=6;
+
+          // Table
+          var cw=[IW*.50,IW*.14,IW*.18,IW*.18];
+          var cx=[M,M+cw[0],M+cw[0]+cw[1],M+cw[0]+cw[1]+cw[2]];
+          var rowH=18;
+          p1.drawRectangle({x:M,y:y-rowH+4,width:IW,height:rowH,color:cBlack});
+          ['DESCRIPTION','QTY','RATE (R)','AMOUNT (R)'].forEach(function(h,i){
+            var tx=i===0?cx[i]+4:cx[i]+cw[i]-fBold.widthOfTextAtSize(h,7.5)-2;
+            p1.drawText(h,{x:tx,y:y-11,font:fBold,size:7.5,color:cWhite});
+          });
+          y-=rowH;
+
+          var lines=inv.lines||[];
+          var subtotal=0;
+          lines.forEach(function(l,idx){
+            if(idx%2===0) p1.drawRectangle({x:M,y:y-rowH+4,width:IW,height:rowH,color:cLight});
+            var qty=l.qty||'';
+            var rate=parseFloat(l.rate)||0;
+            var qtyNum=parseFloat(qty);
+            var amount=(!isNaN(qtyNum)&&qty.trim()!=='')?qtyNum*rate:rate;
+            subtotal+=amount;
+            var desc=l.desc||'';
+            while(desc.length>0&&fReg.widthOfTextAtSize(desc,8.5)>cw[0]-8) desc=desc.slice(0,-1);
+            if(desc.length<(l.desc||'').length) desc=desc.slice(0,-1)+'\u2026';
+            var rateStr=rate>0?fmtR(rate):'Incl.';
+            var amtStr=amount>0?fmtR(amount):'--';
+            p1.drawText(desc,{x:cx[0]+4,y:y-11,font:fReg,size:8.5,color:cBlack});
+            p1.drawText(qty,{x:cx[1]+2,y:y-11,font:fReg,size:8.5,color:cBlack});
+            p1.drawText(rateStr,{x:cx[2]+cw[2]-fReg.widthOfTextAtSize(rateStr,8.5)-4,y:y-11,font:fReg,size:8.5,color:cBlack});
+            p1.drawText(amtStr,{x:cx[3]+cw[3]-fReg.widthOfTextAtSize(amtStr,8.5)-4,y:y-11,font:fReg,size:8.5,color:cBlack});
+            y-=rowH;
+          });
+          y-=6;
+
+          var discAmt=subtotal*discPct/100, total=subtotal-discAmt;
+          var totX=M+IW*.58, totW=IW*.42;
+          p1.drawText('Subtotal',{x:totX,y:y,font:fReg,size:9,color:cGrey});
+          p1.drawText(fmtR(subtotal),{x:totX+totW-fReg.widthOfTextAtSize(fmtR(subtotal),9)-2,y:y,font:fReg,size:9,color:cGrey});
+          y-=14;
+          var dStr='-- '+fmtR(discAmt);
+          p1.drawText('Discount ('+discPct+'%)',{x:totX,y:y,font:fReg,size:9,color:cGrey});
+          p1.drawText(dStr,{x:totX+totW-fReg.widthOfTextAtSize(dStr,9)-2,y:y,font:fReg,size:9,color:cGrey});
+          y-=6;
+          p1.drawRectangle({x:totX-4,y:y-14,width:totW+4,height:22,color:cBlack});
+          p1.drawText('TOTAL DUE',{x:totX,y:y-7,font:fBold,size:9,color:cWhite});
+          var tStr=fmtR(total);
+          p1.drawText(tStr,{x:totX+totW-fBold.widthOfTextAtSize(tStr,9)-6,y:y-7,font:fBold,size:9,color:cWhite});
+          y-=30;
+
+          // Payment details
+          p1.drawText('PAYMENT DETAILS',{x:M,y:y,font:fBold,size:8,color:cSienna});
+          y-=5;
+          p1.drawLine({start:{x:M,y:y},end:{x:M+80,y:y},thickness:.8,color:cSienna});
+          y-=13;
+          [['Bank:','Investec Bank'],['Account Name:','Cornelius Marthinus Prinsloo'],
+           ['Account No.:','10012991243'],['Branch Code:','580105'],['Reference:',invNo]
+          ].forEach(function(pair){
+            p1.drawText(pair[0],{x:M,y:y,font:fBold,size:8.5,color:cBlack});
+            p1.drawText(pair[1],{x:M+76,y:y,font:fReg,size:8.5,color:cBlack});
+            y-=13;
+          });
+
+          // Footer
+          var ftxt='Thank you for your support  \u00b7  Kaal Vellies Kollektief  \u00b7  kvk.myportfolio.com';
+          p1.drawRectangle({x:0,y:0,width:W,height:28,color:cBlack});
+          p1.drawRectangle({x:0,y:28,width:W,height:2,color:cSienna});
+          p1.drawText(ftxt,{x:(W-fReg.widthOfTextAtSize(ftxt,8))/2,y:10,font:fReg,size:8,color:rgb(.875,.765,.451)});
+
+          // PAGE 2 — Scope
+          var p2=pdfDoc.addPage([W,H]);
+          p2.drawRectangle({x:0,y:0,width:W,height:28,color:cBlack});
+          p2.drawRectangle({x:0,y:28,width:W,height:2,color:cSienna});
+          p2.drawText(ftxt,{x:(W-fReg.widthOfTextAtSize(ftxt,8))/2,y:10,font:fReg,size:8,color:rgb(.875,.765,.451)});
+
+          y=H-20;
+          p2.drawText('SCOPE OF WORK',{x:M,y:y,font:fBold,size:20,color:cBlack});
+          y-=14;
+          p2.drawText('Invoice '+invNo+' \u00b7 '+(cName||'Client')+' \u00b7 '+invDate,{x:M,y:y,font:fReg,size:8.5,color:cGrey});
+          y-=8;
+          p2.drawLine({start:{x:M,y:y},end:{x:M+IW,y:y},thickness:1.2,color:cBlack});
+          y-=16;
+
+          function drawHead(page, text, yy) {
+            page.drawText(text,{x:M,y:yy,font:fBold,size:8,color:cSienna});
+            yy-=5;
+            page.drawLine({start:{x:M,y:yy},end:{x:M+80,y:yy},thickness:.8,color:cSienna});
+            return yy-14;
+          }
+
+          function drawItems(page, items, icon, iconColor, yy) {
+            var bw=18,bx=M,textX=bx+bw+8,maxCh=88;
+            items.forEach(function(text,idx){
+              var lines=wrapText(text,maxCh);
+              var rowH=Math.max(bw,lines.length*13+6);
+              if(idx%2===0) page.drawRectangle({x:M,y:yy-rowH+4,width:IW,height:rowH,color:cLight});
+              page.drawRectangle({x:bx,y:yy-rowH+4,width:bw,height:rowH,color:iconColor});
+              var iw=fBold.widthOfTextAtSize(icon,9);
+              page.drawText(icon,{x:bx+(bw-iw)/2,y:yy-(rowH/2)-3,font:fBold,size:9,color:cWhite});
+              lines.forEach(function(line,li){
+                page.drawText(line,{x:textX,y:yy-11-(li*13),font:fReg,size:8.5,color:cMid});
+              });
+              yy-=rowH;
+            });
+            return yy-8;
+          }
+
+          var cGreen=rgb(.298,.686,.475);
+          y=drawHead(p2,'WHAT YOU WILL RECEIVE',y);
+          y=drawItems(p2,inv.scopeReceive||[],'v',cGreen,y);
+          y=drawHead(p2,'PRODUCTION COMMITMENTS',y);
+          y=drawItems(p2,inv.scopeCommit||[],'v',cGreen,y);
+          y=drawHead(p2,'NOT INCLUDED',y);
+          y=drawItems(p2,inv.scopeExclude||[],'x',cMid,y);
+          y-=6;
+
+          // Portfolio
+          y=drawHead(p2,'PORTFOLIO & CREDIT',y);
+          wrapText(inv.portfolioText||'',90).forEach(function(line){
+            p2.drawText(line,{x:M,y:y,font:fReg,size:8.5,color:cMid});
+            y-=12;
+          });
+          y-=8;
+
+          // Acceptance
+          y=drawHead(p2,'ACCEPTANCE',y);
+          wrapText(inv.acceptanceText||'',90).forEach(function(line){
+            p2.drawText(line,{x:M,y:y,font:fReg,size:8.5,color:cMid});
+            y-=12;
+          });
+          y-=16;
+
+          // Signature
+          p2.drawText('Corne Prinsloo',{x:M,y:y,font:fBold,size:9,color:cBlack});
+          y-=30;
+          p2.drawLine({start:{x:M,y:y},end:{x:M+90,y:y},thickness:.8,color:cBlack});
+          y-=11;
+          p2.drawText('Signature  \u00b7  '+invDate,{x:M,y:y,font:fReg,size:8,color:cGrey});
+
+          return pdfDoc.save();
+        });
+      });
+    }).then(function(bytes){
+      var blob=new Blob([bytes],{type:'application/pdf'});
+      var url=URL.createObjectURL(blob);
+      window.open(url,'_blank');
+      setTimeout(function(){URL.revokeObjectURL(url)},60000);
+    }).catch(function(err){
+      console.error(err);
+      alert('Error generating PDF: '+err.message);
+    });
+  };
+
+  loadProjects();
+})();
+</script>
+</body>
+</html>

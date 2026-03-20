@@ -3,212 +3,127 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KVK — Invoice Builder</title>
+  <title>KVK &mdash; Invoice Builder</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Gloock&family=Italiana&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
   <style>
-    :root {
-      --black:      #0B0A09;
-      --dark:       #24211F;
-      --mid:        #4C433B;
-      --grey:       #75726C;
-      --sienna:     #B34B1D;
-      --orange:     #D37835;
-      --sand:       #DFB373;
-      --bg:         #F7F0E6;
-      --rule:       #D9C4A8;
-      --rule-light: #EDE3D6;
-      --green:      #4CAF79;
-    }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body {
-      background: var(--bg); color: var(--dark);
-      font-family: 'Work Sans', sans-serif; font-size: 15px;
-      line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column;
-    }
-    body::before {
-      content: ''; position: fixed; inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
-      opacity: 0.025; pointer-events: none; z-index: 1000;
-    }
-
-    /* Header */
-    header { background: var(--black); }
-    header::after { content: ''; display: block; height: 3px; background: var(--sienna); }
-    .header-inner { max-width: 1100px; margin: 0 auto; padding: 32px 40px 28px; display: flex; align-items: center; gap: 32px; }
-    .logo-wrap img { height: 90px; filter: drop-shadow(0 4px 24px rgba(179,75,29,0.25)); }
-    .header-text { flex: 1; }
-    .brand-name { font-family: 'Italiana', serif; font-size: clamp(28px,4vw,42px); color:#fff; line-height:1.1; }
-    .brand-sub  { font-size:10px; font-weight:500; letter-spacing:.18em; color:var(--sand); text-transform:uppercase; margin-top:6px; }
-    nav { background:var(--black); border-top:1px solid rgba(255,255,255,0.06); }
-    .nav-inner { max-width:1100px; margin:0 auto; padding:0 40px; display:flex; }
-    nav a { font-size:11px; font-weight:500; letter-spacing:.12em; text-transform:uppercase; color:var(--sand); opacity:.6; text-decoration:none; padding:12px 20px 12px 0; transition:opacity .2s; }
-    nav a:hover { opacity:1; }
-
-    /* Main layout */
-    main { flex:1; max-width:1200px; margin:0 auto; padding:52px 40px 80px; width:100%; }
-    .page-header { margin-bottom: 36px; }
-    .page-title { font-family:'Gloock',serif; font-size:clamp(28px,4vw,44px); color:var(--dark); line-height:1.1; margin-bottom:8px; }
-    .page-sub { font-family:'Crimson Pro',serif; font-style:italic; font-size:16px; color:var(--grey); }
-
-    .builder-grid { display:grid; grid-template-columns:1fr 420px; gap:48px; align-items:start; }
-
-    /* Form styles */
-    .section-label {
-      font-size:10px; font-weight:600; letter-spacing:.16em; color:var(--sienna);
-      text-transform:uppercase; padding-bottom:6px;
-      border-bottom:1px solid var(--rule); margin-bottom:16px; margin-top:28px;
-    }
-    .section-label:first-child { margin-top:0; }
-    .form-group { margin-bottom:14px; }
-    label { display:block; font-size:10px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--sienna); margin-bottom:5px; }
-    input, textarea, select {
-      width:100%; background:rgba(255,255,255,0.6); border:1px solid var(--rule);
-      border-radius:4px; padding:9px 11px; font-family:'Work Sans',sans-serif;
-      font-size:13px; color:var(--dark); outline:none;
-      transition:border-color .2s, box-shadow .2s; appearance:none;
-    }
-    input:focus, textarea:focus, select:focus { border-color:var(--sienna); box-shadow:0 0 0 3px rgba(179,75,29,0.1); }
-    select {
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2375726C' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-      background-repeat:no-repeat; background-position:right 11px center; padding-right:28px; cursor:pointer;
-    }
-    textarea { resize:vertical; min-height:80px; font-size:12px; }
-    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    .form-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
-
-    /* Scope items */
-    .scope-items { display:flex; flex-direction:column; gap:6px; margin-bottom:8px; }
-    .scope-item { display:grid; grid-template-columns:28px 1fr 24px; gap:8px; align-items:center; }
-    .scope-num {
-      width:28px; height:28px; background:var(--sienna); color:#fff;
-      border-radius:4px; display:flex; align-items:center; justify-content:center;
-      font-size:11px; font-weight:600; flex-shrink:0;
-    }
-    .scope-num.check { background:var(--green); }
-    .scope-num.cross { background:var(--mid); font-size:14px; }
-
-    /* Line items */
-    .line-item-header { display:grid; grid-template-columns:1fr 90px 90px 80px 24px; gap:8px; margin-bottom:4px; }
-    .line-item-header span { font-size:9px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--grey); }
-    .line-items { display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
-    .line-item { display:grid; grid-template-columns:1fr 90px 90px 80px 24px; gap:8px; align-items:center; }
-    .line-item input { margin:0; }
-    .amount-display {
-      background:rgba(255,255,255,0.4); border:1px solid var(--rule-light);
-      border-radius:4px; padding:9px 11px; font-size:13px; color:var(--mid);
-      text-align:right; white-space:nowrap; overflow:hidden;
-    }
-    .remove-btn {
-      width:24px; height:24px; border-radius:50%; background:transparent;
-      border:1px solid var(--rule); color:var(--grey); font-size:14px;
-      cursor:pointer; display:flex; align-items:center; justify-content:center;
-      transition:all .15s; flex-shrink:0;
-    }
-    .remove-btn:hover { background:#e05050; border-color:#e05050; color:#fff; }
-    .add-line-btn {
-      background:transparent; border:1px dashed var(--rule); border-radius:4px;
-      color:var(--sienna); font-family:'Work Sans',sans-serif; font-size:12px;
-      font-weight:500; letter-spacing:.06em; padding:8px; width:100%;
-      cursor:pointer; transition:all .2s; margin-bottom:14px;
-    }
-    .add-line-btn:hover { border-color:var(--sienna); background:rgba(179,75,29,0.04); }
-
-    /* Totals */
-    .totals-area { background:rgba(255,255,255,0.5); border:1px solid var(--rule-light); border-radius:6px; padding:14px 16px; }
-    .total-row { display:flex; justify-content:space-between; padding:3px 0; font-size:13px; color:var(--mid); }
-    .total-row.grand { border-top:2px solid var(--sienna); margin-top:8px; padding-top:8px; font-size:15px; font-weight:600; color:var(--dark); }
-    .total-row.grand span:last-child { color:var(--sienna); }
-
-    /* Signature upload */
-    .sig-upload-area {
-      border:2px dashed var(--rule); border-radius:6px; padding:20px;
-      text-align:center; cursor:pointer; transition:border-color .2s;
-      background:rgba(255,255,255,0.4); margin-bottom:6px;
-    }
-    .sig-upload-area:hover { border-color:var(--sienna); }
-    .sig-upload-area input[type="file"] { display:none; }
-    .sig-preview { max-height:60px; max-width:180px; display:block; margin:0 auto; }
-    .sig-label { font-size:12px; color:var(--grey); }
-
-    /* Generate button */
-    .generate-btn {
-      width:100%; background:var(--sienna); color:#fff; border:none; border-radius:4px;
-      padding:15px 24px; margin-top:20px; font-family:'Work Sans',sans-serif;
-      font-size:13px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
-      cursor:pointer; transition:background .2s;
-    }
-    .generate-btn:hover { background:var(--orange); }
-    .generate-btn:disabled { opacity:.5; cursor:not-allowed; }
-    .note-small { font-family:'Crimson Pro',serif; font-style:italic; font-size:12px; color:var(--grey); margin-top:8px; }
-
-    /* Preview */
-    .preview-panel { position:sticky; top:24px; }
-    .preview-label { font-size:10px; font-weight:600; letter-spacing:.16em; color:var(--sienna); text-transform:uppercase; padding-bottom:6px; border-bottom:1px solid var(--rule); margin-bottom:16px; }
-
-    .invoice-preview { background:#fff; border:1px solid var(--rule); border-radius:6px; overflow:hidden; font-size:10px; line-height:1.5; }
-    .inv-header { background:#0B0A09; color:#fff; padding:14px 18px; display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
-    .inv-logo-placeholder { width:36px; height:28px; border:1px solid rgba(255,255,255,0.2); border-radius:2px; display:flex; align-items:center; justify-content:center; font-size:7px; color:rgba(255,255,255,0.4); flex-shrink:0; }
-    .inv-brand-block { flex:1; }
-    .inv-brand { font-family:'Italiana',serif; font-size:15px; }
-    .inv-brand-sub { font-size:8px; opacity:.5; letter-spacing:.1em; text-transform:uppercase; }
-    .inv-meta-block { text-align:right; font-size:9px; }
-    .inv-meta-row { display:flex; gap:8px; justify-content:flex-end; margin-bottom:2px; }
-    .inv-meta-lbl { color:rgba(255,255,255,0.45); }
-    .inv-meta-val { font-weight:600; }
-    .inv-accent { height:2px; background:#B34B1D; }
-    .inv-body { padding:14px 18px; }
-    .inv-title { font-size:18px; font-weight:700; color:#24211F; margin-bottom:2px; }
-    .inv-rule { height:1px; background:#24211F; margin:6px 0; }
-    .inv-billed-lbl { font-size:8px; letter-spacing:.12em; text-transform:uppercase; color:#75726C; }
-    .inv-billed-to { font-weight:600; font-size:11px; margin-bottom:10px; }
-    .inv-table { width:100%; border-collapse:collapse; margin-bottom:10px; }
-    .inv-table th { background:#0B0A09; color:#fff; padding:4px 6px; text-align:left; font-size:8px; letter-spacing:.08em; text-transform:uppercase; }
-    .inv-table th:nth-child(n+2) { text-align:right; }
-    .inv-table td { padding:4px 6px; border-bottom:1px solid #EDE3D6; font-size:9px; }
-    .inv-table td:nth-child(n+2) { text-align:right; white-space:nowrap; }
-    .inv-table tr:nth-child(even) td { background:#f7f0e6; }
-    .inv-totals { text-align:right; font-size:9px; color:#75726C; }
-    .inv-totals div { padding:1px 0; }
-    .inv-grand { display:inline-block; background:#0B0A09; color:#fff; padding:4px 8px; font-weight:700; font-size:10px; margin-top:4px; border-radius:2px; }
-
-    /* Footer */
-    footer { background:var(--black); margin-top:auto; }
-    footer::before { content:''; display:block; height:3px; background:var(--sienna); }
-    .footer-inner { max-width:1200px; margin:0 auto; padding:16px 40px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
-    .footer-inner span, .footer-inner a { font-size:11px; color:var(--sand); opacity:.75; text-decoration:none; letter-spacing:.04em; }
-    .footer-inner a:hover { opacity:1; }
-    .footer-sep { opacity:.3; margin:0 8px; }
-
-    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-    main { animation:fadeUp 0.5s ease both; }
-
-    @media (max-width:900px) {
-      .builder-grid { grid-template-columns:1fr; }
-      .preview-panel { position:static; }
-      .header-inner { padding:24px 20px; gap:20px; }
-      .logo-wrap img { height:68px; }
-      .nav-inner { padding:0 20px; }
-      main { padding:36px 20px 60px; }
-      .footer-inner { padding:14px 20px; flex-direction:column; align-items:flex-start; }
-      .line-item { grid-template-columns:1fr 80px 80px 70px 24px; }
-      .line-item-header { grid-template-columns:1fr 80px 80px 70px 24px; }
+    :root{--black:#0B0A09;--dark:#24211F;--mid:#4C433B;--grey:#75726C;--sienna:#B34B1D;--orange:#D37835;--sand:#DFB373;--bg:#F7F0E6;--rule:#D9C4A8;--rule-light:#EDE3D6;--green:#4CAF79}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--dark);font-family:'Work Sans',sans-serif;font-size:15px;line-height:1.5;min-height:100vh;display:flex;flex-direction:column}
+    body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");opacity:.025;pointer-events:none;z-index:1000}
+    header{background:var(--black)}
+    header::after{content:'';display:block;height:3px;background:var(--sienna)}
+    .header-inner{max-width:1200px;margin:0 auto;padding:32px 40px 28px;display:flex;align-items:center;gap:32px}
+    .logo-wrap img{height:90px;filter:drop-shadow(0 4px 24px rgba(179,75,29,.25))}
+    .header-text{flex:1}
+    .brand-name{font-family:'Italiana',serif;font-size:clamp(28px,4vw,42px);color:#fff;line-height:1.1}
+    .brand-sub{font-size:10px;font-weight:500;letter-spacing:.18em;color:var(--sand);text-transform:uppercase;margin-top:6px}
+    nav{background:var(--black);border-top:1px solid rgba(255,255,255,.06)}
+    .nav-inner{max-width:1200px;margin:0 auto;padding:0 40px;display:flex}
+    nav a{font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--sand);opacity:.6;text-decoration:none;padding:12px 20px 12px 0;transition:opacity .2s}
+    nav a:hover{opacity:1}
+    main{flex:1;max-width:1200px;margin:0 auto;padding:52px 40px 80px;width:100%}
+    .page-title{font-family:'Gloock',serif;font-size:clamp(28px,4vw,44px);color:var(--dark);line-height:1.1;margin-bottom:8px}
+    .page-sub{font-family:'Crimson Pro',serif;font-style:italic;font-size:16px;color:var(--grey);margin-bottom:36px}
+    .builder-grid{display:grid;grid-template-columns:1fr 420px;gap:48px;align-items:start}
+    .section-label{font-size:10px;font-weight:600;letter-spacing:.16em;color:var(--sienna);text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid var(--rule);margin-bottom:16px;margin-top:28px}
+    .section-label:first-child{margin-top:0}
+    .form-group{margin-bottom:14px}
+    label{display:block;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--sienna);margin-bottom:5px}
+    input,textarea,select{width:100%;background:rgba(255,255,255,.6);border:1px solid var(--rule);border-radius:4px;padding:9px 11px;font-family:'Work Sans',sans-serif;font-size:13px;color:var(--dark);outline:none;transition:border-color .2s,box-shadow .2s;appearance:none}
+    input:focus,textarea:focus,select:focus{border-color:var(--sienna);box-shadow:0 0 0 3px rgba(179,75,29,.1)}
+    select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2375726C' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:28px;cursor:pointer}
+    textarea{resize:vertical;min-height:80px;font-size:12px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .line-item-header{display:grid;grid-template-columns:1fr 90px 90px 80px 24px;gap:8px;margin-bottom:4px}
+    .line-item-header span{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)}
+    .line-items{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+    .line-item{display:grid;grid-template-columns:1fr 90px 90px 80px 24px;gap:8px;align-items:center}
+    .line-item input{margin:0}
+    .amount-display{background:rgba(255,255,255,.4);border:1px solid var(--rule-light);border-radius:4px;padding:9px 11px;font-size:13px;color:var(--mid);text-align:right;white-space:nowrap;overflow:hidden}
+    .remove-btn{width:24px;height:24px;border-radius:50%;background:transparent;border:1px solid var(--rule);color:var(--grey);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+    .remove-btn:hover{background:#e05050;border-color:#e05050;color:#fff}
+    .add-line-btn{background:transparent;border:1px dashed var(--rule);border-radius:4px;color:var(--sienna);font-family:'Work Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:.06em;padding:8px;width:100%;cursor:pointer;transition:all .2s;margin-bottom:14px}
+    .add-line-btn:hover{border-color:var(--sienna);background:rgba(179,75,29,.04)}
+    .totals-area{background:rgba(255,255,255,.5);border:1px solid var(--rule-light);border-radius:6px;padding:14px 16px}
+    .total-row{display:flex;justify-content:space-between;padding:3px 0;font-size:13px;color:var(--mid)}
+    .total-row.grand{border-top:2px solid var(--sienna);margin-top:8px;padding-top:8px;font-size:15px;font-weight:600;color:var(--dark)}
+    .total-row.grand span:last-child{color:var(--sienna)}
+    .scope-items{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+    .scope-item{display:grid;grid-template-columns:28px 1fr 24px;gap:8px;align-items:center}
+    .scope-badge{width:28px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+    .sig-area{border:2px dashed var(--rule);border-radius:6px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s;background:rgba(255,255,255,.4);margin-bottom:6px}
+    .sig-area:hover{border-color:var(--sienna)}
+    .sig-area input{display:none}
+    .sig-label{font-size:12px;color:var(--grey)}
+    .sig-preview{max-height:60px;max-width:180px;display:block;margin:0 auto}
+    .btn-row{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+    .action-btn{flex:1;padding:13px 20px;border:none;border-radius:4px;font-family:'Work Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background .2s;min-width:140px}
+    .btn-preview{background:var(--sienna);color:#fff}
+    .btn-preview:hover{background:var(--orange)}
+    .btn-save{background:var(--mid);color:#fff}
+    .btn-save:hover{background:var(--dark)}
+    .action-btn:disabled{opacity:.5;cursor:not-allowed}
+    .note-small{font-family:'Crimson Pro',serif;font-style:italic;font-size:12px;color:var(--grey);margin-top:8px}
+    .json-output{display:none;margin-top:16px}
+    .json-output textarea{font-family:monospace;font-size:11px;background:rgba(255,255,255,.8);height:180px}
+    .json-label{font-size:11px;color:var(--grey);margin-bottom:6px;font-style:italic;font-family:'Crimson Pro',serif}
+    .preview-panel{position:sticky;top:24px}
+    .preview-label{font-size:10px;font-weight:600;letter-spacing:.16em;color:var(--sienna);text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid var(--rule);margin-bottom:16px}
+    .invoice-preview{background:#fff;border:1px solid var(--rule);border-radius:6px;overflow:hidden;font-size:10px;line-height:1.5}
+    .inv-header{background:#0B0A09;color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+    .inv-logo-placeholder{width:36px;height:28px;border:1px solid rgba(255,255,255,.2);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:7px;color:rgba(255,255,255,.4);flex-shrink:0}
+    .inv-brand-block{flex:1}
+    .inv-brand{font-family:'Italiana',serif;font-size:15px}
+    .inv-brand-sub{font-size:8px;opacity:.5;letter-spacing:.1em;text-transform:uppercase}
+    .inv-meta-block{text-align:right;font-size:9px}
+    .inv-meta-row{display:flex;gap:8px;justify-content:flex-end;margin-bottom:2px}
+    .inv-meta-lbl{color:rgba(255,255,255,.45)}
+    .inv-meta-val{font-weight:600}
+    .inv-accent{height:2px;background:#B34B1D}
+    .inv-body{padding:14px 18px}
+    .inv-title{font-size:18px;font-weight:700;color:#24211F;margin-bottom:2px}
+    .inv-rule{height:1px;background:#24211F;margin:6px 0}
+    .inv-billed-lbl{font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#75726C}
+    .inv-billed-to{font-weight:600;font-size:11px;margin-bottom:10px}
+    .inv-table{width:100%;border-collapse:collapse;margin-bottom:10px}
+    .inv-table th{background:#0B0A09;color:#fff;padding:4px 6px;text-align:left;font-size:8px;letter-spacing:.08em;text-transform:uppercase}
+    .inv-table th:nth-child(n+2){text-align:right}
+    .inv-table td{padding:4px 6px;border-bottom:1px solid #EDE3D6;font-size:9px}
+    .inv-table td:nth-child(n+2){text-align:right;white-space:nowrap}
+    .inv-table tr:nth-child(even) td{background:#f7f0e6}
+    .inv-totals{text-align:right;font-size:9px;color:#75726C}
+    .inv-grand{display:inline-block;background:#0B0A09;color:#fff;padding:4px 8px;font-weight:700;font-size:10px;margin-top:4px;border-radius:2px}
+    footer{background:var(--black);margin-top:auto}
+    footer::before{content:'';display:block;height:3px;background:var(--sienna)}
+    .footer-inner{max-width:1200px;margin:0 auto;padding:16px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+    .footer-inner span,.footer-inner a{font-size:11px;color:var(--sand);opacity:.75;text-decoration:none;letter-spacing:.04em}
+    .footer-inner a:hover{opacity:1}
+    .footer-sep{opacity:.3;margin:0 8px}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    main{animation:fadeUp .5s ease both}
+    @media(max-width:900px){
+      .builder-grid{grid-template-columns:1fr}
+      .preview-panel{position:static}
+      .header-inner{padding:24px 20px;gap:20px}
+      .logo-wrap img{height:68px}
+      .nav-inner{padding:0 20px}
+      main{padding:36px 20px 60px}
+      .footer-inner{padding:14px 20px;flex-direction:column;align-items:flex-start}
+      .line-item{grid-template-columns:1fr 80px 80px 70px 24px}
+      .line-item-header{grid-template-columns:1fr 80px 80px 70px 24px}
     }
   </style>
 </head>
 <body>
-
 <header>
   <div class="header-inner">
-    <div class="logo-wrap">
-      <img src="kvk_logo2.png" alt="KVK Logo" onerror="this.style.display='none'" />
-    </div>
+    <div class="logo-wrap"><img src="kvk_logo2.png" alt="KVK" onerror="this.style.display='none'" /></div>
     <div class="header-text">
       <div class="brand-name">Kaal Vellies Kollektief</div>
-      <div class="brand-sub">Photography · Videography · Stellenbosch</div>
+      <div class="brand-sub">Photography &middot; Videography &middot; Stellenbosch</div>
     </div>
   </div>
 </header>
@@ -219,129 +134,91 @@
     <a href="projects.html">Projects</a>
   </div>
 </nav>
-
 <main>
-  <div class="page-header">
+  <div style="margin-bottom:36px">
     <h1 class="page-title">Invoice builder.</h1>
-    <p class="page-sub">Fill in the details — PDF generates directly in your browser. Nothing is sent anywhere.</p>
+    <p class="page-sub">Fill in the details, preview the PDF, then copy the JSON into projects.json so clients can view it from their project page.</p>
   </div>
-
   <div class="builder-grid">
-    <!-- ══ LEFT FORM ══════════════════════════════════════════════════ -->
     <div class="form-col">
 
-      <!-- Invoice Details -->
       <div class="section-label">Invoice Details</div>
       <div class="form-row">
-        <div class="form-group">
-          <label>Invoice No.</label>
-          <input type="text" id="invoiceNo" value="KVK-2026-001" oninput="updatePreview()" />
-        </div>
-        <div class="form-group">
-          <label>Invoice Date</label>
-          <input type="date" id="invoiceDate" oninput="updatePreview()" />
-        </div>
+        <div class="form-group"><label>Invoice No.</label><input type="text" id="invoiceNo" value="KVK-2026-001" /></div>
+        <div class="form-group"><label>Invoice Date</label><input type="date" id="invoiceDate" /></div>
       </div>
       <div class="form-row">
-        <div class="form-group">
-          <label>Due Date</label>
-          <input type="text" id="dueDate" value="After Delivery" oninput="updatePreview()" />
-        </div>
-        <div class="form-group">
-          <label>Link to Project</label>
-          <select id="projectLink" onchange="onProjectChange()">
-            <option value="">— None —</option>
-          </select>
-        </div>
+        <div class="form-group"><label>Due Date</label><input type="text" id="dueDate" value="After Delivery" /></div>
+        <div class="form-group"><label>Discount (%)</label><input type="number" id="discount" value="0" min="0" max="100" step="1" /></div>
       </div>
 
-      <!-- Billed To -->
       <div class="section-label">Billed To</div>
-      <div class="form-group">
-        <label>Client / Organisation</label>
-        <input type="text" id="clientName" placeholder="e.g. Stellumthombo" oninput="updatePreview()" />
-      </div>
-      <div class="form-group">
-        <label>Address</label>
-        <input type="text" id="clientAddress" placeholder="2 Drostdy Street, Stellenbosch, 7600" oninput="updatePreview()" />
-      </div>
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" id="clientEmail" placeholder="info@client.co.za" oninput="updatePreview()" />
-      </div>
+      <div class="form-group"><label>Client / Organisation</label><input type="text" id="clientName" placeholder="e.g. Stellumthombo" /></div>
+      <div class="form-group"><label>Address</label><input type="text" id="clientAddress" placeholder="2 Drostdy Street, Stellenbosch" /></div>
+      <div class="form-group"><label>Email</label><input type="text" id="clientEmail" placeholder="info@client.co.za" /></div>
 
-      <!-- Line Items -->
       <div class="section-label">Line Items</div>
       <div class="line-item-header">
-        <span>Description</span><span style="text-align:center">Qty / Hrs</span><span style="text-align:right">Rate (R)</span><span style="text-align:right">Amount</span><span></span>
+        <span>Description</span><span style="text-align:center">Qty</span><span style="text-align:right">Rate (R)</span><span style="text-align:right">Amount</span><span></span>
       </div>
       <div class="line-items" id="lineItems"></div>
-      <button class="add-line-btn" onclick="addLineItem()">+ Add line item</button>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Discount (%)</label>
-          <input type="number" id="discount" value="0" min="0" max="100" step="1" oninput="recalc()" />
-        </div>
-      </div>
+      <button class="add-line-btn" id="addLineBtn">+ Add line item</button>
 
       <div class="totals-area">
         <div class="total-row"><span>Subtotal</span><span id="subtotalDisplay">R 0.00</span></div>
-        <div class="total-row"><span>Discount</span><span id="discountDisplay">— R 0.00</span></div>
+        <div class="total-row"><span>Discount</span><span id="discountDisplay">-- R 0.00</span></div>
         <div class="total-row grand"><span>Total Due</span><span id="totalDisplay">R 0.00</span></div>
       </div>
 
-      <!-- Scope of Work -->
-      <div class="section-label">Scope of Work — What They'll Receive</div>
+      <div class="section-label">Scope &mdash; What They&apos;ll Receive</div>
       <div class="scope-items" id="scopeReceive"></div>
-      <button class="add-line-btn" onclick="addScopeItem('receive')">+ Add deliverable</button>
+      <button class="add-line-btn" id="addReceiveBtn">+ Add deliverable</button>
 
-      <div class="section-label">Scope of Work — Production Commitments</div>
+      <div class="section-label">Scope &mdash; Production Commitments</div>
       <div class="scope-items" id="scopeCommit"></div>
-      <button class="add-line-btn" onclick="addScopeItem('commit')">+ Add commitment</button>
+      <button class="add-line-btn" id="addCommitBtn">+ Add commitment</button>
 
-      <div class="section-label">Scope of Work — Not Included</div>
+      <div class="section-label">Scope &mdash; Not Included</div>
       <div class="scope-items" id="scopeExclude"></div>
-      <button class="add-line-btn" onclick="addScopeItem('exclude')">+ Add exclusion</button>
+      <button class="add-line-btn" id="addExcludeBtn">+ Add exclusion</button>
 
-      <!-- Portfolio & Acceptance -->
       <div class="section-label">Portfolio &amp; Credit</div>
-      <div class="form-group">
-        <textarea id="portfolioText" oninput="updatePreview()">While all final work remains the property of the client upon payment, Kaal Vellies Kollektief retains the right to feature this work in its portfolio, website, and social media channels for the purpose of showcasing creative work. Credit will reference the client by name where appropriate.</textarea>
-      </div>
+      <div class="form-group"><textarea id="portfolioText">While all final work remains the property of the client upon payment, Kaal Vellies Kollektief retains the right to feature this work in its portfolio, website, and social media channels. Credit will reference the client by name where appropriate.</textarea></div>
 
       <div class="section-label">Acceptance</div>
-      <div class="form-group">
-        <textarea id="acceptanceText" oninput="updatePreview()">By proceeding with payment, the client agrees to the scope and terms outlined above.</textarea>
-      </div>
+      <div class="form-group"><textarea id="acceptanceText">By proceeding with payment, the client agrees to the scope and terms outlined above.</textarea></div>
 
-      <!-- Signature -->
       <div class="section-label">Signature</div>
-      <div class="sig-upload-area" onclick="document.getElementById('sigFile').click()">
-        <input type="file" id="sigFile" accept="image/*" onchange="loadSignature(event)" />
-        <div id="sigPreviewWrap">
-          <div class="sig-label">Click to upload your signature image (PNG with transparent background works best)</div>
-        </div>
+      <div class="sig-area" id="sigArea">
+        <input type="file" id="sigFile" accept="image/*" />
+        <div id="sigPreview"><div class="sig-label">Click to upload signature (PNG with transparent background works best)</div></div>
       </div>
 
-      <button class="generate-btn" id="generateBtn" onclick="generatePDF()">↓ &nbsp; Generate PDF</button>
-      <p class="note-small">Saves as [InvoiceNo].pdf — two pages: invoice + scope.</p>
+      <div class="btn-row">
+        <button class="action-btn btn-preview" id="previewBtn">&#8594; Open PDF Preview</button>
+        <button class="action-btn btn-save" id="saveBtn">&#123;&#125; Copy Invoice JSON</button>
+      </div>
+      <p class="note-small">PDF opens in a new tab. Copy the JSON and paste it into the "invoice" field of your project in projects.json.</p>
+
+      <div class="json-output" id="jsonOutput">
+        <div class="json-label">Paste this as the "invoice" value in your project in projects.json:</div>
+        <textarea id="jsonText" readonly onclick="this.select()"></textarea>
+      </div>
 
     </div>
 
-    <!-- ══ RIGHT PREVIEW ════════════════════════════════════════════ -->
     <div class="preview-panel">
-      <div class="preview-label">Live Preview — Page 1</div>
+      <div class="preview-label">Live Preview &mdash; Page 1</div>
       <div class="invoice-preview">
         <div class="inv-header">
-          <div class="inv-logo-placeholder" id="prev-logo">KVK</div>
+          <div class="inv-logo-placeholder">KVK</div>
           <div class="inv-brand-block">
             <div class="inv-brand">Kaal Vellies Kollektief</div>
-            <div class="inv-brand-sub">Photography · Videography</div>
+            <div class="inv-brand-sub">Photography &middot; Videography</div>
           </div>
           <div class="inv-meta-block">
             <div class="inv-meta-row"><span class="inv-meta-lbl">INV NO.</span><span class="inv-meta-val" id="prev-no">KVK-2026-001</span></div>
-            <div class="inv-meta-row"><span class="inv-meta-lbl">DATE</span><span class="inv-meta-val" id="prev-date">—</span></div>
+            <div class="inv-meta-row"><span class="inv-meta-lbl">DATE</span><span class="inv-meta-val" id="prev-date">--</span></div>
             <div class="inv-meta-row"><span class="inv-meta-lbl">DUE</span><span class="inv-meta-val" id="prev-due">After Delivery</span></div>
           </div>
         </div>
@@ -350,552 +227,420 @@
           <div class="inv-title">INVOICE</div>
           <div class="inv-rule"></div>
           <div class="inv-billed-lbl">Billed To</div>
-          <div class="inv-billed-to" id="prev-client">—</div>
+          <div class="inv-billed-to" id="prev-client">--</div>
           <table class="inv-table">
             <thead><tr><th>Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead>
             <tbody id="prev-lines"></tbody>
           </table>
           <div class="inv-totals">
             <div id="prev-sub">Subtotal: R 0.00</div>
-            <div id="prev-disc">Discount: — R 0.00</div>
+            <div id="prev-disc">Discount: -- R 0.00</div>
             <div class="inv-grand" id="prev-total">TOTAL DUE: R 0.00</div>
           </div>
-          <div style="margin-top:12px;font-size:9px;color:#4C433B;">
-            <strong style="color:#B34B1D;">PAYMENT DETAILS</strong><br/>
-            Bank: Investec &nbsp;·&nbsp; Acc: Cornelius Marthinus Prinsloo &nbsp;·&nbsp; No: 10012991243<br/>
-            Branch: 580105 &nbsp;·&nbsp; Ref: <span id="prev-ref">KVK-2026-001</span>
+          <div style="margin-top:12px;font-size:9px;color:#4C433B">
+            <strong style="color:#B34B1D">PAYMENT DETAILS</strong><br/>
+            Bank: Investec &nbsp;&middot;&nbsp; Acc: Cornelius Marthinus Prinsloo &nbsp;&middot;&nbsp; No: 10012991243<br/>
+            Branch: 580105 &nbsp;&middot;&nbsp; Ref: <span id="prev-ref">KVK-2026-001</span>
           </div>
         </div>
       </div>
-      <p style="font-family:'Crimson Pro',serif;font-style:italic;font-size:12px;color:var(--grey);margin-top:10px;">Page 2 (scope, portfolio, acceptance, signature) generates in the PDF.</p>
+      <p style="font-family:'Crimson Pro',serif;font-style:italic;font-size:12px;color:var(--grey);margin-top:10px">Page 2 (scope, portfolio, acceptance, signature) generates in the PDF.</p>
     </div>
   </div>
 </main>
-
 <footer>
   <div class="footer-inner">
-    <div>
-      <a href="https://kvk.myportfolio.com" target="_blank">kvk.myportfolio.com</a>
-      <span class="footer-sep">·</span>
-      <a href="/cdn-cgi/l/email-protection#c5a6aab7aba0ebb5b7acabb6a9aaaa85aca6a9aab0a1eba6aaa8"><span class="__cf_email__" data-cfemail="90f3ffe2fef5bee0e2f9fee3fcffffd0f9f3fcffe5f4bef3fffd">[email&#160;protected]</span></a>
-      <span class="footer-sep">·</span>
-      <a href="https://wa.me/27796250814">+27 79 625 0814</a>
-    </div>
+    <div id="footerContact"></div>
     <span>@kaalvellies_kollektief</span>
   </div>
 </footer>
+<script>
+(function() {
+  var em = ['corne.prinsloo','icloud.com'].join('@');
+  var fc = document.getElementById('footerContact');
+  if (fc) fc.innerHTML =
+    '<a href="https://kvk.myportfolio.com" target="_blank">kvk.myportfolio.com</a>' +
+    '<span class="footer-sep">&middot;</span>' +
+    '<a href="mailto:'+em+'">'+em+'</a>' +
+    '<span class="footer-sep">&middot;</span>' +
+    '<a href="https://wa.me/27796250814">+27 79 625 0814</a>';
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-const { PDFDocument, rgb, StandardFonts, degrees } = PDFLib;
+  document.getElementById('invoiceDate').value = new Date().toISOString().split('T')[0];
 
-// ── Formatting ────────────────────────────────────────────────────────────
-const fmtR = n => 'R ' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  var lineId = 0, scopeId = 0, sigDataUrl = null;
 
-// ── Init ──────────────────────────────────────────────────────────────────
-document.getElementById('invoiceDate').value = new Date().toISOString().split('T')[0];
+  function fmtR(n) { return 'R ' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,' '); }
 
-// Load projects
-async function loadProjects() {
-  try {
-    const res = await fetch('projects.json');
-    const projects = await res.json();
-    const sel = document.getElementById('projectLink');
-    projects.forEach(p => {
-      const opt = document.createElement('option');
-      opt.value = p.id;
-      opt.textContent = `${p.service} — ${p.date}`;
-      sel.appendChild(opt);
+  // ── Line items ──────────────────────────────────────────────────────────
+  function addLine(desc, qty, rate) {
+    desc = desc||''; qty = qty||''; rate = rate||'';
+    lineId++;
+    var id = lineId;
+    var div = document.createElement('div');
+    div.className = 'line-item'; div.id = 'li-'+id;
+    div.innerHTML =
+      '<input class="li-desc" type="text" placeholder="Description" value="'+desc+'" />' +
+      '<input class="li-qty" type="text" placeholder="e.g. 2 hrs" value="'+qty+'" style="text-align:center" />' +
+      '<input class="li-rate" type="number" placeholder="0.00" value="'+rate+'" step="0.01" min="0" style="text-align:right" />' +
+      '<div class="amount-display" id="amt-'+id+'">R 0.00</div>' +
+      '<button class="remove-btn" data-id="'+id+'">x</button>';
+    div.querySelector('.li-desc').addEventListener('input', recalc);
+    div.querySelector('.li-qty').addEventListener('input', recalc);
+    div.querySelector('.li-rate').addEventListener('input', recalc);
+    div.querySelector('.remove-btn').addEventListener('click', function() {
+      var el = document.getElementById('li-'+this.dataset.id);
+      if (el) { el.remove(); recalc(); }
     });
-  } catch(e) {}
-}
-loadProjects();
+    document.getElementById('lineItems').appendChild(div);
+    recalc();
+  }
 
-async function onProjectChange() {
-  const id = document.getElementById('projectLink').value;
-  if (!id) return;
-  try {
-    const res = await fetch('projects.json');
-    const projects = await res.json();
-    const p = projects.find(pr => pr.id === id);
-    if (p?.invoiceRef) document.getElementById('invoiceNo').value = p.invoiceRef;
-    if (p?.service)   document.getElementById('clientName').value = p.service;
-    updatePreview(); recalc();
-  } catch(e) {}
-}
+  document.getElementById('addLineBtn').addEventListener('click', function() { addLine(); });
 
-// ── Line items ────────────────────────────────────────────────────────────
-let lineId = 0;
-function addLineItem(desc='', qty='', rate='') {
-  lineId++;
-  const id = lineId;
-  const div = document.createElement('div');
-  div.className = 'line-item'; div.id = `line-${id}`;
-  div.innerHTML = `
-    <input type="text"   class="li-desc" placeholder="Description" value="${desc}" oninput="recalc()" />
-    <input type="text"   class="li-qty"  placeholder="e.g. 2 or 2 hrs" value="${qty}" oninput="recalc()" style="text-align:center" />
-    <input type="number" class="li-rate" placeholder="0.00" value="${rate}" oninput="recalc()" step="0.01" min="0" style="text-align:right" />
-    <div class="amount-display" id="amt-${id}">R 0.00</div>
-    <button class="remove-btn" onclick="removeLine(${id})" title="Remove">×</button>
-  `;
-  document.getElementById('lineItems').appendChild(div);
+  addLine('Shoot Day 1','2 hrs','180');
+  addLine('Shoot Day 2','2 hrs','180');
+  addLine('Video Editing','4 hrs','180');
+  addLine('Travel','32 km','5');
+
+  // ── Scope items ─────────────────────────────────────────────────────────
+  function addScope(containerId, text, color) {
+    text = text||''; scopeId++;
+    var id = scopeId;
+    var div = document.createElement('div');
+    div.className = 'scope-item'; div.id = 'sc-'+id;
+    div.innerHTML =
+      '<div class="scope-badge" style="background:'+color+'">' +
+        (color==='#4C433B'?'x':'v') +
+      '</div>' +
+      '<input type="text" placeholder="Enter item..." value="'+text+'" />' +
+      '<button class="remove-btn" data-id="'+id+'">x</button>';
+    div.querySelector('.remove-btn').addEventListener('click', function() {
+      var el = document.getElementById('sc-'+this.dataset.id);
+      if (el) el.remove();
+    });
+    document.getElementById(containerId).appendChild(div);
+  }
+
+  document.getElementById('addReceiveBtn').addEventListener('click', function() { addScope('scopeReceive','','#4CAF79'); });
+  document.getElementById('addCommitBtn').addEventListener('click',  function() { addScope('scopeCommit','','#4CAF79'); });
+  document.getElementById('addExcludeBtn').addEventListener('click', function() { addScope('scopeExclude','','#4C433B'); });
+
+  ['Long-form video (~5 min) - landscape (16:9), colour graded, licensed music and titles.',
+   'Short-form video (~1 min) - same format, cut for social media.',
+   'Bonus: Vertical Reels cut - portrait (9:16) for Instagram and Facebook Reels.',
+   'Up to 3 revision rounds across all videos.'
+  ].forEach(function(t){ addScope('scopeReceive',t,'#4CAF79'); });
+
+  ['Music will be fully royalty-free and licensed - safe on YouTube, Facebook, and Instagram.',
+   'No identifiable footage of children\'s faces. Filming uses over-the-shoulder and back-of-head shots.',
+   'First cut of all videos delivered within 1 week of the final shoot day.',
+   'Final files delivered as MP4 (H.264), ready for direct upload to all major platforms.'
+  ].forEach(function(t){ addScope('scopeCommit',t,'#4CAF79'); });
+
+  ['Drone footage, additional crew, or lighting equipment.',
+   'More than 2 locations or 4 total shoot hours. Additional time billed at the hourly rate.',
+   'More than 3 revision rounds. Additional revisions billed at the hourly rate.'
+  ].forEach(function(t){ addScope('scopeExclude',t,'#4C433B'); });
+
+  // ── Signature ────────────────────────────────────────────────────────────
+  document.getElementById('sigArea').addEventListener('click', function() {
+    document.getElementById('sigFile').click();
+  });
+  document.getElementById('sigFile').addEventListener('change', function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      sigDataUrl = ev.target.result;
+      document.getElementById('sigPreview').innerHTML =
+        '<img src="'+sigDataUrl+'" class="sig-preview" alt="Signature" />';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // ── Recalc ───────────────────────────────────────────────────────────────
+  function getLines() {
+    return Array.from(document.querySelectorAll('.line-item')).map(function(li) {
+      var desc = li.querySelector('.li-desc').value||'';
+      var qty  = li.querySelector('.li-qty').value||'';
+      var rate = parseFloat(li.querySelector('.li-rate').value)||0;
+      var qn   = parseFloat(qty);
+      var amt  = (!isNaN(qn) && qty.trim()!=='') ? qn*rate : rate;
+      return {desc:desc, qty:qty, rate:rate, amount:amt, id:li.id.replace('li-','')};
+    });
+  }
+
+  function recalc() {
+    var lines = getLines();
+    var sub = 0;
+    lines.forEach(function(l) {
+      sub += l.amount;
+      var el = document.getElementById('amt-'+l.id);
+      if (el) el.textContent = fmtR(l.amount);
+    });
+    var dp = parseFloat(document.getElementById('discount').value)||0;
+    var da = sub*dp/100, tot = sub-da;
+    document.getElementById('subtotalDisplay').textContent = fmtR(sub);
+    document.getElementById('discountDisplay').textContent = '-- '+fmtR(da);
+    document.getElementById('totalDisplay').textContent    = fmtR(tot);
+    updatePreview(lines, sub, da, tot);
+  }
+
+  function updatePreview(lines, sub, da, tot) {
+    document.getElementById('prev-no').textContent  = document.getElementById('invoiceNo').value||'--';
+    document.getElementById('prev-date').textContent= document.getElementById('invoiceDate').value||'--';
+    document.getElementById('prev-due').textContent = document.getElementById('dueDate').value||'--';
+    document.getElementById('prev-ref').textContent = document.getElementById('invoiceNo').value||'--';
+    var parts = [
+      document.getElementById('clientName').value,
+      document.getElementById('clientAddress').value,
+      document.getElementById('clientEmail').value
+    ].filter(Boolean);
+    document.getElementById('prev-client').textContent = parts.join(' | ')||'--';
+    document.getElementById('prev-lines').innerHTML = (lines||getLines()).map(function(l,i) {
+      return '<tr><td>'+(l.desc||'--')+'</td><td>'+(l.qty||'--')+'</td>' +
+        '<td>'+fmtR(l.rate)+'</td><td>'+fmtR(l.amount)+'</td></tr>';
+    }).join('');
+    var dp = parseFloat(document.getElementById('discount').value)||0;
+    if (sub===undefined) { var ls=getLines(); sub=ls.reduce(function(a,l){return a+l.amount},0); da=sub*dp/100; tot=sub-da; }
+    document.getElementById('prev-sub').textContent  = 'Subtotal: '+fmtR(sub);
+    document.getElementById('prev-disc').textContent = 'Discount ('+dp+'%): -- '+fmtR(da);
+    document.getElementById('prev-total').textContent= 'TOTAL DUE: '+fmtR(tot);
+  }
+
+  ['invoiceNo','invoiceDate','dueDate','discount','clientName','clientAddress','clientEmail'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', recalc);
+  });
+
   recalc();
-}
-function removeLine(id) {
-  const el = document.getElementById(`line-${id}`);
-  if (el) { el.remove(); recalc(); }
-}
 
-// Default lines
-addLineItem('Shoot Day', '2 hrs', '200');
-addLineItem('Video Editing', '4 hrs', '200');
-addLineItem('Travel — 32 km @ R5/km', '', '160');
+  // ── Build invoice data object ─────────────────────────────────────────────
+  function buildInvoiceData() {
+    return {
+      invoiceNo:      document.getElementById('invoiceNo').value,
+      date:           document.getElementById('invoiceDate').value,
+      dueDate:        document.getElementById('dueDate').value,
+      discount:       parseFloat(document.getElementById('discount').value)||0,
+      clientName:     document.getElementById('clientName').value,
+      clientAddress:  document.getElementById('clientAddress').value,
+      clientEmail:    document.getElementById('clientEmail').value,
+      lines: getLines().map(function(l){ return {desc:l.desc, qty:l.qty, rate:l.rate}; }),
+      scopeReceive:   Array.from(document.querySelectorAll('#scopeReceive input[type=text]')).map(function(i){return i.value}).filter(Boolean),
+      scopeCommit:    Array.from(document.querySelectorAll('#scopeCommit input[type=text]')).map(function(i){return i.value}).filter(Boolean),
+      scopeExclude:   Array.from(document.querySelectorAll('#scopeExclude input[type=text]')).map(function(i){return i.value}).filter(Boolean),
+      portfolioText:  document.getElementById('portfolioText').value,
+      acceptanceText: document.getElementById('acceptanceText').value
+    };
+  }
 
-// ── Scope items ───────────────────────────────────────────────────────────
-let scopeId = 0;
-const scopeDefaults = {
-  receive: [
-    'Long-form video (~5 min) — landscape (16:9), colour graded, licensed music and titles.',
-    'Short-form video (~1 min) — same format, cut for social media.',
-    'Bonus: Vertical Reels cut — portrait (9:16) for Instagram & Facebook Reels.',
-    'Up to 3 revision rounds across all videos.',
-  ],
-  commit: [
-    'Music will be fully royalty-free and licensed — safe on YouTube, Facebook, and Instagram.',
-    'No identifiable footage of children\'s faces. Filming uses over-the-shoulder, hands, and back-of-head shots.',
-    'First cut of all videos delivered within 1 week of the final shoot day.',
-    'Final files delivered as MP4 (H.264), ready for direct upload to all major platforms.',
-  ],
-  exclude: [
-    'Drone footage, additional crew, or lighting equipment.',
-    'More than 2 locations or 4 total shoot hours. Additional time billed at the hourly rate.',
-    'More than 3 revision rounds. Additional revisions billed at the hourly rate.',
-  ],
-};
-const scopeIcons = { receive: 'v', commit: 'v', exclude: 'x' };
-const scopeColors = { receive: '#4CAF79', commit: '#4CAF79', exclude: '#4C433B' };
-
-function addScopeItem(type, text='') {
-  scopeId++;
-  const id = scopeId;
-  const containerId = type === 'receive' ? 'scopeReceive' : type === 'commit' ? 'scopeCommit' : 'scopeExclude';
-  const icon = scopeIcons[type];
-  const color = scopeColors[type];
-  const div = document.createElement('div');
-  div.className = 'scope-item'; div.id = `scope-${id}`;
-  div.innerHTML = `
-    <div class="scope-num" style="background:${color}">${icon}</div>
-    <input type="text" placeholder="Enter item…" value="${text}" />
-    <button class="remove-btn" onclick="document.getElementById('scope-${id}').remove()" title="Remove">×</button>
-  `;
-  document.getElementById(containerId).appendChild(div);
-}
-
-// Load defaults
-scopeDefaults.receive.forEach(t => addScopeItem('receive', t));
-scopeDefaults.commit.forEach(t => addScopeItem('commit', t));
-scopeDefaults.exclude.forEach(t => addScopeItem('exclude', t));
-
-// ── Signature ─────────────────────────────────────────────────────────────
-let signatureDataUrl = null;
-function loadSignature(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    signatureDataUrl = e.target.result;
-    document.getElementById('sigPreviewWrap').innerHTML =
-      `<img src="${signatureDataUrl}" class="sig-preview" alt="Signature" />`;
-  };
-  reader.readAsDataURL(file);
-}
-
-// ── Recalc ────────────────────────────────────────────────────────────────
-function getLineData() {
-  return Array.from(document.querySelectorAll('.line-item')).map(line => {
-    const desc   = line.querySelector('.li-desc').value || '';
-    const qty    = line.querySelector('.li-qty').value || '';
-    const rate   = parseFloat(line.querySelector('.li-rate').value) || 0;
-    const qtyNum = parseFloat(qty);
-    // Extract leading number from qty (e.g. "2 hrs" -> 2, "32 km" -> 32, "---" -> NaN)
-    const qtyExtracted = parseFloat(qty.trim());
-    const amount = (!isNaN(qtyExtracted) && qty.trim() !== '') ? qtyExtracted * rate : rate;
-    return { desc, qty, rate, amount, id: line.id.replace('line-','') };
+  // ── Copy JSON button ──────────────────────────────────────────────────────
+  document.getElementById('saveBtn').addEventListener('click', function() {
+    var data = buildInvoiceData();
+    var json = JSON.stringify(data, null, 2);
+    document.getElementById('jsonText').value = json;
+    var out = document.getElementById('jsonOutput');
+    out.style.display = 'block';
+    document.getElementById('jsonText').select();
+    try { document.execCommand('copy'); } catch(e) {}
+    this.textContent = 'Copied!';
+    var btn = this;
+    setTimeout(function(){ btn.innerHTML = '&#123;&#125; Copy Invoice JSON'; }, 2000);
+    out.scrollIntoView({behavior:'smooth'});
   });
-}
 
-function recalc() {
-  const lines = getLineData();
-  let subtotal = 0;
-  lines.forEach(l => {
-    subtotal += l.amount;
-    const el = document.getElementById(`amt-${l.id}`);
-    if (el) el.textContent = fmtR(l.amount);
+  // ── Generate + open PDF ───────────────────────────────────────────────────
+  document.getElementById('previewBtn').addEventListener('click', function() {
+    var btn = this;
+    btn.disabled = true; btn.textContent = 'Generating...';
+    generatePDF(buildInvoiceData(), sigDataUrl).then(function(bytes) {
+      var blob = new Blob([bytes], {type:'application/pdf'});
+      var url  = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+      btn.disabled = false; btn.textContent = '\u2192 Open PDF Preview';
+    }).catch(function(err) {
+      console.error(err);
+      alert('PDF error: '+err.message);
+      btn.disabled = false; btn.textContent = '\u2192 Open PDF Preview';
+    });
   });
-  const discPct = parseFloat(document.getElementById('discount').value) || 0;
-  const discAmt = subtotal * discPct / 100;
-  const total   = subtotal - discAmt;
 
-  document.getElementById('subtotalDisplay').textContent = fmtR(subtotal);
-  document.getElementById('discountDisplay').textContent = `— ${fmtR(discAmt)}`;
-  document.getElementById('totalDisplay').textContent    = fmtR(total);
-  updatePreview();
-}
+  // ── PDF engine ────────────────────────────────────────────────────────────
+  function generatePDF(inv, sigDataUrl) {
+    var pdfLib = window.PDFLib;
+    var PDFDocument=pdfLib.PDFDocument, rgb=pdfLib.rgb, StandardFonts=pdfLib.StandardFonts;
+    var W=595,H=842,M=45,IW=W-M*2;
 
-// ── Live preview ──────────────────────────────────────────────────────────
-function updatePreview() {
-  const no   = document.getElementById('invoiceNo').value || '—';
-  const date = document.getElementById('invoiceDate').value || '—';
-  const due  = document.getElementById('dueDate').value || '—';
-  document.getElementById('prev-no').textContent  = no;
-  document.getElementById('prev-date').textContent = date;
-  document.getElementById('prev-due').textContent  = due;
-  document.getElementById('prev-ref').textContent  = no;
-
-  const name  = document.getElementById('clientName').value;
-  const addr  = document.getElementById('clientAddress').value;
-  const email = document.getElementById('clientEmail').value;
-  document.getElementById('prev-client').textContent =
-    [name, addr, email].filter(Boolean).join(' · ') || '—';
-
-  const lines = getLineData();
-  let subtotal = 0;
-  document.getElementById('prev-lines').innerHTML = lines.map((l,i) => {
-    subtotal += l.amount;
-    return `<tr>
-      <td>${l.desc || '—'}</td>
-      <td style="text-align:right">${l.qty || '—'}</td>
-      <td style="text-align:right">${l.rate ? fmtR(l.rate) : '—'}</td>
-      <td style="text-align:right;white-space:nowrap">${fmtR(l.amount)}</td>
-    </tr>`;
-  }).join('');
-
-  const discPct = parseFloat(document.getElementById('discount').value) || 0;
-  const discAmt = subtotal * discPct / 100;
-  const total   = subtotal - discAmt;
-  document.getElementById('prev-sub').textContent   = `Subtotal: ${fmtR(subtotal)}`;
-  document.getElementById('prev-disc').textContent  = `Discount (${discPct}%): — ${fmtR(discAmt)}`;
-  document.getElementById('prev-total').textContent = `TOTAL DUE: ${fmtR(total)}`;
-}
-
-['invoiceNo','invoiceDate','dueDate','clientName','clientAddress','clientEmail']
-  .forEach(id => { const el = document.getElementById(id); if(el) el.addEventListener('input', updatePreview); });
-
-recalc();
-
-// ── PDF helpers ───────────────────────────────────────────────────────────
-function wrapText(text, maxChars) {
-  const words = text.split(' ');
-  const lines = [];
-  let cur = '';
-  words.forEach(w => {
-    if ((cur + ' ' + w).trim().length <= maxChars) {
-      cur = (cur + ' ' + w).trim();
-    } else {
-      if (cur) lines.push(cur);
-      cur = w;
-    }
-  });
-  if (cur) lines.push(cur);
-  return lines;
-}
-
-function drawSectionHead(page, text, x, y, font, color) {
-  page.drawText(text, { x, y, font, size: 8, color });
-  page.drawLine({ start:{x, y:y-3}, end:{x:x+80, y:y-3}, thickness:0.8, color });
-  return y - 14;
-}
-
-// ── GENERATE PDF ──────────────────────────────────────────────────────────
-async function generatePDF() {
-  const btn = document.getElementById('generateBtn');
-  btn.disabled = true; btn.textContent = 'Generating…';
-
-  try {
-    const pdfDoc = await PDFDocument.create();
-    const W = 595, H = 842, M = 45, IW = W - M*2;
-
-    const fBold   = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-    const fReg    = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    const fObliq  = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
-
-    const cBlack  = rgb(0.043,0.039,0.035);
-    const cSienna = rgb(0.702,0.294,0.110);
-    const cWhite  = rgb(1,1,1);
-    const cGrey   = rgb(0.459,0.439,0.420);
-    const cMid    = rgb(0.298,0.263,0.231);
-    const cLight  = rgb(0.969,0.941,0.902);
-    const cGreen  = rgb(0.298,0.686,0.475);
-
-    const invNo   = document.getElementById('invoiceNo').value    || 'KVK-2026-001';
-    const invDate = document.getElementById('invoiceDate').value   || '';
-    const invDue  = document.getElementById('dueDate').value       || 'After Delivery';
-    const cName   = document.getElementById('clientName').value    || '';
-    const cAddr   = document.getElementById('clientAddress').value || '';
-    const cEmail  = document.getElementById('clientEmail').value   || '';
-    const discPct = parseFloat(document.getElementById('discount').value) || 0;
-
-    // Try load logo
-    let logoImg = null;
-    try {
-      const logoRes = await fetch('kvk_logo2.png');
-      if (logoRes.ok) {
-        const logoBytes = await logoRes.arrayBuffer();
-        logoImg = await pdfDoc.embedPng(logoBytes);
-      }
-    } catch(e) {}
-
-    // Try load signature
-    let sigImg = null;
-    if (signatureDataUrl) {
-      try {
-        const sigBytes = await fetch(signatureDataUrl).then(r => r.arrayBuffer());
-        sigImg = signatureDataUrl.includes('png')
-          ? await pdfDoc.embedPng(sigBytes)
-          : await pdfDoc.embedJpg(sigBytes);
-      } catch(e) {}
-    }
-
-    // ════════════════════════════════════════════════════════
-    // PAGE 1 — INVOICE
-    // ════════════════════════════════════════════════════════
-    const p1 = pdfDoc.addPage([W, H]);
-
-    // Header band
-    p1.drawRectangle({ x:0, y:H-90, width:W, height:90, color:cBlack });
-    p1.drawRectangle({ x:0, y:H-93, width:W, height:3,  color:cSienna });
-
-    // Logo
-    if (logoImg) {
-      const logoDims = logoImg.scaleToFit(38, 32);
-      p1.drawImage(logoImg, { x:M, y:H-12-logoDims.height, width:logoDims.width, height:logoDims.height });
-    }
-
-    // Brand name
-    p1.drawText('Kaal Vellies Kollektief', { x:M+46, y:H-34, font:fBold,  size:16, color:cWhite });
-    p1.drawText('Photography · Videography · Stellenbosch', { x:M+46, y:H-48, font:fReg, size:7.5, color:rgb(0.875,0.765,0.451) });
-
-    // Meta top-right
-    const metaLabels = ['INVOICE NO.','DATE','DUE DATE'];
-    const metaVals   = [invNo, invDate, invDue];
-    metaLabels.forEach((lbl,i) => {
-      const ry = H - 28 - i*18;
-      p1.drawText(lbl, { x:W-M-155, y:ry, font:fReg, size:7, color:rgb(0.55,0.55,0.55) });
-      p1.drawText(metaVals[i], { x:W-M-70, y:ry, font:fBold, size:8.5, color:cWhite });
-    });
-
-    let y = H - 105;
-
-    // INVOICE title + rule
-    p1.drawText('INVOICE', { x:M, y, font:fBold, size:22, color:cBlack });
-    y -= 10;
-    p1.drawLine({ start:{x:M,y}, end:{x:M+IW,y}, thickness:1.2, color:cBlack });
-    y -= 14;
-
-    // Billed to
-    p1.drawText('BILLED TO', { x:M, y, font:fReg, size:7, color:cGrey });
-    y -= 13;
-    if (cName)  { p1.drawText(cName,  { x:M, y, font:fBold, size:11, color:cBlack }); y -= 12; }
-    if (cAddr)  { p1.drawText(cAddr,  { x:M, y, font:fReg,  size:9,  color:cMid   }); y -= 12; }
-    if (cEmail) { p1.drawText(cEmail, { x:M, y, font:fReg,  size:9,  color:cMid   }); y -= 12; }
-    y -= 6;
-
-    // Table header
-    const cw = [IW*0.50, IW*0.14, IW*0.18, IW*0.18];
-    const cx = [M, M+cw[0], M+cw[0]+cw[1], M+cw[0]+cw[1]+cw[2]];
-    const rowH = 18;
-
-    p1.drawRectangle({ x:M, y:y-rowH+4, width:IW, height:rowH, color:cBlack });
-    ['DESCRIPTION','QTY','RATE (R)','AMOUNT (R)'].forEach((h,i) => {
-      const tx = i===0 ? cx[i]+4 : i===1 ? cx[i]+2 : cx[i]+cw[i]-fBold.widthOfTextAtSize(h,7.5)-2;
-      p1.drawText(h, { x:tx, y:y-11, font:fBold, size:7.5, color:cWhite });
-    });
-    y -= rowH;
-
-    // Line item rows
-    const lines = getLineData();
-    let subtotal = 0;
-    lines.forEach((l,idx) => {
-      if (idx%2===0) p1.drawRectangle({ x:M, y:y-rowH+4, width:IW, height:rowH, color:cLight });
-
-      // Truncate desc to fit column
-      let desc = l.desc;
-      while (desc.length > 0 && fReg.widthOfTextAtSize(desc, 8.5) > cw[0]-8) desc = desc.slice(0,-1);
-      if (desc.length < l.desc.length) desc = desc.slice(0,-1) + '…';
-
-      // Format rate & amount — never wrap, truncate if needed
-      const rateStr   = l.rate > 0 ? fmtR(l.rate) : 'Incl.';
-      const amountStr = l.amount > 0 ? fmtR(l.amount) : '—';
-
-      p1.drawText(desc, { x:cx[0]+4, y:y-11, font:fReg, size:8.5, color:cBlack });
-      p1.drawText(l.qty || '—', { x:cx[1]+2, y:y-11, font:fReg, size:8.5, color:cBlack });
-      // Right-align rate and amount
-      const rateX   = cx[2]+cw[2] - fReg.widthOfTextAtSize(rateStr,8.5)   - 4;
-      const amountX = cx[3]+cw[3] - fReg.widthOfTextAtSize(amountStr,8.5) - 4;
-      p1.drawText(rateStr,   { x:rateX,   y:y-11, font:fReg, size:8.5, color:cBlack });
-      p1.drawText(amountStr, { x:amountX, y:y-11, font:fReg, size:8.5, color:cBlack });
-
-      subtotal += l.amount;
-      y -= rowH;
-    });
-    y -= 6;
-
-    // Totals
-    const discAmt = subtotal * discPct / 100;
-    const total   = subtotal - discAmt;
-    const totX = M + IW*0.58, totW = IW*0.42;
-
-    p1.drawText('Subtotal',          { x:totX, y, font:fReg,  size:9, color:cGrey });
-    p1.drawText(fmtR(subtotal), { x:totX+totW - fReg.widthOfTextAtSize(fmtR(subtotal),9) - 2, y, font:fReg, size:9, color:cGrey });
-    y -= 14;
-    p1.drawText(`Discount (${discPct}%)`, { x:totX, y, font:fReg, size:9, color:cGrey });
-    const dStr = `— ${fmtR(discAmt)}`;
-    p1.drawText(dStr, { x:totX+totW - fReg.widthOfTextAtSize(dStr,9) - 2, y, font:fReg, size:9, color:cGrey });
-    y -= 6;
-
-    p1.drawRectangle({ x:totX-4, y:y-14, width:totW+4, height:22, color:cBlack });
-    p1.drawText('TOTAL DUE', { x:totX, y:y-7, font:fBold, size:9, color:cWhite });
-    const tStr = fmtR(total);
-    p1.drawText(tStr, { x:totX+totW - fBold.widthOfTextAtSize(tStr,9) - 6, y:y-7, font:fBold, size:9, color:cWhite });
-    y -= 30;
-
-    // Payment details
-    p1.drawText('PAYMENT DETAILS', { x:M, y, font:fBold, size:8, color:cSienna });
-    y -= 5;
-    p1.drawLine({ start:{x:M,y}, end:{x:M+80,y}, thickness:0.8, color:cSienna });
-    y -= 13;
-
-    const bank = [
-      ['Bank:','Investec Bank'],
-      ['Account Name:','Cornelius Marthinus Prinsloo'],
-      ['Account No.:','10012991243'],
-      ['Branch Code:','580105'],
-      ['Reference:',invNo],
-    ];
-    bank.forEach(([lbl,val]) => {
-      p1.drawText(lbl, { x:M,    y, font:fBold, size:8.5, color:cBlack });
-      p1.drawText(val, { x:M+76, y, font:fReg,  size:8.5, color:cBlack });
-      y -= 13;
-    });
-
-    // Footer p1
-    p1.drawRectangle({ x:0, y:0, width:W, height:28, color:cBlack });
-    p1.drawRectangle({ x:0, y:28, width:W, height:2, color:cSienna });
-    const footTxt = `Thank you for your support  ·  Kaal Vellies Kollektief  ·  kvk.myportfolio.com`;
-    const ftW = fReg.widthOfTextAtSize(footTxt, 8);
-    p1.drawText(footTxt, { x:(W-ftW)/2, y:10, font:fReg, size:8, color:rgb(0.875,0.765,0.451) });
-
-    // ════════════════════════════════════════════════════════
-    // PAGE 2 — SCOPE OF WORK
-    // ════════════════════════════════════════════════════════
-    const p2 = pdfDoc.addPage([W, H]);
-
-    // Footer p2
-    p2.drawRectangle({ x:0, y:0, width:W, height:28, color:cBlack });
-    p2.drawRectangle({ x:0, y:28, width:W, height:2, color:cSienna });
-    p2.drawText(footTxt, { x:(W-ftW)/2, y:10, font:fReg, size:8, color:rgb(0.875,0.765,0.451) });
-
-    y = H - 20;
-
-    // Scope title
-    p2.drawText('SCOPE OF WORK', { x:M, y, font:fBold, size:20, color:cBlack });
-    y -= 14;
-    p2.drawText(`Invoice ${invNo}  ·  ${cName || 'Client'}  ·  ${invDate}`, { x:M, y, font:fReg, size:8.5, color:cGrey });
-    y -= 8;
-    p2.drawLine({ start:{x:M,y}, end:{x:M+IW,y}, thickness:1.2, color:cBlack });
-    y -= 16;
-
-    // Helper: draw a scope section
-    function drawScopeSection(page, items, icon, iconColor, colText) {
-      const bw = 18, bh = 18, bx = M;
-      const textX = bx + bw + 8;
-      const maxCh = 88; // characters per line — tuned to column width
-
-      items.forEach((text, idx) => {
-        const lines = wrapText(text, maxCh);
-        const rowH  = Math.max(bh, lines.length * 13 + 6);
-
-        // Alternating row background (drawn first, underneath everything)
-        if (idx % 2 === 0) {
-          page.drawRectangle({ x:M, y:y - rowH + 4, width:IW, height:rowH, color:cLight });
-        }
-
-        // Icon badge
-        page.drawRectangle({ x:bx, y:y - rowH + 4, width:bw, height:rowH, color:iconColor });
-        const iconW = fBold.widthOfTextAtSize(icon, 9);
-        page.drawText(icon, {
-          x: bx + (bw - iconW) / 2,
-          y: y - (rowH / 2) - 3,
-          font: fBold, size: 9, color: cWhite
-        });
-
-        // Text lines — all regular weight, no bold
-        lines.forEach((line, li) => {
-          page.drawText(line, {
-            x: textX,
-            y: y - 11 - (li * 13),
-            font: fReg, size: 8.5, color: colText
-          });
-        });
-
-        y -= rowH;
+    function fmtRp(n){return 'R '+Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,' ')}
+    function wrapText(text,maxCh){
+      var words=(text||'').split(' '),lines=[],cur='';
+      words.forEach(function(w){
+        if((cur+' '+w).trim().length<=maxCh){cur=(cur+' '+w).trim()}
+        else{if(cur)lines.push(cur);cur=w}
       });
-      y -= 8;
+      if(cur)lines.push(cur);
+      return lines.length?lines:[''];
     }
 
-    // What they'll receive
-    y = drawSectionHead(p2, 'WHAT YOU WILL RECEIVE', M, y, fBold, cSienna);
-    const receiveItems = Array.from(document.querySelectorAll('#scopeReceive .scope-item input')).map(i => i.value).filter(Boolean);
-    drawScopeSection(p2, receiveItems, 'v', cGreen, cMid);
+    return PDFDocument.create().then(function(pdfDoc) {
+      return Promise.all([
+        pdfDoc.embedFont(StandardFonts.HelveticaBold),
+        pdfDoc.embedFont(StandardFonts.Helvetica),
+        fetch('kvk_logo2.png').then(function(r){return r.ok?r.arrayBuffer():null}).catch(function(){return null}),
+        sigDataUrl ? fetch(sigDataUrl).then(function(r){return r.arrayBuffer()}).catch(function(){return null}) : Promise.resolve(null)
+      ]).then(function(results) {
+        var fBold=results[0], fReg=results[1], logoBytes=results[2], sigBytes=results[3];
+        var cBlack=rgb(.043,.039,.035), cSienna=rgb(.702,.294,.11), cWhite=rgb(1,1,1);
+        var cGrey=rgb(.459,.439,.42), cMid=rgb(.298,.263,.231), cLight=rgb(.969,.941,.902);
+        var cGreen=rgb(.298,.686,.475);
 
-    // Production commitments
-    y = drawSectionHead(p2, 'PRODUCTION COMMITMENTS', M, y, fBold, cSienna);
-    const commitItems = Array.from(document.querySelectorAll('#scopeCommit .scope-item input')).map(i => i.value).filter(Boolean);
-    drawScopeSection(p2, commitItems, 'v', cGreen, cMid);
+        var logoP = logoBytes ? pdfDoc.embedPng(logoBytes).catch(function(){return null}) : Promise.resolve(null);
+        var sigP  = sigBytes
+          ? ((sigDataUrl||'').includes('png')
+              ? pdfDoc.embedPng(sigBytes).catch(function(){return null})
+              : pdfDoc.embedJpg(sigBytes).catch(function(){return null}))
+          : Promise.resolve(null);
 
-    // Not included
-    y = drawSectionHead(p2, 'NOT INCLUDED', M, y, fBold, cSienna);
-    const excludeItems = Array.from(document.querySelectorAll('#scopeExclude .scope-item input')).map(i => i.value).filter(Boolean);
-    drawScopeSection(p2, excludeItems, 'x', cMid, cMid);
+        return Promise.all([logoP, sigP]).then(function(imgs) {
+          var logoImg=imgs[0], sigImg=imgs[1];
 
-    y -= 6;
+          var invNo   = inv.invoiceNo||'KVK-2026-001';
+          var invDate = inv.date||'';
+          var invDue  = inv.dueDate||'After Delivery';
+          var cName   = inv.clientName||'';
+          var cAddr   = inv.clientAddress||'';
+          var cEmail  = inv.clientEmail||'';
+          var discPct = inv.discount||0;
 
-    // Portfolio & credit
-    y = drawSectionHead(p2, 'PORTFOLIO & CREDIT', M, y, fBold, cSienna);
-    const portText = document.getElementById('portfolioText').value;
-    const portLines = wrapText(portText, 90);
-    portLines.forEach(line => {
-      p2.drawText(line, { x:M, y, font:fReg, size:8.5, color:cMid });
-      y -= 12;
+          // PAGE 1
+          var p1 = pdfDoc.addPage([W,H]);
+          p1.drawRectangle({x:0,y:H-90,width:W,height:90,color:cBlack});
+          p1.drawRectangle({x:0,y:H-93,width:W,height:3,color:cSienna});
+          if (logoImg) { var ld=logoImg.scaleToFit(38,32); p1.drawImage(logoImg,{x:M,y:H-12-ld.height,width:ld.width,height:ld.height}); }
+          p1.drawText('Kaal Vellies Kollektief',{x:M+46,y:H-34,font:fBold,size:16,color:cWhite});
+          p1.drawText('Photography \u00b7 Videography \u00b7 Stellenbosch',{x:M+46,y:H-48,font:fReg,size:7.5,color:rgb(.875,.765,.451)});
+          [[invNo,'INVOICE NO.'],[invDate,'DATE'],[invDue,'DUE DATE']].forEach(function(pair,i){
+            var ry=H-28-i*18;
+            p1.drawText(pair[1],{x:W-M-155,y:ry,font:fReg,size:7,color:rgb(.55,.55,.55)});
+            p1.drawText(pair[0],{x:W-M-70,y:ry,font:fBold,size:8.5,color:cWhite});
+          });
+
+          var y=H-105;
+          p1.drawText('INVOICE',{x:M,y:y,font:fBold,size:22,color:cBlack}); y-=10;
+          p1.drawLine({start:{x:M,y:y},end:{x:M+IW,y:y},thickness:1.2,color:cBlack}); y-=14;
+          p1.drawText('BILLED TO',{x:M,y:y,font:fReg,size:7,color:cGrey}); y-=13;
+          if(cName) {p1.drawText(cName,{x:M,y:y,font:fBold,size:11,color:cBlack});y-=12}
+          if(cAddr) {p1.drawText(cAddr,{x:M,y:y,font:fReg,size:9,color:cMid});y-=12}
+          if(cEmail){p1.drawText(cEmail,{x:M,y:y,font:fReg,size:9,color:cMid});y-=12}
+          y-=6;
+
+          var cw=[IW*.50,IW*.14,IW*.18,IW*.18];
+          var cx=[M,M+cw[0],M+cw[0]+cw[1],M+cw[0]+cw[1]+cw[2]];
+          var rowH=18;
+          p1.drawRectangle({x:M,y:y-rowH+4,width:IW,height:rowH,color:cBlack});
+          ['DESCRIPTION','QTY','RATE (R)','AMOUNT (R)'].forEach(function(h,i){
+            var tx=i===0?cx[i]+4:cx[i]+cw[i]-fBold.widthOfTextAtSize(h,7.5)-2;
+            p1.drawText(h,{x:tx,y:y-11,font:fBold,size:7.5,color:cWhite});
+          });
+          y-=rowH;
+
+          var lines=inv.lines||[];
+          var sub=0;
+          lines.forEach(function(l,idx){
+            if(idx%2===0) p1.drawRectangle({x:M,y:y-rowH+4,width:IW,height:rowH,color:cLight});
+            var qty=l.qty||'', rate=parseFloat(l.rate)||0;
+            var qn=parseFloat(qty), amt=(!isNaN(qn)&&qty.trim()!=='')?qn*rate:rate;
+            sub+=amt;
+            var desc=l.desc||'';
+            while(desc.length>0&&fReg.widthOfTextAtSize(desc,8.5)>cw[0]-8) desc=desc.slice(0,-1);
+            if(desc.length<(l.desc||'').length) desc=desc.slice(0,-1)+'\u2026';
+            var rs=rate>0?fmtRp(rate):'Incl.', as=amt>0?fmtRp(amt):'--';
+            p1.drawText(desc,{x:cx[0]+4,y:y-11,font:fReg,size:8.5,color:cBlack});
+            p1.drawText(qty, {x:cx[1]+2,y:y-11,font:fReg,size:8.5,color:cBlack});
+            p1.drawText(rs,  {x:cx[2]+cw[2]-fReg.widthOfTextAtSize(rs,8.5)-4,y:y-11,font:fReg,size:8.5,color:cBlack});
+            p1.drawText(as,  {x:cx[3]+cw[3]-fReg.widthOfTextAtSize(as,8.5)-4,y:y-11,font:fReg,size:8.5,color:cBlack});
+            y-=rowH;
+          });
+          y-=6;
+
+          var da=sub*discPct/100, tot=sub-da;
+          var totX=M+IW*.58, totW=IW*.42;
+          p1.drawText('Subtotal',{x:totX,y:y,font:fReg,size:9,color:cGrey});
+          var ss=fmtRp(sub); p1.drawText(ss,{x:totX+totW-fReg.widthOfTextAtSize(ss,9)-2,y:y,font:fReg,size:9,color:cGrey}); y-=14;
+          var ds='-- '+fmtRp(da); p1.drawText('Discount ('+discPct+'%)',{x:totX,y:y,font:fReg,size:9,color:cGrey});
+          p1.drawText(ds,{x:totX+totW-fReg.widthOfTextAtSize(ds,9)-2,y:y,font:fReg,size:9,color:cGrey}); y-=6;
+          p1.drawRectangle({x:totX-4,y:y-14,width:totW+4,height:22,color:cBlack});
+          p1.drawText('TOTAL DUE',{x:totX,y:y-7,font:fBold,size:9,color:cWhite});
+          var ts=fmtRp(tot); p1.drawText(ts,{x:totX+totW-fBold.widthOfTextAtSize(ts,9)-6,y:y-7,font:fBold,size:9,color:cWhite}); y-=30;
+
+          p1.drawText('PAYMENT DETAILS',{x:M,y:y,font:fBold,size:8,color:cSienna}); y-=5;
+          p1.drawLine({start:{x:M,y:y},end:{x:M+80,y:y},thickness:.8,color:cSienna}); y-=13;
+          [['Bank:','Investec Bank'],['Account Name:','Cornelius Marthinus Prinsloo'],
+           ['Account No.:','10012991243'],['Branch Code:','580105'],['Reference:',invNo]
+          ].forEach(function(pr){
+            p1.drawText(pr[0],{x:M,y:y,font:fBold,size:8.5,color:cBlack});
+            p1.drawText(pr[1],{x:M+76,y:y,font:fReg,size:8.5,color:cBlack}); y-=13;
+          });
+
+          var ft='Thank you for your support  \u00b7  Kaal Vellies Kollektief  \u00b7  kvk.myportfolio.com';
+          p1.drawRectangle({x:0,y:0,width:W,height:28,color:cBlack});
+          p1.drawRectangle({x:0,y:28,width:W,height:2,color:cSienna});
+          p1.drawText(ft,{x:(W-fReg.widthOfTextAtSize(ft,8))/2,y:10,font:fReg,size:8,color:rgb(.875,.765,.451)});
+
+          // PAGE 2
+          var p2=pdfDoc.addPage([W,H]);
+          p2.drawRectangle({x:0,y:0,width:W,height:28,color:cBlack});
+          p2.drawRectangle({x:0,y:28,width:W,height:2,color:cSienna});
+          p2.drawText(ft,{x:(W-fReg.widthOfTextAtSize(ft,8))/2,y:10,font:fReg,size:8,color:rgb(.875,.765,.451)});
+          y=H-20;
+          p2.drawText('SCOPE OF WORK',{x:M,y:y,font:fBold,size:20,color:cBlack}); y-=14;
+          p2.drawText('Invoice '+invNo+' \u00b7 '+(cName||'Client')+' \u00b7 '+invDate,{x:M,y:y,font:fReg,size:8.5,color:cGrey}); y-=8;
+          p2.drawLine({start:{x:M,y:y},end:{x:M+IW,y:y},thickness:1.2,color:cBlack}); y-=16;
+
+          function dHead(pg,txt,yy){
+            pg.drawText(txt,{x:M,y:yy,font:fBold,size:8,color:cSienna}); yy-=5;
+            pg.drawLine({start:{x:M,y:yy},end:{x:M+80,y:yy},thickness:.8,color:cSienna});
+            return yy-14;
+          }
+          function dItems(pg,items,icon,iconColor,yy){
+            var bw=18,bx=M,tx=bx+bw+8;
+            (items||[]).forEach(function(text,idx){
+              var lines=wrapText(text,88);
+              var rh=Math.max(bw,lines.length*13+6);
+              if(idx%2===0) pg.drawRectangle({x:M,y:yy-rh+4,width:IW,height:rh,color:cLight});
+              pg.drawRectangle({x:bx,y:yy-rh+4,width:bw,height:rh,color:iconColor});
+              var iw=fBold.widthOfTextAtSize(icon,9);
+              pg.drawText(icon,{x:bx+(bw-iw)/2,y:yy-(rh/2)-3,font:fBold,size:9,color:cWhite});
+              lines.forEach(function(line,li){ pg.drawText(line,{x:tx,y:yy-11-(li*13),font:fReg,size:8.5,color:cMid}); });
+              yy-=rh;
+            });
+            return yy-8;
+          }
+
+          y=dHead(p2,'WHAT YOU WILL RECEIVE',y); y=dItems(p2,inv.scopeReceive,'v',cGreen,y);
+          y=dHead(p2,'PRODUCTION COMMITMENTS',y); y=dItems(p2,inv.scopeCommit,'v',cGreen,y);
+          y=dHead(p2,'NOT INCLUDED',y);           y=dItems(p2,inv.scopeExclude,'x',cMid,y);
+          y-=6;
+          y=dHead(p2,'PORTFOLIO & CREDIT',y);
+          wrapText(inv.portfolioText||'',90).forEach(function(l){ p2.drawText(l,{x:M,y:y,font:fReg,size:8.5,color:cMid}); y-=12; });
+          y-=8;
+          y=dHead(p2,'ACCEPTANCE',y);
+          wrapText(inv.acceptanceText||'',90).forEach(function(l){ p2.drawText(l,{x:M,y:y,font:fReg,size:8.5,color:cMid}); y-=12; });
+          y-=16;
+          p2.drawText('Corne Prinsloo',{x:M,y:y,font:fBold,size:9,color:cBlack}); y-=6;
+          if(sigImg){ var sd=sigImg.scaleToFit(80,35); p2.drawImage(sigImg,{x:M,y:y-sd.height,width:sd.width,height:sd.height}); y-=sd.height+6; } else { y-=28; }
+          p2.drawLine({start:{x:M,y:y},end:{x:M+90,y:y},thickness:.8,color:cBlack}); y-=11;
+          p2.drawText('Signature  \u00b7  '+invDate,{x:M,y:y,font:fReg,size:8,color:cGrey});
+
+          return pdfDoc.save();
+        });
+      });
     });
-    y -= 8;
+  }
 
-    // Acceptance
-    y = drawSectionHead(p2, 'ACCEPTANCE', M, y, fBold, cSienna);
-    const accText = document.getElementById('acceptanceText').value;
-    const accLines = wrapText(accText, 90);
-    accLines.forEach(line => {
-      p2.drawText(line, { x:M, y, font:fReg, size:8.5, color:cMid });
-      y -= 12;
-    });
-    y -= 16;
-
-    // Signature block
-    p2.drawText('Corné Prinsloo', { x:M, y, font:fBold, size:9, color:cBlack });
-    y -= 6;
-    if (sigImg) {
-      const sigDims = sigImg.scaleToFit(80, 35);
-      p2.drawImage(sigImg, { x:M, y:y-sigDims.height, width:sigDims.width, height:sigDims.height });
-      y -= sigDims.height + 6;
-    } else {
-      y -= 24;
-    }
-    p2.drawLine({ start:{x:M, y}, end:{x:M+90, y}, thickness:0.8, color:cBlack });
-    y -= 11;
-    p2.drawText(`Signature  ·  ${invDate}`, { x:M, y, font:fReg, size:8, color:cGrey });
-
-    // ── Save ──────────────────────────────────────────────────────────
-    const bytes = await pdfDoc.save();
-    const blob  = new Blob([bytes], { type:'application/pdf' });
-    const url   = URL.createObjectURL(blob);
-    const a     = document.createElement('a');
-    a.href = url; a.download = `${invNo}.pdf`; a.click(
+  recalc();
+})();
+</script>
+</body>
+</html>
