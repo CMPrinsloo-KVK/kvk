@@ -718,9 +718,60 @@
 </section>
 
 
-<!-- ── FOOTER ───────────────────────────────────────────────────────────── -->
+
+<!-- ── FOOTER ──────────────────────────────────────────────────────────── -->
 <footer>
   <div class="footer-inner">
-    <div id="footerContact"><a href="https://kvk.myportfolio.com" target="_blank">kvk.myportfolio.com</a>
-      <span class="footer-sep">·</span>
-      <a href="/cdn-cgi/l/email-protection#10737f627e753e6062797e637c7f7f5079737c7f65743e737f7d"><span class="__cf_email__"
+    <div id="footerContact"></div>
+    <span>@kaalvellies_kollektief</span>
+  </div>
+</footer>
+
+      <a href="https://wa.me/27796250814">+27 79 625 0814</a>
+    </div>
+    <span>@kaalvellies_kollektief</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // Reviews — fetch from Supabase
+  var SUPABASE_URL  = 'YOUR_SUPABASE_URL';
+  var SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
+  fetch(SUPABASE_URL+'/rest/v1/reviews?select=*&approved=eq.true&order=created_at.desc', {
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+  }).then(function(r){return r.json()})
+  .then(function(reviews){
+    var grid=document.getElementById('reviewsGrid');
+    if(!reviews||!reviews.length){
+      grid.innerHTML='<div style="color:rgba(255,255,255,.4);font-style:italic;font-family:\'Crimson Pro\',serif;font-size:14px">Reviews coming soon.</div>';
+      return;
+    }
+    grid.innerHTML=reviews.map(function(r){
+      var stars='\u2605'.repeat(Math.min(r.rating||5,5));
+      return '<div class="review-tile">'+
+        '<div class="review-stars">'+stars+'</div>'+
+        '<div class="review-text">\u201c'+r.text+'\u201d</div>'+
+        '<div class="review-author">'+r.author+'</div>'+
+        (r.role?'<div class="review-role">'+r.role+'</div>':'')+
+        '</div>';
+    }).join('');
+  }).catch(function(){
+    document.getElementById('reviewsGrid').innerHTML='';
+  });
+
+  // Footer email — assembled at runtime to avoid Cloudflare mangling
+  var em=['corne.prinsloo','icloud.com'].join('@');
+  var fc=document.getElementById('footerContact');
+  if(fc){
+    fc.innerHTML=
+      '<a href="https://kvk.myportfolio.com" target="_blank">kvk.myportfolio.com</a>'+
+      '<span class="footer-sep">&middot;</span>'+
+      '<a href="mailto:'+em+'">'+em+'</a>'+
+      '<span class="footer-sep">&middot;</span>'+
+      '<a href="https://wa.me/27796250814">+27 79 625 0814</a>';
+  }
+})();
+</script>
+</body>
+</html>
