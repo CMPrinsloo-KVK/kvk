@@ -371,10 +371,10 @@
 <script>
 (function () {
   // ── CONFIG — swap these with your Supabase project values ──────────────
-  var SUPABASE_URL  = 'https://jqwdzkxcspuzbvismjhl.supabase.co';
-  var SUPABASE_ANON = 'sb_publishable_cZlEmuWU3aFxkGIv75AA5A_qhKxzeOU';
+  var SUPABASE_URL  = 'YOUR_SUPABASE_URL';
+  var SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
   // ── Admin password — change this ───────────────────────────────────────
-  var ADMIN_PASS = 'Bentley@10';
+  var ADMIN_PASS = 'kvk2026';
   // ──────────────────────────────────────────────────────────────────────
 
   // ── Lock screen ────────────────────────────────────────────────────────
@@ -496,7 +496,7 @@
 
   function loadProjects() {
     document.getElementById('projectsGrid').innerHTML =
-      '<div style="color:var(--grey);font-style:italic;font-family:'Crimson Pro',serif">Loading...</div>';
+      '<div style="color:var(--grey);font-style:italic;font-family:Crimson Pro,serif">Loading...</div>';
     sbFetch('projects?select=*&order=created_at.desc').then(function(data) {
       allProjects = Array.isArray(data) ? data : [];
       renderProjectsGrid(allProjects);
@@ -504,7 +504,7 @@
     }).catch(function(e) {
       console.error(e);
       document.getElementById('projectsGrid').innerHTML =
-        '<div style="color:var(--red);font-family:'Crimson Pro',serif;font-style:italic">'+
+        '<div style="color:var(--red);font-family:Crimson Pro,serif;font-style:italic">'+
         'Could not load projects: ' + e.message + '</div>';
     });
   }
@@ -1029,7 +1029,7 @@
     // Validate Supabase config before trying to fetch
     if (SUPABASE_URL.includes('YOUR_SUPABASE')) {
       document.getElementById('projectsGrid').innerHTML =
-        '<div style="color:var(--red);font-family:'Crimson Pro',serif;font-style:italic">'+
+        '<div style="color:var(--red);font-family:Crimson Pro,serif;font-style:italic">'+
         'Supabase not configured yet. Open admin.html and replace YOUR_SUPABASE_URL and YOUR_SUPABASE_ANON_KEY.</div>';
       document.getElementById('reviewsPending').innerHTML = '';
       document.getElementById('reviewsApproved').innerHTML = '';
