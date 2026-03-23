@@ -376,8 +376,8 @@
 <script>
 (function () {
   // ── CONFIG — swap these with your Supabase project values ──────────────
-  var SUPABASE_URL  = 'https://jqwdzkxcspuzbvismjhl.supabase.co';
-  var SUPABASE_ANON = 'sb_publishable_cZlEmuWU3aFxkGIv75AA5A_qhKxzeOU';
+  var SUPABASE_URL  = 'YOUR_SUPABASE_URL';
+  var SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
   // ── Admin password — change this ───────────────────────────────────────
   var ADMIN_PASS = 'kvk2026';
   // ──────────────────────────────────────────────────────────────────────
@@ -924,13 +924,13 @@
     function scopeRowsNumbered(items) {
       return items.map(function(t, i) {
         var bg = (i%2===0) ? '  \\rowcolor{lightgrey}\n' : '';
-        return bg + '  {\\color{accent}\\textbf{' + (i+1) + '}} &\n  \\small ' + esc(t) + ' \\\\\n';
+        return bg + '  {\\color{highlight}\\textbf{' + (i+1) + '}} &\n  \\small ' + esc(t) + ' \\\\\n';
       }).join('');
     }
     function scopeRowsCheck(items) {
       return items.map(function(t, i) {
         var bg = (i%2===0) ? '  \\rowcolor{lightgrey}\n' : '';
-        return bg + '  {\\color{accent}$\\checkmark$} &\n  \\small ' + esc(t) + ' \\\\\n';
+        return bg + '  {\\color{highlight}$\\checkmark$} &\n  \\small ' + esc(t) + ' \\\\\n';
       }).join('');
     }
     function scopeRowsCross(items) {
@@ -966,7 +966,8 @@
 '\\usepackage{multirow}\n' +
 '\\usepackage{amssymb}\n\n' +
 '\\renewcommand{\\familydefault}{\\sfdefault}\n\n' +
-'\\definecolor{accent}{HTML}{B34B1D}\n' +
+'\\definecolor{accent}{HTML}{0B0A09}\n' +
+'\\definecolor{highlight}{HTML}{D37835}\n' +
 '\\definecolor{darktext}{HTML}{24211F}\n' +
 '\\definecolor{lightgrey}{HTML}{F7F0E6}\n' +
 '\\definecolor{midgrey}{HTML}{75726C}\n\n' +
@@ -1007,7 +1008,7 @@
 '  \\end{tabular}\n' +
 '\\end{minipage}\n\n' +
 '\\vspace{1mm}\n' +
-'{\\color{accent}\\rule{\\linewidth}{1.2pt}}\n' +
+'{\\color{highlight}\\rule{\\linewidth}{1.2pt}}\n' +
 '\\vspace{3mm}\n\n' +
 '{\\color{midgrey}\\scriptsize BILLED TO}\\\\[0.8mm]\n' +
 '{\\normalsize\\textbf{' + cName + '}}\\\\[0.5mm]\n' +
@@ -1035,8 +1036,8 @@ lineRows +
 '\\end{tabular}\n' +
 '\\end{flushright}\n\n' +
 '\\vspace{4mm}\n\n' +
-'{\\color{accent}\\textbf{\\small PAYMENT DETAILS}}\\\\[0.8mm]\n' +
-'{\\color{accent}\\rule{48mm}{0.8pt}}\\\\[1.5mm]\n' +
+'{\\color{highlight}\\textbf{\\small PAYMENT DETAILS}}\\\\[0.8mm]\n' +
+'{\\color{highlight}\\rule{48mm}{0.8pt}}\\\\[1.5mm]\n' +
 '{\\small\n' +
 '\\begin{tabular}{@{}ll@{}}\n' +
 '  Bank:          & Investec Bank \\\\[0.8mm]\n' +
@@ -1065,37 +1066,37 @@ lineRows +
 '{\\color{darktext}\\fontsize{22}{26}\\selectfont\\textbf{SCOPE OF WORK}}\\\\[1mm]\n' +
 '{\\color{midgrey}\\small Invoice ' + invNo + ' \\ $\\bullet$ \\ ' + cName + ' \\ $\\bullet$ \\ ' + invDate + '}\n\n' +
 '\\vspace{1mm}\n' +
-'{\\color{accent}\\rule{\\linewidth}{1.2pt}}\n' +
+'{\\color{highlight}\\rule{\\linewidth}{1.2pt}}\n' +
 '\\vspace{3mm}\n\n' +
-'{\\color{accent}\\textbf{\\small WHAT YOU WILL RECEIVE}}\\\\[0.5mm]\n' +
-'{\\color{accent}\\rule{60mm}{0.8pt}}\n' +
+'{\\color{highlight}\\textbf{\\small WHAT YOU WILL RECEIVE}}\\\\[0.5mm]\n' +
+'{\\color{highlight}\\rule{60mm}{0.8pt}}\n' +
 '\\vspace{1.5mm}\n\n' +
 '\\renewcommand{\\arraystretch}{1.5}\n' +
 '\\begin{tabularx}{\\linewidth}{M{6mm} L}\n' +
 scopeRowsNumbered(inv.scopeReceive) +
 '\\end{tabularx}\n\n' +
 '\\vspace{3.5mm}\n\n' +
-'{\\color{accent}\\textbf{\\small PRODUCTION COMMITMENTS}}\\\\[0.5mm]\n' +
-'{\\color{accent}\\rule{60mm}{0.8pt}}\n' +
+'{\\color{highlight}\\textbf{\\small PRODUCTION COMMITMENTS}}\\\\[0.5mm]\n' +
+'{\\color{highlight}\\rule{60mm}{0.8pt}}\n' +
 '\\vspace{1.5mm}\n\n' +
 '\\begin{tabularx}{\\linewidth}{M{6mm} L}\n' +
 scopeRowsCheck(inv.scopeCommit) +
 '\\end{tabularx}\n\n' +
 '\\vspace{3.5mm}\n\n' +
-'{\\color{accent}\\textbf{\\small NOT INCLUDED}}\\\\[0.5mm]\n' +
-'{\\color{accent}\\rule{60mm}{0.8pt}}\n' +
+'{\\color{highlight}\\textbf{\\small NOT INCLUDED}}\\\\[0.5mm]\n' +
+'{\\color{highlight}\\rule{60mm}{0.8pt}}\n' +
 '\\vspace{1.5mm}\n\n' +
 '\\begin{tabularx}{\\linewidth}{M{6mm} L}\n' +
 scopeRowsCross(inv.scopeExclude) +
 '\\end{tabularx}\n\n' +
 '\\vspace{4mm}\n\n' +
 '\\vspace{3.5mm}\n\n' +
-'{\\color{accent}\\textbf{\\small PORTFOLIO \\& CREDIT}}\\\\[0.5mm]\n' +
-'{\\color{accent}\\rule{60mm}{0.8pt}}\\\\[1.5mm]\n' +
+'{\\color{highlight}\\textbf{\\small PORTFOLIO \\& CREDIT}}\\\\[0.5mm]\n' +
+'{\\color{highlight}\\rule{60mm}{0.8pt}}\\\\[1.5mm]\n' +
 '{\\small ' + esc(inv.portfolioText) + '}\n\n' +
 '\\vspace{4mm}\n\n' +
-'{\\color{accent}\\textbf{\\small ACCEPTANCE}}\\\\[0.5mm]\n' +
-'{\\color{accent}\\rule{60mm}{0.8pt}}\\\\[1.5mm]\n' +
+'{\\color{highlight}\\textbf{\\small ACCEPTANCE}}\\\\[0.5mm]\n' +
+'{\\color{highlight}\\rule{60mm}{0.8pt}}\\\\[1.5mm]\n' +
 '{\\small ' + esc(inv.acceptanceText) + '}\n\n' +
 '\\vspace{5mm}\n' +
 '\\begin{tabular}{@{}p{70mm}@{}}\n' +
