@@ -376,8 +376,8 @@
 <script>
 (function () {
   // ── CONFIG — swap these with your Supabase project values ──────────────
-  var SUPABASE_URL  = 'https://jqwdzkxcspuzbvismjhl.supabase.co';
-  var SUPABASE_ANON = 'sb_publishable_cZlEmuWU3aFxkGIv75AA5A_qhKxzeOU';
+  var SUPABASE_URL  = 'YOUR_SUPABASE_URL';
+  var SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
   // ── Admin password — change this ───────────────────────────────────────
   var ADMIN_PASS = 'kvk2026';
   // ──────────────────────────────────────────────────────────────────────
@@ -790,10 +790,21 @@
     var id=this.value;
     var p=allProjects.find(function(pr){return pr.id===id;});
     if(!p) return;
-    document.getElementById('invNo').value=p.invoice_pdf
-      ? p.invoice_pdf.replace(/-[a-z0-9]{5}\.pdf$/,'.pdf').replace('.pdf','')
-      : 'KVK-2026-001';
-    // Load existing invoice data if saved
+    // Extract invoice number and random code from stored invoice_pdf if present
+    if(p.invoice_pdf) {
+      var m = p.invoice_pdf.match(/^(.+)-([a-z0-9]{5})\.pdf$/);
+      if(m) {
+        document.getElementById('invNo').value = m[1]; // e.g. KVK-2026-002
+        window._invCode = m[2];                         // reuse existing code
+      } else {
+        document.getElementById('invNo').value = p.invoice_pdf.replace(/\.pdf$/,'');
+        window._invCode = randCode();
+      }
+    } else {
+      document.getElementById('invNo').value = 'KVK-2026-001';
+      window._invCode = randCode();
+    }
+    // Load existing invoice data if saved (will override invNo from above)
     if(p.invoice_data && Object.keys(p.invoice_data).length) {
       loadInvoiceData(p.invoice_data);
       toast('Invoice data loaded from project');
@@ -860,11 +871,17 @@
   });
 
   // Random code for PDF filename
-  if(!window._invCode) window._invCode=(function(){
+  function randCode(){
     var c='abcdefghjkmnpqrstuvwxyz23456789',s='';
     for(var i=0;i<5;i++) s+=c[Math.floor(Math.random()*c.length)];
     return s;
-  })();
+  }
+  if(!window._invCode) window._invCode=randCode();
+
+  // Regenerate code if invoice number is manually changed
+  document.getElementById('invNo').addEventListener('change',function(){
+    window._invCode=randCode();
+  });
 
   function getPDFFilename(){
     return (document.getElementById('invNo').value||'KVK-2026-001')+'-'+window._invCode+'.pdf';
