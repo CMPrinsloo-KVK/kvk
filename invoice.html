@@ -449,7 +449,7 @@
       return out;
     }
 
-    var receiveRows = scopeRows('scopeReceive','\\textbf{\\checkmark}');
+    var receiveRows = scopeRows('scopeReceive','$\\checkmark$');
     var commitRows  = scopeRows('scopeCommit','$\\checkmark$');
     var excludeRows = scopeRows('scopeExclude','$\\times$');
     var portEsc     = esc(portText);
@@ -480,7 +480,7 @@
 '\\pagestyle{empty}\n'+
 '\\setlength{\\parindent}{0pt}\n\n'+
 '\\newcolumntype{M}[1]{>{\\centering\\arraybackslash}m{#1}}\n'+
-'\\newcolumntype{L}{{\\raggedright\\arraybackslash}m{\\dimexpr\\linewidth-8mm\\relax}}\n\n'+
+'\\newcolumntype{L}{>{\\raggedright\\arraybackslash}m{\\dimexpr\\linewidth-8mm\\relax}}\n\n'+
 '\\begin{document}\n\n'+
 '% ══════════════════════════════════════════\n'+
 '% PAGE 1 — INVOICE\n'+

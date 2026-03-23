@@ -926,7 +926,7 @@
       '\\definecolor{sand}{HTML}{DFB373}\n'+
       '\\pagestyle{empty}\\setlength{\\parindent}{0pt}\n'+
       '\\newcolumntype{M}[1]{>{\\centering\\arraybackslash}m{#1}}\n'+
-      '\\newcolumntype{L}{{\\raggedright\\arraybackslash}m{\\dimexpr\\linewidth-8mm\\relax}}\n'+
+      '\\newcolumntype{L}{>{\\raggedright\\arraybackslash}m{\\dimexpr\\linewidth-8mm\\relax}}\n'+
       '\\begin{document}\n\n'+
       '% PAGE 1\n'+
       '\\begin{tikzpicture}[remember picture,overlay]\n'+
@@ -974,7 +974,7 @@
       '\\vspace{1mm}{\\color{accent}\\rule{\\linewidth}{1.2pt}}\\vspace{3mm}\n\n'+
       '{\\color{accent}\\textbf{\\small WHAT YOU WILL RECEIVE}}\\\\[0.5mm]{\\color{accent}\\rule{60mm}{0.8pt}}\\vspace{1.5mm}\n'+
       '\\renewcommand{\\arraystretch}{1.5}\n\\begin{tabularx}{\\linewidth}{M{6mm}L}\n'+
-      scopeRows(inv.scopeReceive,'\\textbf{\\checkmark}')+
+      scopeRows(inv.scopeReceive,'$\\checkmark$')+
       '\\end{tabularx}\\vspace{3.5mm}\n\n'+
       '{\\color{accent}\\textbf{\\small PRODUCTION COMMITMENTS}}\\\\[0.5mm]{\\color{accent}\\rule{60mm}{0.8pt}}\\vspace{1.5mm}\n'+
       '\\begin{tabularx}{\\linewidth}{M{6mm}L}\n'+
