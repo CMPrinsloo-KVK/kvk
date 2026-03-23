@@ -200,8 +200,8 @@
   }
 
   // Supabase config — swap with your values
-  var SUPABASE_URL  = 'https://jqwdzkxcspuzbvismjhl.supabase.co';
-  var SUPABASE_ANON = 'sb_publishable_cZlEmuWU3aFxkGIv75AA5A_qhKxzeOU';
+  var SUPABASE_URL  = 'YOUR_SUPABASE_URL';
+  var SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
 
   function loadProjects() {
     fetch(SUPABASE_URL + '/rest/v1/projects?select=*&order=created_at.desc', {
@@ -256,10 +256,12 @@
 
     var html = '';
 
-    // Milestones
+    // Milestones — use canonical order, not object key order
+    var MILESTONE_ORDER = ['storyboard','shoot','edit','delivery'];
     html += '<div class="milestone-label">Progress</div><div class="milestones">';
-    Object.entries(p.milestones).forEach(function(entry){
-      var key=entry[0], val=entry[1];
+    MILESTONE_ORDER.forEach(function(key){
+      if (!p.milestones[key]) return; // skip if not applicable for this project type
+      var val  = p.milestones[key];
       var name = MILESTONE_NAMES[key]||key;
       var st   = val.status;
       var time = val.completedAt ? formatDateTime(val.completedAt) : null;
@@ -275,11 +277,22 @@
     html += '</div>';
 
     // Payment
-    var payLabels = {deposit:'Deposit (50%)',final:'Final Payment'};
+    var depositLabel = 'Deposit';
+    if (p.payment && p.payment.deposit) {
+      var depAmt = p.payment.deposit.amount;
+      var depPct = p.payment.deposit.percentage;
+      if (depAmt)      depositLabel = 'Deposit (R '+depAmt+')';
+      else if (depPct) depositLabel = 'Deposit ('+depPct+'%)';
+      else if (p.payment.deposit.status === 'none') depositLabel = null; // skip
+    }
+    var payLabels = {deposit: depositLabel, final:'Final Payment'};
     html += '<div class="payment-label">Payment</div><div class="payment-rows">';
-    Object.entries(p.payment).forEach(function(entry){
-      var key=entry[0], val=entry[1];
+    ['deposit','final'].forEach(function(key){
+      if (!p.payment[key]) return;
+      var val  = p.payment[key];
+      if (key === 'deposit' && val.status === 'none') return; // skip no-deposit projects
       var lbl  = payLabels[key]||key;
+      if (!lbl) return;
       var st   = val.status;
       var time = val.paidAt ? formatDateTime(val.paidAt) : null;
       html += '<div class="payment-row">' +
