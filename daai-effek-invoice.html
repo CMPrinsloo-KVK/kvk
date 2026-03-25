@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daai Effek — Invoice Builder</title>
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{--black:#1A1A2E;--dark:#24211F;--mid:#4C433B;--grey:#75726C;--blue:#4A6FA5;--blue-light:#6B8FBF;--bg:#F7F0E6;--rule:#D9C4A8;--rule-light:#EDE3D6}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--dark);font-family:'Work Sans',sans-serif;font-size:14px;line-height:1.5;min-height:100vh}
+
+    header{background:var(--black);padding:0}
+    header::after{content:'';display:block;height:3px;background:var(--blue)}
+    .header-inner{max-width:900px;margin:0 auto;padding:20px 32px;display:flex;align-items:center;gap:16px}
+    .brand{font-size:20px;font-weight:600;color:#fff;letter-spacing:.04em}
+    .brand-sub{font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.12em;text-transform:uppercase;margin-top:2px}
+    .badge{font-size:9px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;background:var(--blue);color:#fff;padding:3px 8px;border-radius:2px}
+
+    .content{max-width:900px;margin:0 auto;padding:36px 32px 80px}
+
+    .section-label{font-size:10px;font-weight:600;letter-spacing:.16em;color:var(--blue);text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid var(--rule);margin-bottom:20px;margin-top:32px}
+    .section-label:first-child{margin-top:0}
+
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .form-group{margin-bottom:14px}
+    .form-full{grid-column:1/-1}
+    label{display:block;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);margin-bottom:5px}
+    input,textarea,select{width:100%;background:rgba(255,255,255,.8);border:1px solid var(--rule);border-radius:4px;padding:9px 11px;font-family:'Work Sans',sans-serif;font-size:13px;color:var(--dark);outline:none;transition:border-color .2s;appearance:none}
+    input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(74,111,165,.12)}
+    select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2375726C' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;cursor:pointer}
+    textarea{resize:vertical;min-height:70px;font-size:12px}
+
+    /* Payment method toggle */
+    .payment-method-row{display:flex;gap:10px;margin-bottom:16px}
+    .pm-btn{padding:8px 18px;border-radius:4px;border:1px solid var(--rule);background:rgba(255,255,255,.6);color:var(--grey);font-family:'Work Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s}
+    .pm-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+    .bank-details{display:none;background:rgba(255,255,255,.5);border:1px solid var(--rule-light);border-radius:6px;padding:16px;margin-top:4px}
+    .bank-details.show{display:block}
+
+    /* Line items */
+    .line-item-header{display:grid;grid-template-columns:1fr 100px 100px 90px 24px;gap:8px;margin-bottom:4px}
+    .line-item-header span{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)}
+    .line-items{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+    .line-item{display:grid;grid-template-columns:1fr 100px 100px 90px 24px;gap:8px;align-items:center}
+    .line-item input{margin:0}
+    .amount-display{background:rgba(255,255,255,.4);border:1px solid var(--rule-light);border-radius:4px;padding:9px 11px;font-size:13px;color:var(--mid);text-align:right;white-space:nowrap}
+    .remove-btn{width:24px;height:24px;border-radius:50%;background:transparent;border:1px solid var(--rule);color:var(--grey);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+    .remove-btn:hover{background:#e05050;border-color:#e05050;color:#fff}
+    .add-line-btn{background:transparent;border:1px dashed var(--rule);border-radius:4px;color:var(--blue);font-family:'Work Sans',sans-serif;font-size:12px;font-weight:500;padding:8px;width:100%;cursor:pointer;transition:all .2s;margin-bottom:12px}
+    .add-line-btn:hover{border-color:var(--blue);background:rgba(74,111,165,.04)}
+
+    .totals-area{background:rgba(255,255,255,.5);border:1px solid var(--rule-light);border-radius:6px;padding:14px 16px}
+    .total-row{display:flex;justify-content:space-between;padding:3px 0;font-size:13px;color:var(--mid)}
+    .total-row.grand{border-top:2px solid var(--blue);margin-top:8px;padding-top:8px;font-size:15px;font-weight:600;color:var(--dark)}
+    .total-row.grand span:last-child{color:var(--blue)}
+
+    /* Scope */
+    .scope-items{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+    .scope-item{display:grid;grid-template-columns:28px 1fr 24px;gap:8px;align-items:center}
+    .scope-badge{width:28px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+
+    /* Buttons */
+    .btn-row{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+    .btn{padding:11px 22px;border:none;border-radius:4px;font-family:'Work Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background .2s}
+    .btn-primary{background:var(--blue);color:#fff}
+    .btn-primary:hover{background:var(--blue-light)}
+    .btn-ghost{background:transparent;color:var(--grey);border:1px solid var(--rule)}
+    .btn-ghost:hover{border-color:var(--blue);color:var(--blue)}
+
+    /* Output box */
+    .output-box{display:none;margin-top:20px;background:rgba(255,255,255,.7);border:1px solid var(--rule);border-radius:6px;padding:20px}
+    .output-box h3{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:12px}
+    .step{font-size:13px;color:var(--dark);margin-bottom:8px;padding:10px 14px;background:rgba(255,255,255,.6);border-radius:4px;border-left:3px solid var(--blue)}
+    .step code{font-family:monospace;font-size:13px;font-weight:600;color:var(--dark);background:rgba(0,0,0,.06);padding:2px 6px;border-radius:3px}
+
+    /* Toast */
+    .toast{position:fixed;bottom:24px;right:24px;background:var(--dark);color:#fff;padding:12px 20px;border-radius:6px;font-size:13px;transform:translateY(80px);opacity:0;transition:all .3s;z-index:9999;border-left:3px solid var(--blue)}
+    .toast.show{transform:translateY(0);opacity:1}
+
+    @media(max-width:768px){
+      .content{padding:24px 20px 60px}
+      .header-inner{padding:16px 20px}
+      .form-grid{grid-template-columns:1fr}
+      .line-item,.line-item-header{grid-template-columns:1fr 80px 80px 70px 24px}
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div style="flex:1">
+      <div class="brand">Daai Effek</div>
+      <div class="brand-sub">Video · Photo · Content · Marketing</div>
+    </div>
+    <span class="badge">Invoice Builder</span>
+  </div>
+</header>
+
+<div class="content">
+
+  <div class="section-label">Invoice Details</div>
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Invoice No.</label>
+      <input type="text" id="invNo" value="Daai-Effek-001" />
+    </div>
+    <div class="form-group">
+      <label>Invoice Date</label>
+      <input type="date" id="invDate" />
+    </div>
+    <div class="form-group">
+      <label>Due Date</label>
+      <input type="text" id="invDue" value="After Delivery" />
+    </div>
+    <div class="form-group">
+      <label>Discount (%)</label>
+      <input type="number" id="invDiscount" value="0" min="0" max="100" />
+    </div>
+  </div>
+
+  <div class="section-label">Billed To</div>
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Client / Organisation</label>
+      <input type="text" id="invClient" placeholder="Oom Samie se Winkel" />
+    </div>
+    <div class="form-group">
+      <label>Address</label>
+      <input type="text" id="invAddr" placeholder="84 Dorp Street" />
+    </div>
+    <div class="form-group form-full">
+      <label>Email <span style="font-weight:400;opacity:.6">(optional)</span></label>
+      <input type="text" id="invEmail" placeholder="info@client.co.za" />
+    </div>
+  </div>
+
+  <div class="section-label">Line Items</div>
+  <div class="line-item-header">
+    <span>Description</span><span style="text-align:center">Qty</span><span style="text-align:right">Rate (R)</span><span style="text-align:right">Amount</span><span></span>
+  </div>
+  <div class="line-items" id="invLineItems"></div>
+  <button class="add-line-btn" id="invAddLine">+ Add line item</button>
+
+  <div class="totals-area">
+    <div class="total-row"><span>Subtotal</span><span id="invSubtotal">R 0.00</span></div>
+    <div class="total-row"><span>Discount</span><span id="invDiscDisplay">-R 0.00</span></div>
+    <div class="total-row grand"><span>Total Due</span><span id="invTotal">R 0.00</span></div>
+  </div>
+
+  <div class="section-label">Payment Method</div>
+  <div class="payment-method-row">
+    <button class="pm-btn active" data-method="cash" id="pmCash">Cash</button>
+    <button class="pm-btn" data-method="eft" id="pmEFT">EFT</button>
+  </div>
+  <div class="bank-details" id="bankDetails">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Bank</label>
+        <input type="text" id="bankName" value="Investec Bank" />
+      </div>
+      <div class="form-group">
+        <label>Account Name</label>
+        <input type="text" id="bankAccName" value="Cornelius Marthinus Prinsloo" />
+      </div>
+      <div class="form-group">
+        <label>Account No.</label>
+        <input type="text" id="bankAccNo" value="10012991243" />
+      </div>
+      <div class="form-group">
+        <label>Branch Code</label>
+        <input type="text" id="bankBranch" value="580105" />
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Scope — What They'll Receive</div>
+  <div class="scope-items" id="invScopeReceive"></div>
+  <button class="add-line-btn" id="invAddReceive">+ Add deliverable</button>
+
+  <div class="section-label">Scope — Production Commitments</div>
+  <div class="scope-items" id="invScopeCommit"></div>
+  <button class="add-line-btn" id="invAddCommit">+ Add commitment</button>
+
+  <div class="section-label">Scope — Not Included</div>
+  <div class="scope-items" id="invScopeExclude"></div>
+  <button class="add-line-btn" id="invAddExclude">+ Add exclusion</button>
+
+  <div class="section-label">Portfolio &amp; Credit</div>
+  <div class="form-group"><textarea id="invPortfolio">While all final work remains the property of the client upon payment, Daai Effek retains the right to feature this work in its portfolio, website, and social media channels. Credit will reference the client by name where appropriate.</textarea></div>
+
+  <div class="section-label">Acceptance</div>
+  <div class="form-group"><textarea id="invAcceptance">By proceeding with payment, the client agrees to the scope and terms outlined above.</textarea></div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" id="invDownloadTex">&darr; Download .tex</button>
+    <button class="btn btn-ghost" id="invGetFilename">&#123;&#125; Get Filename</button>
+  </div>
+
+  <div class="output-box" id="invOutputBox">
+    <h3>Next Steps</h3>
+    <div class="step">1. Compile: <code>xelatex <span id="invTexName"></span></code></div>
+    <div class="step">2. Rename PDF to: <code id="invPDFName"></code></div>
+    <div class="step">3. Upload to <code>/invoices/</code> on GitHub</div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+
+  // ── Init date ────────────────────────────────────────────────────────────
+  document.getElementById('invDate').value = new Date().toISOString().split('T')[0];
+
+  // ── Payment method toggle ────────────────────────────────────────────────
+  var paymentMethod = 'cash';
+  document.querySelectorAll('.pm-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.pm-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      paymentMethod = btn.dataset.method;
+      document.getElementById('bankDetails').classList.toggle('show', paymentMethod === 'eft');
+    });
+  });
+
+  // ── Toast ────────────────────────────────────────────────────────────────
+  function toast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show';
+    setTimeout(function() { t.className = 'toast'; }, 3000);
+  }
+
+  // ── Line items ───────────────────────────────────────────────────────────
+  var invLineId = 0, invScopeId = 0;
+
+  function invFmtDisp(n) { return 'R ' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+
+  function invAddLine(desc, qty, rate) {
+    desc = desc || ''; qty = qty || ''; rate = rate || '';
+    invLineId++;
+    var id = invLineId;
+    var div = document.createElement('div');
+    div.className = 'line-item'; div.id = 'inv-li-' + id;
+    div.innerHTML =
+      '<input class="li-desc" type="text" placeholder="Description" value="' + desc.replace(/"/g, '&quot;') + '" />' +
+      '<input class="li-qty" type="text" placeholder="e.g. 6" value="' + qty + '" style="text-align:center" />' +
+      '<input class="li-rate" type="number" placeholder="0.00" value="' + rate + '" step="0.01" min="0" style="text-align:right" />' +
+      '<div class="amount-display" id="inv-amt-' + id + '">R 0.00</div>' +
+      '<button class="remove-btn" data-id="' + id + '">&times;</button>';
+    div.querySelector('.li-desc').addEventListener('input', invRecalc);
+    div.querySelector('.li-qty').addEventListener('input', invRecalc);
+    div.querySelector('.li-rate').addEventListener('input', invRecalc);
+    div.querySelector('.remove-btn').addEventListener('click', function() {
+      var el = document.getElementById('inv-li-' + this.dataset.id);
+      if (el) { el.remove(); invRecalc(); }
+    });
+    document.getElementById('invLineItems').appendChild(div);
+    invRecalc();
+  }
+  document.getElementById('invAddLine').addEventListener('click', function() { invAddLine(); });
+
+  function invAddScope(containerId, text, color) {
+    text = text || ''; invScopeId++;
+    var id = invScopeId;
+    var div = document.createElement('div');
+    div.className = 'scope-item'; div.id = 'inv-sc-' + id;
+    div.innerHTML =
+      '<div class="scope-badge" style="background:' + color + '">' + (color === '#4C433B' ? '&times;' : '&#10003;') + '</div>' +
+      '<input type="text" placeholder="Enter item..." value="' + text.replace(/"/g, '&quot;') + '" />' +
+      '<button class="remove-btn" data-id="' + id + '">&times;</button>';
+    div.querySelector('.remove-btn').addEventListener('click', function() {
+      var el = document.getElementById('inv-sc-' + this.dataset.id);
+      if (el) el.remove();
+    });
+    document.getElementById(containerId).appendChild(div);
+  }
+  document.getElementById('invAddReceive').addEventListener('click', function() { invAddScope('invScopeReceive', '', '#4A6FA5'); });
+  document.getElementById('invAddCommit').addEventListener('click',  function() { invAddScope('invScopeCommit',  '', '#4A6FA5'); });
+  document.getElementById('invAddExclude').addEventListener('click', function() { invAddScope('invScopeExclude', '', '#4C433B'); });
+
+  // Default scope items
+  ['Social Media Reel Production — 6 edited and subtitled videos (~30–60 sec each).']
+    .forEach(function(t) { invAddScope('invScopeReceive', t, '#4A6FA5'); });
+  ['First cut delivered within 1 week of the final shoot day.',
+   'Final files delivered as MP4 (H.264).']
+    .forEach(function(t) { invAddScope('invScopeCommit', t, '#4A6FA5'); });
+
+  // Default line item
+  invAddLine('Social Media Reel Production', '6', '700');
+
+  function invGetLines() {
+    return Array.from(document.querySelectorAll('#invLineItems .line-item')).map(function(li) {
+      var desc = li.querySelector('.li-desc').value || '';
+      var qty  = li.querySelector('.li-qty').value || '';
+      var rate = parseFloat(li.querySelector('.li-rate').value) || 0;
+      var qn   = parseFloat(qty);
+      var amt  = (!isNaN(qn) && qty.trim() !== '') ? qn * rate : rate;
+      return { desc: desc, qty: qty, rate: rate, amount: amt, id: li.id.replace('inv-li-', '') };
+    });
+  }
+
+  function invRecalc() {
+    var lines = invGetLines(), sub = 0;
+    lines.forEach(function(l) {
+      sub += l.amount;
+      var el = document.getElementById('inv-amt-' + l.id);
+      if (el) el.textContent = invFmtDisp(l.amount);
+    });
+    var dp = parseFloat(document.getElementById('invDiscount').value) || 0;
+    var da = sub * dp / 100, tot = sub - da;
+    document.getElementById('invSubtotal').textContent  = invFmtDisp(sub);
+    document.getElementById('invDiscDisplay').textContent = '-' + invFmtDisp(da);
+    document.getElementById('invTotal').textContent     = invFmtDisp(tot);
+  }
+
+  ['invNo','invDate','invDue','invDiscount','invClient','invAddr','invEmail'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', invRecalc);
+  });
+
+  // ── Random code for filename ─────────────────────────────────────────────
+  function randCode() {
+    var c = 'abcdefghjkmnpqrstuvwxyz23456789', s = '';
+    for (var i = 0; i < 5; i++) s += c[Math.floor(Math.random() * c.length)];
+    return s;
+  }
+  if (!window._invCode) window._invCode = randCode();
+  document.getElementById('invNo').addEventListener('change', function() { window._invCode = randCode(); });
+
+  function getPDFFilename() {
+    return (document.getElementById('invNo').value || 'Daai-Effek-001') + '-' + window._invCode + '.pdf';
+  }
+
+  document.getElementById('invGetFilename').addEventListener('click', function() {
+    var pdf = getPDFFilename();
+    var tex = (document.getElementById('invNo').value || 'Daai-Effek-001') + '.tex';
+    document.getElementById('invTexName').textContent = tex;
+    document.getElementById('invPDFName').textContent = pdf;
+    document.getElementById('invOutputBox').style.display = 'block';
+    document.getElementById('invOutputBox').scrollIntoView({ behavior: 'smooth' });
+  });
+
+  // ── LaTeX generator ──────────────────────────────────────────────────────
+  document.getElementById('invDownloadTex').addEventListener('click', function() {
+
+    var inv = {
+      invoiceNo:     document.getElementById('invNo').value,
+      date:          document.getElementById('invDate').value,
+      dueDate:       document.getElementById('invDue').value,
+      discount:      parseFloat(document.getElementById('invDiscount').value) || 0,
+      clientName:    document.getElementById('invClient').value,
+      clientAddress: document.getElementById('invAddr').value,
+      clientEmail:   document.getElementById('invEmail').value,
+      payMethod:     paymentMethod,
+      bankName:      document.getElementById('bankName').value,
+      bankAccName:   document.getElementById('bankAccName').value,
+      bankAccNo:     document.getElementById('bankAccNo').value,
+      bankBranch:    document.getElementById('bankBranch').value,
+      scopeReceive:  Array.from(document.querySelectorAll('#invScopeReceive input[type=text]')).map(function(i) { return i.value; }).filter(Boolean),
+      scopeCommit:   Array.from(document.querySelectorAll('#invScopeCommit input[type=text]')).map(function(i) { return i.value; }).filter(Boolean),
+      scopeExclude:  Array.from(document.querySelectorAll('#invScopeExclude input[type=text]')).map(function(i) { return i.value; }).filter(Boolean),
+      portfolioText: document.getElementById('invPortfolio').value,
+      acceptanceText:document.getElementById('invAcceptance').value
+    };
+
+    function esc(s) {
+      return (s || '')
+        .replace(/\\/g, '\\textbackslash{}')
+        .replace(/&/g,  '\\&')
+        .replace(/%/g,  '\\%')
+        .replace(/\$/g, '\\$')
+        .replace(/#/g,  '\\#')
+        .replace(/_/g,  '\\_')
+        .replace(/\{/g, '\\{')
+        .replace(/\}/g, '\\}')
+        .replace(/~/g,  '\\textasciitilde{}')
+        .replace(/\^/g, '\\textasciicircum{}');
+    }
+
+    function fmtAmt(n) {
+      return Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    var lines = invGetLines();
+    var sub   = lines.reduce(function(a, l) { return a + l.amount; }, 0);
+    var da    = sub * (inv.discount / 100);
+    var tot   = sub - da;
+
+    var lineRows = '';
+    lines.forEach(function(l, i) {
+      var bg   = (i % 2 === 0) ? '  \\rowcolor{lightgrey}\n' : '';
+      var qty  = esc(l.qty)   || '---';
+      var rate = l.rate > 0   ? l.rate.toFixed(2)  : 'Incl.';
+      var amt  = l.amount > 0 ? l.amount.toFixed(2) : '---';
+      lineRows += bg + '  \\small ' + esc(l.desc) + ' &\n' +
+                  '  \\small ' + qty + ' & \\small ' + rate + ' & \\small ' + amt + ' \\\\\n\n';
+    });
+
+    function scopeRowsNumbered(items) {
+      return items.map(function(t, i) {
+        var bg = (i % 2 === 0) ? '  \\rowcolor{lightgrey}\n' : '';
+        return bg + '  {\\color{highlight}\\textbf{' + (i + 1) + '}} &\n  \\small ' + esc(t) + ' \\\\\n';
+      }).join('');
+    }
+    function scopeRowsCheck(items) {
+      return items.map(function(t, i) {
+        var bg = (i % 2 === 0) ? '  \\rowcolor{lightgrey}\n' : '';
+        return bg + '  {\\color{highlight}$\\checkmark$} &\n  \\small ' + esc(t) + ' \\\\\n';
+      }).join('');
+    }
+    function scopeRowsCross(items) {
+      return items.map(function(t, i) {
+        var bg = (i % 2 === 0) ? '  \\rowcolor{lightgrey}\n' : '';
+        return bg + '  {\\color{darktext}$\\times$} &\n  \\small ' + esc(t) + ' \\\\\n';
+      }).join('');
+    }
+
+    var invNo   = esc(inv.invoiceNo);
+    var invDate = esc(inv.date);
+    var invDue  = esc(inv.dueDate);
+    var cName   = esc(inv.clientName);
+    var cAddr   = inv.clientAddress ? '{\\small ' + esc(inv.clientAddress) + '}\\\\\n' : '';
+    var cEmail  = inv.clientEmail   ? '{\\small ' + inv.clientEmail + '}\\\\\n'         : '';
+
+    // Payment section LaTeX
+    var paymentTex = '';
+    if (inv.payMethod === 'cash') {
+      paymentTex =
+        '{\\color{highlight}\\textbf{\\small PAYMENT}}\\\\[0.8mm]\n' +
+        '{\\color{highlight}\\rule{48mm}{0.8pt}}\\\\[1.5mm]\n' +
+        '{\\small\n' +
+        '\\begin{tabular}{@{}ll@{}}\n' +
+        '  Method: & Cash \\\\\n' +
+        '\\end{tabular}\n' +
+        '}\n\n';
+    } else {
+      paymentTex =
+        '{\\color{highlight}\\textbf{\\small PAYMENT DETAILS}}\\\\[0.8mm]\n' +
+        '{\\color{highlight}\\rule{48mm}{0.8pt}}\\\\[1.5mm]\n' +
+        '{\\small\n' +
+        '\\begin{tabular}{@{}ll@{}}\n' +
+        '  Bank:          & ' + esc(inv.bankName)    + ' \\\\[0.8mm]\n' +
+        '  Account Name:  & ' + esc(inv.bankAccName) + ' \\\\[0.8mm]\n' +
+        '  Account No.:   & ' + esc(inv.bankAccNo)   + ' \\\\[0.8mm]\n' +
+        '  Branch Code:   & ' + esc(inv.bankBranch)  + ' \\\\[0.8mm]\n' +
+        '  Reference:     & ' + invNo + ' \\\\\n' +
+        '\\end{tabular}\n' +
+        '}\n\n';
+    }
+
+    var tex =
+'\\documentclass[a4paper,9pt]{article}\n\n' +
+'\\usepackage[a4paper, top=0mm, bottom=0mm, left=0mm, right=0mm]{geometry}\n' +
+'\\usepackage{xcolor}\n' +
+'\\usepackage{tabularx}\n' +
+'\\usepackage{fontenc}\n' +
+'\\usepackage{helvet}\n' +
+'\\usepackage{graphicx}\n' +
+'\\usepackage{array}\n' +
+'\\usepackage{colortbl}\n' +
+'\\usepackage{tikz}\n' +
+'\\usepackage{multirow}\n' +
+'\\usepackage{amssymb}\n\n' +
+'\\renewcommand{\\familydefault}{\\sfdefault}\n\n' +
+'\\definecolor{accent}{HTML}{1A1A2E}\n' +
+'\\definecolor{highlight}{HTML}{4A6FA5}\n' +
+'\\definecolor{darktext}{HTML}{24211F}\n' +
+'\\definecolor{lightgrey}{HTML}{F7F0E6}\n' +
+'\\definecolor{midgrey}{HTML}{75726C}\n\n' +
+'\\pagestyle{empty}\n' +
+'\\setlength{\\parindent}{0pt}\n\n' +
+'\\newcolumntype{M}[1]{>{\\centering\\arraybackslash}m{#1}}\n' +
+'\\newcolumntype{L}{>{\\raggedright\\arraybackslash}m{\\dimexpr\\linewidth-8mm\\relax}}\n\n' +
+'% ── Slash mark (reusable, with optional scale) ────────────────────────\n' +
+'\\newcommand{\\daaimark}[2][white]{%\n' +
+'  \\begin{tikzpicture}[baseline=(current bounding box.center), scale=#2]\n' +
+'    \\draw[#1, opacity=0.12, line width=3.0pt, line cap=round]\n' +
+'      (0.8mm,0mm) -- (5.8mm,10mm);\n' +
+'    \\draw[#1, opacity=0.22, line width=3.6pt, line cap=round]\n' +
+'      (1.8mm,0mm) -- (6.8mm,10mm);\n' +
+'    \\draw[#1, opacity=0.38, line width=4.4pt, line cap=round]\n' +
+'      (3.0mm,0mm) -- (8.0mm,10mm);\n' +
+'    \\draw[#1, opacity=1.0, line width=5.2pt, line cap=round]\n' +
+'      (4.5mm,0mm) -- (9.5mm,10mm);\n' +
+'    \\draw[highlight, opacity=0.85, line width=3.0pt, line cap=round]\n' +
+'      (6.2mm,0mm) -- (11.2mm,10mm);\n' +
+'  \\end{tikzpicture}%\n' +
+'}\n\n' +
+'% ── Full logo: mark + wordmark ──────────────────────────────────────────\n' +
+'\\newcommand{\\daaieffeklogo}[1][white]{%\n' +
+'  \\daaimark[#1]{1}%\n' +
+'  \\hspace{3mm}%\n' +
+'  \\raisebox{-1.5mm}{\\color{#1}\\textbf{\\LARGE DAAI EFFEK}}%\n' +
+'}\n\n' +
+'\\begin{document}\n\n' +
+'% ════════════════════════════════════\n' +
+'% PAGE 1 — INVOICE\n' +
+'% ════════════════════════════════════\n\n' +
+'\\begin{tikzpicture}[remember picture, overlay]\n' +
+'  \\fill[accent] (current page.north west) rectangle ([yshift=-38mm]current page.north east);\n\n' +
+'  \\node[anchor=west] at ([xshift=12mm, yshift=-14mm]current page.north west)\n' +
+'    {\\daaieffeklogo[white]};\n\n' +
+'  \\node[white, font=\\small, anchor=east] at\n' +
+'    ([xshift=-18mm, yshift=-18mm]current page.north east)\n' +
+'    {Video \\ $\\cdot$ \\ Photo};\n' +
+'  \\node[white, font=\\small, anchor=east] at\n' +
+'    ([xshift=-18mm, yshift=-25mm]current page.north east)\n' +
+'    {Content \\ $\\cdot$ \\ Marketing};\n' +
+'\\end{tikzpicture}\n\n' +
+'\\vspace{38mm}\n\n' +
+'\\hspace{18mm}%\n' +
+'\\begin{minipage}[t]{170mm}\n\n' +
+'\\vspace{3mm}\n' +
+'\\begin{minipage}[t]{0.55\\linewidth}\n' +
+'  {\\color{darktext}\\fontsize{22}{26}\\selectfont\\textbf{INVOICE}}\n' +
+'\\end{minipage}%\n' +
+'\\begin{minipage}[t]{0.44\\linewidth}\n' +
+'  \\raggedleft\n' +
+'  \\begin{tabular}{@{}ll@{}}\n' +
+'    {\\color{midgrey}\\scriptsize INVOICE NO.} & \\textbf{' + invNo + '} \\\\[0.5mm]\n' +
+'    {\\color{midgrey}\\scriptsize DATE}        & \\textbf{' + invDate + '} \\\\[0.5mm]\n' +
+'    {\\color{midgrey}\\scriptsize DUE DATE}    & \\textbf{' + invDue + '} \\\\\n' +
+'  \\end{tabular}\n' +
+'\\end{minipage}\n\n' +
+'\\vspace{1mm}\n' +
+'{\\color{highlight}\\rule{\\linewidth}{1.2pt}}\n' +
+'\\vspace{3mm}\n\n' +
+'{\\color{midgrey}\\scriptsize BILLED TO}\\\\[0.8mm]\n' +
+'{\\normalsize\\textbf{' + cName + '}}\\\\[0.5mm]\n' +
+cAddr + cEmail +
+'\n\\vspace{4mm}\n\n' +
+'\\renewcommand{\\arraystretch}{1.5}\n\n' +
+'\\begin{tabularx}{\\linewidth}{>{\\raggedright\\arraybackslash}X\n' +
+'                              >{\\centering\\arraybackslash}p{13mm}\n' +
+'                              >{\\centering\\arraybackslash}p{18mm}\n' +
+'                              >{\\raggedleft\\arraybackslash}p{21mm}}\n\n' +
+'  \\rowcolor{accent}\n' +
+'  \\color{white}\\textbf{\\small DESCRIPTION} &\n' +
+'  \\color{white}\\textbf{\\small QTY} &\n' +
+'  \\color{white}\\textbf{\\small RATE (R)} &\n' +
+'  \\color{white}\\textbf{\\small AMOUNT (R)} \\\\\n\n' +
+lineRows +
+'\\end{tabularx}\n\n' +
+'\\vspace{3mm}\n\n' +
+'\\begin{flushright}\n' +
+'\\begin{tabular}{@{}lr@{}}\n' +
+'  \\small Subtotal & \\small R\\ ' + fmtAmt(sub) + ' \\\\[0.8mm]\n' +
+'  \\small Discount (' + inv.discount + '\\%) & \\small -R\\ ' + fmtAmt(da) + ' \\\\[1.5mm]\n' +
+'  \\rowcolor{accent}\n' +
+'  \\color{white}\\textbf{\\small TOTAL DUE} & \\color{white}\\textbf{\\small R\\ ' + fmtAmt(tot) + '} \\\\\n' +
+'\\end{tabular}\n' +
+'\\end{flushright}\n\n' +
+'\\vspace{4mm}\n\n' +
+paymentTex +
+'\\end{minipage}\n\n' +
+'\\vspace*{\\fill}\n' +
+'\\vspace{10mm}\n\n' +
+'% ════════════════════════════════════\n' +
+'% PAGE 2 — SCOPE OF WORK\n' +
+'% ════════════════════════════════════\n' +
+'\\newpage\n\n' +
+'\\begin{tikzpicture}[remember picture, overlay]\n' +
+'  \\fill[accent] (current page.south west) rectangle ([yshift=10mm]current page.south east);\n' +
+'  \\node[white, font=\\small] at ([xshift=-10mm, yshift=5mm]current page.south)\n' +
+'    {Daai gevoel. Elke keer.%\n' +
+'     \\quad\\makebox[4mm][c]{\\raisebox{-0.8mm}{\\daaimark[white]{0.5}}}\\quad%\n' +
+'     Daai Effek};\n' +
+'\\end{tikzpicture}\n\n' +
+'\\vspace{10mm}\n\n' +
+'\\hspace{18mm}%\n' +
+'\\begin{minipage}[t]{170mm}\n\n' +
+'\\vspace{3mm}\n' +
+'{\\color{darktext}\\fontsize{22}{26}\\selectfont\\textbf{SCOPE OF WORK}}\\\\[1mm]\n' +
+'{\\color{midgrey}\\small Invoice ' + invNo + ' \\ $\\bullet$ \\ ' + cName + ' \\ $\\bullet$ \\ ' + invDate + '}\n\n' +
+'\\vspace{1mm}\n' +
+'{\\color{highlight}\\rule{\\linewidth}{1.2pt}}\n' +
+'\\vspace{3mm}\n\n' +
+'{\\color{highlight}\\textbf{\\small WHAT YOU WILL RECEIVE}}\\\\[0.5mm]\n' +
+'{\\color{highlight}\\rule{60mm}{0.8pt}}\n' +
+'\\vspace{1.5mm}\n\n' +
+'\\renewcommand{\\arraystretch}{1.5}\n' +
+'\\begin{tabularx}{\\linewidth}{M{6mm} L}\n' +
+scopeRowsNumbered(inv.scopeReceive) +
+'\\end{tabularx}\n\n' +
+'\\vspace{3.5mm}\n\n' +
+'{\\color{highlight}\\textbf{\\small PRODUCTION COMMITMENTS}}\\\\[0.5mm]\n' +
+'{\\color{highlight}\\rule{60mm}{0.8pt}}\n' +
+'\\vspace{1.5mm}\n\n' +
+'\\begin{tabularx}{\\linewidth}{M{6mm} L}\n' +
+scopeRowsCheck(inv.scopeCommit) +
+'\\end{tabularx}\n\n' +
+'\\vspace{3.5mm}\n\n' +
+'{\\color{highlight}\\textbf{\\small NOT INCLUDED}}\\\\[0.5mm]\n' +
+'{\\color{highlight}\\rule{60mm}{0.8pt}}\n' +
+'\\vspace{1.5mm}\n\n' +
+'\\begin{tabularx}{\\linewidth}{M{6mm} L}\n' +
+(inv.scopeExclude.length ? scopeRowsCross(inv.scopeExclude) : '  \\rowcolor{lightgrey}\n  {\\color{darktext}$\\times$} &\n  \\small N/A \\\\\n') +
+'\\end{tabularx}\n\n' +
+'\\vspace{4mm}\n\n' +
+'\\vspace{3.5mm}\n\n' +
+'{\\color{highlight}\\textbf{\\small PORTFOLIO \\& CREDIT}}\\\\[0.5mm]\n' +
+'{\\color{highlight}\\rule{60mm}{0.8pt}}\\\\[1.5mm]\n' +
+'{\\small ' + esc(inv.portfolioText) + '}\n\n' +
+'\\vspace{4mm}\n\n' +
+'{\\color{highlight}\\textbf{\\small ACCEPTANCE}}\\\\[0.5mm]\n' +
+'{\\color{highlight}\\rule{60mm}{0.8pt}}\\\\[1.5mm]\n' +
+'{\\small ' + esc(inv.acceptanceText) + '}\n\n' +
+'\\vspace{5mm}\n' +
+'\\begin{tabular}{@{}p{70mm}@{}}\n' +
+'  \\small \\textbf{Daai Effek} \\\\[8mm]\n' +
+'  \\hrule \\\\[1mm]\n' +
+'  \\small Signature \\\\ ' + invDate + ' \\\\\n' +
+'\\end{tabular}\n' +
+'\\end{minipage}\n\n' +
+'\\vspace*{\\fill}\n\n' +
+'\\end{document}\n';
+
+    var blob = new Blob([tex], { type: 'text/plain' });
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href = url; a.download = inv.invoiceNo + '.tex'; a.click();
+    URL.revokeObjectURL(url);
+    document.getElementById('invGetFilename').click();
+    toast('Downloaded ' + inv.invoiceNo + '.tex');
+  });
+
+  invRecalc();
+})();
+</script>
+</body>
+</html>
