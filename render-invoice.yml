@@ -1,0 +1,65 @@
+name: Render invoice
+
+on:
+  repository_dispatch:
+    types: [render-invoice]
+  workflow_dispatch:
+    inputs:
+      invoice_id:
+        description: Invoice UUID to render
+        required: true
+
+permissions:
+  contents: write
+
+# Renders queue rather than racing each other on the push
+concurrency:
+  group: render-invoice
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+
+    env:
+      INVOICE_ID: ${{ github.event.client_payload.invoice_id || inputs.invoice_id }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      SITE_BASE: ${{ vars.SITE_BASE || 'https://cmprinsloo-kvk.github.io/kvk' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build the .tex from Supabase
+        run: node scripts/render-invoice.js build
+
+      - name: Compile with XeLaTeX
+        uses: xu-cheng/latex-action@v4
+        with:
+          root_file: document.tex
+          working_directory: build
+          os: debian
+          latexmk_use_xelatex: true
+
+      - name: File the PDF and update the row
+        run: node scripts/render-invoice.js finish
+
+      - name: Commit
+        run: |
+          git config user.name  "kvk-bot"
+          git config user.email "actions@github.com"
+          git add invoices/
+          if git diff --staged --quiet; then
+            echo "Nothing to commit"
+          else
+            git commit -m "Render invoice ${INVOICE_ID}"
+            git push
+          fi
+
+      - name: Report failure back to Supabase
+        if: failure()
+        run: node scripts/render-invoice.js fail
