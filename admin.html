@@ -172,7 +172,7 @@
     <div class="tabs-inner">
       <button class="tab active" data-panel="projects">Projects</button>
       <button class="tab" data-panel="newproject">New Project</button>
-      <button class="tab" data-panel="invoice">Invoice Builder</button>
+      <button class="tab" data-panel="invoice">Invoices</button>
       <button class="tab" data-panel="reviews">Reviews</button>
     </div>
   </div>
@@ -269,96 +269,20 @@
       </div>
     </div>
 
-    <!-- ── INVOICE BUILDER PANEL ──────────────────────────────────────── -->
+    <!-- ==  INVOICE BUILDER  moved to invoice.html  == -->
     <div class="panel" id="panel-invoice">
-      <div class="section-label">Invoice Builder</div>
+      <div class="section-label">Invoices &amp; Quotes</div>
+      <p style="color:var(--grey);font-family:'Crimson Pro',serif;font-style:italic;margin-bottom:18px">
+        The builder now lives on its own page and saves straight to Supabase.
+      </p>
+      <a href="invoice.html" class="btn btn-primary" style="text-decoration:none;display:inline-block">
+        Open the invoice builder
+      </a>
 
-      <div class="form-group" style="max-width:320px">
-        <label>Load from Project <span style="font-weight:400;opacity:.6">(pre-fills client details)</span></label>
-        <select id="invProjectLink">
-          <option value="">-- None --</option>
-        </select>
-      </div>
-
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Invoice No.</label>
-          <input type="text" id="invNo" value="KVK-2026-001" />
-        </div>
-        <div class="form-group">
-          <label>Invoice Date</label>
-          <input type="date" id="invDate" />
-        </div>
-        <div class="form-group">
-          <label>Due Date</label>
-          <input type="text" id="invDue" value="After Delivery" />
-        </div>
-        <div class="form-group">
-          <label>Discount (%)</label>
-          <input type="number" id="invDiscount" value="0" min="0" max="100" />
-        </div>
-      </div>
-
-      <div class="section-label">Billed To</div>
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Client / Organisation</label>
-          <input type="text" id="invClient" placeholder="Stellumthombo" />
-        </div>
-        <div class="form-group">
-          <label>Address</label>
-          <input type="text" id="invAddr" placeholder="2 Drostdy Street, Stellenbosch" />
-        </div>
-        <div class="form-group form-full">
-          <label>Email</label>
-          <input type="text" id="invEmail" placeholder="info@client.co.za" />
-        </div>
-      </div>
-
-      <div class="section-label">Line Items</div>
-      <div class="line-item-header">
-        <span>Description</span><span style="text-align:center">Qty</span><span style="text-align:right">Rate (R)</span><span style="text-align:right">Amount</span><span></span>
-      </div>
-      <div class="line-items" id="invLineItems"></div>
-      <button class="add-line-btn" id="invAddLine">+ Add line item</button>
-
-      <div class="totals-area">
-        <div class="total-row"><span>Subtotal</span><span id="invSubtotal">R 0.00</span></div>
-        <div class="total-row"><span>Discount</span><span id="invDiscDisplay">-R 0.00</span></div>
-        <div class="total-row grand"><span>Total Due</span><span id="invTotal">R 0.00</span></div>
-      </div>
-
-      <div class="section-label">Scope &mdash; What They&apos;ll Receive</div>
-      <div class="scope-items" id="invScopeReceive"></div>
-      <button class="add-line-btn" id="invAddReceive">+ Add deliverable</button>
-
-      <div class="section-label">Scope &mdash; Production Commitments</div>
-      <div class="scope-items" id="invScopeCommit"></div>
-      <button class="add-line-btn" id="invAddCommit">+ Add commitment</button>
-
-      <div class="section-label">Scope &mdash; Not Included</div>
-      <div class="scope-items" id="invScopeExclude"></div>
-      <button class="add-line-btn" id="invAddExclude">+ Add exclusion</button>
-
-      <div class="section-label">Portfolio &amp; Credit</div>
-      <div class="form-group"><textarea id="invPortfolio">While all final work remains the property of the client upon payment, Kaal Vellies Kollektief retains the right to feature this work in its portfolio, website, and social media channels. Credit will reference the client by name where appropriate.</textarea></div>
-
-      <div class="section-label">Acceptance</div>
-      <div class="form-group"><textarea id="invAcceptance">By proceeding with payment, the client agrees to the scope and terms outlined above.</textarea></div>
-
-      <div class="btn-row">
-        <button class="btn btn-primary" id="invDownloadTex">&darr; Download .tex</button>
-        <button class="btn btn-secondary" id="invSaveToProject">Save Invoice to Project</button>
-        <button class="btn btn-ghost" id="invGetFilename">&#123;&#125; Get Filename</button>
-      </div>
-
-      <div class="output-box" id="invOutputBox">
-        <h3>Next Steps</h3>
-        <div class="step">1. Compile: <code>xelatex <span id="invTexName"></span></code></div>
-        <div class="step">2. Rename PDF to: <code id="invPDFName"></code></div>
-        <div class="step">3. Upload to <code>/invoices/</code> on GitHub &mdash; it will appear on the client&apos;s project page automatically</div>
-      </div>
+      <div class="section-label" style="margin-top:34px">Recent Documents</div>
+      <div id="invList"><div style="color:var(--grey);font-style:italic;font-family:'Crimson Pro',serif">Loading...</div></div>
     </div>
+
 
     <!-- ── REVIEWS PANEL ──────────────────────────────────────────────── -->
     <div class="panel" id="panel-reviews">
@@ -677,465 +601,39 @@
     }).catch(function(e) { toast('Error saving: '+e.message, true); });
   });
 
-  // ── Invoice builder ────────────────────────────────────────────────────
-  var invLineId = 0, invScopeId = 0;
-
-  document.getElementById('invDate').value = new Date().toISOString().split('T')[0];
-
-  function invFmtDisp(n) { return 'R '+Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,' '); }
-
-  function invAddLine(desc, qty, rate) {
-    desc=desc||''; qty=qty||''; rate=rate||'';
-    invLineId++;
-    var id=invLineId;
-    var div=document.createElement('div');
-    div.className='line-item'; div.id='inv-li-'+id;
-    div.innerHTML=
-      '<input class="li-desc" type="text" placeholder="Description" value="'+desc.replace(/"/g,'&quot;')+'" />'+
-      '<input class="li-qty" type="text" placeholder="e.g. 2 hrs" value="'+qty+'" style="text-align:center" />'+
-      '<input class="li-rate" type="number" placeholder="0.00" value="'+rate+'" step="0.01" min="0" style="text-align:right" />'+
-      '<div class="amount-display" id="inv-amt-'+id+'">R 0.00</div>'+
-      '<button class="remove-btn" data-id="'+id+'">x</button>';
-    div.querySelector('.li-desc').addEventListener('input',invRecalc);
-    div.querySelector('.li-qty').addEventListener('input',invRecalc);
-    div.querySelector('.li-rate').addEventListener('input',invRecalc);
-    div.querySelector('.remove-btn').addEventListener('click',function(){
-      var el=document.getElementById('inv-li-'+this.dataset.id);
-      if(el){el.remove();invRecalc();}
-    });
-    document.getElementById('invLineItems').appendChild(div);
-    invRecalc();
+  // ==  Invoice list  builder lives in invoice.html  ==
+  function loadInvoiceList() {
+    sbFetch('invoices?select=id,number,doc_type,client_name,total,status,pdf_url,issue_date' +
+            '&order=created_at.desc&limit=25')
+      .then(function(data) {
+        var rows = Array.isArray(data) ? data : [];
+        var box = document.getElementById('invList');
+        if (!rows.length) {
+          box.innerHTML = '<div style="color:var(--grey);font-style:italic;font-family:\'Crimson Pro\',serif">Nothing yet.</div>';
+          return;
+        }
+        box.innerHTML = rows.map(function(r) {
+          var pdf = r.pdf_url
+            ? '<a href="' + r.pdf_url + '" target="_blank" style="color:var(--sienna);font-weight:600">PDF</a>'
+            : '<span style="color:var(--grey)">no PDF</span>';
+          return '<div style="display:flex;justify-content:space-between;align-items:center;gap:14px;' +
+                 'padding:10px 0;border-bottom:1px solid var(--rule-light);font-size:13px">' +
+                 '<div><strong>' + r.number + '</strong>' +
+                 (r.doc_type === 'quote' ? ' <span style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey)">quote</span>' : '') +
+                 '<br/><span style="color:var(--grey);font-size:12px">' +
+                 (r.client_name || 'no client') + ' &middot; ' + (r.issue_date || '') + '</span></div>' +
+                 '<div style="text-align:right;white-space:nowrap">R ' + Number(r.total).toFixed(2) +
+                 '<br/><a href="invoice.html" style="color:var(--grey);font-size:11px">edit</a> &middot; ' + pdf + '</div>' +
+                 '</div>';
+        }).join('');
+      })
+      .catch(function(e) {
+        document.getElementById('invList').innerHTML =
+          '<div style="color:var(--red)">Could not load: ' + e.message + '</div>';
+      });
   }
-  document.getElementById('invAddLine').addEventListener('click',function(){invAddLine();});
+  loadInvoiceList();
 
-  function invAddScope(containerId, text, color) {
-    text=text||''; invScopeId++;
-    var id=invScopeId;
-    var div=document.createElement('div');
-    div.className='scope-item'; div.id='inv-sc-'+id;
-    div.innerHTML=
-      '<div class="scope-badge" style="background:'+color+'">'+(color==='#4C433B'?'x':'v')+'</div>'+
-      '<input type="text" placeholder="Enter item..." value="'+text.replace(/"/g,'&quot;')+'" />'+
-      '<button class="remove-btn" data-id="'+id+'">x</button>';
-    div.querySelector('.remove-btn').addEventListener('click',function(){
-      var el=document.getElementById('inv-sc-'+this.dataset.id);
-      if(el) el.remove();
-    });
-    document.getElementById(containerId).appendChild(div);
-  }
-  document.getElementById('invAddReceive').addEventListener('click',function(){invAddScope('invScopeReceive','','#4CAF79');});
-  document.getElementById('invAddCommit').addEventListener('click',function(){invAddScope('invScopeCommit','','#4CAF79');});
-  document.getElementById('invAddExclude').addEventListener('click',function(){invAddScope('invScopeExclude','','#4C433B');});
-
-  // Default scope items
-  [
-    'Long-form video (~5 min) -- landscape (16:9), colour graded, licensed music and titles.',
-    'Short-form video (~1 min) -- same format, cut for social media.',
-    'Bonus: Vertical Reels cut -- portrait (9:16) for Instagram and Facebook Reels.',
-    'Up to 3 revision rounds across all videos.'
-  ].forEach(function(t){invAddScope('invScopeReceive',t,'#4CAF79');});
-  [
-    'Music will be fully royalty-free and licensed.',
-    'No identifiable footage of children\'s faces.',
-    'First cut delivered within 1 week of the final shoot day.',
-    'Final files delivered as MP4 (H.264).'
-  ].forEach(function(t){invAddScope('invScopeCommit',t,'#4CAF79');});
-  [
-    'Drone footage, additional crew, or lighting equipment.',
-    'More than 2 locations or 4 total shoot hours.',
-    'More than 3 revision rounds.'
-  ].forEach(function(t){invAddScope('invScopeExclude',t,'#4C433B');});
-
-  function invGetLines() {
-    return Array.from(document.querySelectorAll('#invLineItems .line-item')).map(function(li){
-      var desc=li.querySelector('.li-desc').value||'';
-      var qty=li.querySelector('.li-qty').value||'';
-      var rate=parseFloat(li.querySelector('.li-rate').value)||0;
-      var qn=parseFloat(qty);
-      var amt=(!isNaN(qn)&&qty.trim()!=='')?qn*rate:rate;
-      return {desc:desc,qty:qty,rate:rate,amount:amt,id:li.id.replace('inv-li-','')};
-    });
-  }
-
-  function invRecalc() {
-    var lines=invGetLines(), sub=0;
-    lines.forEach(function(l){
-      sub+=l.amount;
-      var el=document.getElementById('inv-amt-'+l.id);
-      if(el) el.textContent=invFmtDisp(l.amount);
-    });
-    var dp=parseFloat(document.getElementById('invDiscount').value)||0;
-    var da=sub*dp/100, tot=sub-da;
-    document.getElementById('invSubtotal').textContent=invFmtDisp(sub);
-    document.getElementById('invDiscDisplay').textContent='-'+invFmtDisp(da);
-    document.getElementById('invTotal').textContent=invFmtDisp(tot);
-  }
-
-  ['invNo','invDate','invDue','invDiscount','invClient','invAddr','invEmail'].forEach(function(id){
-    var el=document.getElementById(id);
-    if(el) el.addEventListener('input',invRecalc);
-  });
-
-  function populateInvProjectDropdown(projects) {
-    var sel=document.getElementById('invProjectLink');
-    sel.innerHTML='<option value="">-- None --</option>';
-    projects.forEach(function(p){
-      var o=document.createElement('option');
-      o.value=p.id; o.textContent=p.service+' -- '+p.date;
-      sel.appendChild(o);
-    });
-  }
-
-  document.getElementById('invProjectLink').addEventListener('change',function(){
-    var id=this.value;
-    var p=allProjects.find(function(pr){return pr.id===id;});
-    if(!p) return;
-    // Extract invoice number and random code from stored invoice_pdf if present
-    if(p.invoice_pdf) {
-      var m = p.invoice_pdf.match(/^(.+)-([a-z0-9]{5})\.pdf$/);
-      if(m) {
-        document.getElementById('invNo').value = m[1]; // e.g. KVK-2026-002
-        window._invCode = m[2];                         // reuse existing code
-      } else {
-        document.getElementById('invNo').value = p.invoice_pdf.replace(/\.pdf$/,'');
-        window._invCode = randCode();
-      }
-    } else {
-      document.getElementById('invNo').value = 'KVK-2026-001';
-      window._invCode = randCode();
-    }
-    // Load existing invoice data if saved (will override invNo from above)
-    if(p.invoice_data && Object.keys(p.invoice_data).length) {
-      loadInvoiceData(p.invoice_data);
-      toast('Invoice data loaded from project');
-    }
-    invRecalc();
-  });
-
-  function loadInvoiceData(inv) {
-    if(inv.invoiceNo)  document.getElementById('invNo').value=inv.invoiceNo;
-    if(inv.date)       document.getElementById('invDate').value=inv.date;
-    if(inv.dueDate)    document.getElementById('invDue').value=inv.dueDate;
-    if(inv.discount!=null) document.getElementById('invDiscount').value=inv.discount;
-    if(inv.clientName) document.getElementById('invClient').value=inv.clientName;
-    if(inv.clientAddress) document.getElementById('invAddr').value=inv.clientAddress;
-    if(inv.clientEmail)   document.getElementById('invEmail').value=inv.clientEmail;
-    if(inv.lines && inv.lines.length) {
-      document.getElementById('invLineItems').innerHTML='';
-      invLineId=0;
-      inv.lines.forEach(function(l){invAddLine(l.desc,l.qty,l.rate);});
-    }
-    if(inv.scopeReceive){
-      document.getElementById('invScopeReceive').innerHTML=''; invScopeId=0;
-      inv.scopeReceive.forEach(function(t){invAddScope('invScopeReceive',t,'#4CAF79');});
-    }
-    if(inv.scopeCommit){
-      document.getElementById('invScopeCommit').innerHTML='';
-      inv.scopeCommit.forEach(function(t){invAddScope('invScopeCommit',t,'#4CAF79');});
-    }
-    if(inv.scopeExclude){
-      document.getElementById('invScopeExclude').innerHTML='';
-      inv.scopeExclude.forEach(function(t){invAddScope('invScopeExclude',t,'#4C433B');});
-    }
-    if(inv.portfolioText)  document.getElementById('invPortfolio').value=inv.portfolioText;
-    if(inv.acceptanceText) document.getElementById('invAcceptance').value=inv.acceptanceText;
-    invRecalc();
-  }
-
-  function buildInvData() {
-    return {
-      invoiceNo:      document.getElementById('invNo').value,
-      date:           document.getElementById('invDate').value,
-      dueDate:        document.getElementById('invDue').value,
-      discount:       parseFloat(document.getElementById('invDiscount').value)||0,
-      clientName:     document.getElementById('invClient').value,
-      clientAddress:  document.getElementById('invAddr').value,
-      clientEmail:    document.getElementById('invEmail').value,
-      lines:          invGetLines().map(function(l){return{desc:l.desc,qty:l.qty,rate:l.rate};}),
-      scopeReceive:   Array.from(document.querySelectorAll('#invScopeReceive input[type=text]')).map(function(i){return i.value;}).filter(Boolean),
-      scopeCommit:    Array.from(document.querySelectorAll('#invScopeCommit input[type=text]')).map(function(i){return i.value;}).filter(Boolean),
-      scopeExclude:   Array.from(document.querySelectorAll('#invScopeExclude input[type=text]')).map(function(i){return i.value;}).filter(Boolean),
-      portfolioText:  document.getElementById('invPortfolio').value,
-      acceptanceText: document.getElementById('invAcceptance').value
-    };
-  }
-
-  // Save invoice data back to project in Supabase
-  document.getElementById('invSaveToProject').addEventListener('click',function(){
-    var pid=document.getElementById('invProjectLink').value;
-    if(!pid){toast('Select a project first',true);return;}
-    var data=buildInvData();
-    sbFetch('projects?id=eq.'+pid,{method:'PATCH',body:{invoice_data:data},prefer:'return=minimal'})
-      .then(function(){toast('Invoice saved to project');loadProjects();})
-      .catch(function(e){toast('Error: '+e.message,true);});
-  });
-
-  // Random code for PDF filename
-  function randCode(){
-    var c='abcdefghjkmnpqrstuvwxyz23456789',s='';
-    for(var i=0;i<5;i++) s+=c[Math.floor(Math.random()*c.length)];
-    return s;
-  }
-  if(!window._invCode) window._invCode=randCode();
-
-  // Regenerate code if invoice number is manually changed
-  document.getElementById('invNo').addEventListener('change',function(){
-    window._invCode=randCode();
-  });
-
-  function getPDFFilename(){
-    return (document.getElementById('invNo').value||'KVK-2026-001')+'-'+window._invCode+'.pdf';
-  }
-
-  document.getElementById('invGetFilename').addEventListener('click',function(){
-    var pdf=getPDFFilename();
-    var tex=(document.getElementById('invNo').value||'KVK-2026-001')+'.tex';
-    document.getElementById('invTexName').textContent=tex;
-    document.getElementById('invPDFName').textContent=pdf;
-    // Also update the project's invoice_pdf field if a project is selected
-    var pid=document.getElementById('invProjectLink').value;
-    if(pid){
-      sbFetch('projects?id=eq.'+pid,{method:'PATCH',body:{invoice_pdf:pdf},prefer:'return=minimal'})
-        .then(function(){toast('PDF filename saved to project');loadProjects();});
-    }
-    document.getElementById('invOutputBox').style.display='block';
-    document.getElementById('invOutputBox').scrollIntoView({behavior:'smooth'});
-  });
-
-  // LaTeX generator
-  document.getElementById('invDownloadTex').addEventListener('click',function(){
-    var inv = buildInvData();
-
-    // Escape special LaTeX characters in user-supplied text
-    function esc(s) {
-      return (s||'')
-        .replace(/\\/g,'\\textbackslash{}')
-        .replace(/&/g,'\\&')
-        .replace(/%/g,'\\%')
-        .replace(/\$/g,'\\$')
-        .replace(/#/g,'\\#')
-        .replace(/_/g,'\\_')
-        .replace(/\{/g,'\\{')
-        .replace(/\}/g,'\\}')
-        .replace(/~/g,'\\textasciitilde{}')
-        .replace(/\^/g,'\\textasciicircum{}');
-    }
-
-    // Build line item rows — alternating rowcolor like Stellumthombo
-    var lines = invGetLines();
-    var sub   = lines.reduce(function(a,l){ return a+l.amount; }, 0);
-    var da    = sub * (inv.discount/100);
-    var tot   = sub - da;
-
-    var lineRows = '';
-    lines.forEach(function(l, i) {
-      var bg   = (i%2===0) ? '  \\rowcolor{lightgrey}\n' : '';
-      var qty  = esc(l.qty)  || '---';
-      var rate = l.rate > 0  ? l.rate.toFixed(2)   : 'Incl.';
-      var amt  = l.amount > 0? l.amount.toFixed(2)  : '---';
-      lineRows += bg + '  \\small ' + esc(l.desc) + ' &\n' +
-                  '  \\small ' + qty + ' & \\small ' + rate + ' & \\small ' + amt + ' \\\\\n\n';
-    });
-
-    // Build scope section rows — numbered for "receive", checkmark for others
-    function scopeRowsNumbered(items) {
-      return items.map(function(t, i) {
-        var bg = (i%2===0) ? '  \\rowcolor{lightgrey}\n' : '';
-        return bg + '  {\\color{highlight}\\textbf{' + (i+1) + '}} &\n  \\small ' + esc(t) + ' \\\\\n';
-      }).join('');
-    }
-    function scopeRowsCheck(items) {
-      return items.map(function(t, i) {
-        var bg = (i%2===0) ? '  \\rowcolor{lightgrey}\n' : '';
-        return bg + '  {\\color{highlight}$\\checkmark$} &\n  \\small ' + esc(t) + ' \\\\\n';
-      }).join('');
-    }
-    function scopeRowsCross(items) {
-      return items.map(function(t, i) {
-        var bg = (i%2===0) ? '  \\rowcolor{lightgrey}\n' : '';
-        return bg + '  {\\color{darktext}$\\times$} &\n  \\small ' + esc(t) + ' \\\\\n';
-      }).join('');
-    }
-
-    var invNo   = esc(inv.invoiceNo);
-    var invDate = esc(inv.date);
-    var invDue  = esc(inv.dueDate);
-    var cName   = esc(inv.clientName);
-    var cAddr   = inv.clientAddress ? '{\\small ' + esc(inv.clientAddress) + '}\\\\\n' : '';
-    var cEmail  = inv.clientEmail   ? '{\\small ' + inv.clientEmail + '}\\\\\n'         : '';
-
-    // Format numbers with comma thousands separator like original: 2,960.00
-    function fmtAmt(n) {
-      return Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    }
-
-    var tex =
-'\\documentclass[a4paper,9pt]{article}\n\n' +
-'\\usepackage[a4paper, top=0mm, bottom=0mm, left=0mm, right=0mm]{geometry}\n' +
-'\\usepackage{xcolor}\n' +
-'\\usepackage{tabularx}\n' +
-'\\usepackage{fontenc}\n' +
-'\\usepackage{helvet}\n' +
-'\\usepackage{graphicx}\n' +
-'\\usepackage{array}\n' +
-'\\usepackage{colortbl}\n' +
-'\\usepackage{tikz}\n' +
-'\\usepackage{multirow}\n' +
-'\\usepackage{amssymb}\n\n' +
-'\\renewcommand{\\familydefault}{\\sfdefault}\n\n' +
-'\\definecolor{accent}{HTML}{0B0A09}\n' +
-'\\definecolor{highlight}{HTML}{D37835}\n' +
-'\\definecolor{darktext}{HTML}{24211F}\n' +
-'\\definecolor{lightgrey}{HTML}{F7F0E6}\n' +
-'\\definecolor{midgrey}{HTML}{75726C}\n\n' +
-'\\pagestyle{empty}\n' +
-'\\setlength{\\parindent}{0pt}\n\n' +
-'\\newcolumntype{M}[1]{>{\\centering\\arraybackslash}m{#1}}\n' +
-'\\newcolumntype{L}{>{\\raggedright\\arraybackslash}m{\\dimexpr\\linewidth-8mm\\relax}}\n\n' +
-'\\begin{document}\n\n' +
-'% ════════════════════════════════════\n' +
-'% PAGE 1 — INVOICE\n' +
-'% ════════════════════════════════════\n\n' +
-'\\begin{tikzpicture}[remember picture, overlay]\n' +
-'  \\fill[accent] (current page.north west) rectangle ([yshift=-38mm]current page.north east);\n\n' +
-'  \\IfFileExists{kvk_logo2.png}{%\n' +
-'    \\node[anchor=north west] at ([xshift=12mm, yshift=-3mm]current page.north west)\n' +
-'      {\\includegraphics[width=38mm, height=30mm, keepaspectratio]{kvk_logo2.png}};\n' +
-'  }{}%\n\n' +
-'  \\node[white, font=\\bfseries\\large, anchor=east] at\n' +
-'    ([xshift=-18mm, yshift=-15mm]current page.north east)\n' +
-'    {Kaal Vellies Kollektief};\n' +
-'  \\node[white, font=\\small, anchor=east] at\n' +
-'    ([xshift=-18mm, yshift=-22mm]current page.north east)\n' +
-'    {Photography \\ $\\cdot$ \\ Videography};\n' +
-'\\end{tikzpicture}\n\n' +
-'\\vspace{38mm}\n\n' +
-'\\hspace{18mm}%\n' +
-'\\begin{minipage}[t]{170mm}\n\n' +
-'\\vspace{3mm}\n' +
-'\\begin{minipage}[t]{0.55\\linewidth}\n' +
-'  {\\color{darktext}\\fontsize{22}{26}\\selectfont\\textbf{INVOICE}}\n' +
-'\\end{minipage}%\n' +
-'\\begin{minipage}[t]{0.44\\linewidth}\n' +
-'  \\raggedleft\n' +
-'  \\begin{tabular}{@{}ll@{}}\n' +
-'    {\\color{midgrey}\\scriptsize INVOICE NO.} & \\textbf{' + invNo + '} \\\\[0.5mm]\n' +
-'    {\\color{midgrey}\\scriptsize DATE}        & \\textbf{' + invDate + '} \\\\[0.5mm]\n' +
-'    {\\color{midgrey}\\scriptsize DUE DATE}    & \\textbf{' + invDue + '} \\\\\n' +
-'  \\end{tabular}\n' +
-'\\end{minipage}\n\n' +
-'\\vspace{1mm}\n' +
-'{\\color{highlight}\\rule{\\linewidth}{1.2pt}}\n' +
-'\\vspace{3mm}\n\n' +
-'{\\color{midgrey}\\scriptsize BILLED TO}\\\\[0.8mm]\n' +
-'{\\normalsize\\textbf{' + cName + '}}\\\\[0.5mm]\n' +
-cAddr + cEmail +
-'\n\\vspace{4mm}\n\n' +
-'\\renewcommand{\\arraystretch}{1.5}\n\n' +
-'\\begin{tabularx}{\\linewidth}{>{\\raggedright\\arraybackslash}X\n' +
-'                              >{\\centering\\arraybackslash}p{13mm}\n' +
-'                              >{\\centering\\arraybackslash}p{18mm}\n' +
-'                              >{\\raggedleft\\arraybackslash}p{21mm}}\n\n' +
-'  \\rowcolor{accent}\n' +
-'  \\color{white}\\textbf{\\small DESCRIPTION} &\n' +
-'  \\color{white}\\textbf{\\small QTY} &\n' +
-'  \\color{white}\\textbf{\\small RATE (R)} &\n' +
-'  \\color{white}\\textbf{\\small AMOUNT (R)} \\\\\n\n' +
-lineRows +
-'\\end{tabularx}\n\n' +
-'\\vspace{3mm}\n\n' +
-'\\begin{flushright}\n' +
-'\\begin{tabular}{@{}lr@{}}\n' +
-'  \\small Subtotal & \\small R\\ ' + fmtAmt(sub) + ' \\\\[0.8mm]\n' +
-'  \\small Discount (' + inv.discount + '\\%) & \\small -R\\ ' + fmtAmt(da) + ' \\\\[1.5mm]\n' +
-'  \\rowcolor{accent}\n' +
-'  \\color{white}\\textbf{\\small TOTAL DUE} & \\color{white}\\textbf{\\small R\\ ' + fmtAmt(tot) + '} \\\\\n' +
-'\\end{tabular}\n' +
-'\\end{flushright}\n\n' +
-'\\vspace{4mm}\n\n' +
-'{\\color{highlight}\\textbf{\\small PAYMENT DETAILS}}\\\\[0.8mm]\n' +
-'{\\color{highlight}\\rule{48mm}{0.8pt}}\\\\[1.5mm]\n' +
-'{\\small\n' +
-'\\begin{tabular}{@{}ll@{}}\n' +
-'  Bank:          & Investec Bank \\\\[0.8mm]\n' +
-'  Account Name:  & Cornelius Marthinus Prinsloo \\\\[0.8mm]\n' +
-'  Account No.:   & 10012991243 \\\\[0.8mm]\n' +
-'  Branch Code:   & 580105 \\\\[0.8mm]\n' +
-'  Reference:     & ' + invNo + ' \\\\\n' +
-'\\end{tabular}\n' +
-'}\n\n' +
-'\\end{minipage}\n\n' +
-'\\vspace*{\\fill}\n' +
-'\\vspace{10mm}\n\n' +
-'% ════════════════════════════════════\n' +
-'% PAGE 2 — SCOPE OF WORK\n' +
-'% ════════════════════════════════════\n' +
-'\\newpage\n\n' +
-'\\begin{tikzpicture}[remember picture, overlay]\n' +
-'  \\fill[accent] (current page.south west) rectangle ([yshift=10mm]current page.south east);\n' +
-'  \\node[white, font=\\small] at ([yshift=5mm]current page.south)\n' +
-'    {Thank you for your support \\ $\\bullet$ \\ Kaal Vellies Kollektief \\ $\\bullet$ \\ kvk.myportfolio.com};\n' +
-'\\end{tikzpicture}\n\n' +
-'\\vspace{10mm}\n\n' +
-'\\hspace{18mm}%\n' +
-'\\begin{minipage}[t]{170mm}\n\n' +
-'\\vspace{3mm}\n' +
-'{\\color{darktext}\\fontsize{22}{26}\\selectfont\\textbf{SCOPE OF WORK}}\\\\[1mm]\n' +
-'{\\color{midgrey}\\small Invoice ' + invNo + ' \\ $\\bullet$ \\ ' + cName + ' \\ $\\bullet$ \\ ' + invDate + '}\n\n' +
-'\\vspace{1mm}\n' +
-'{\\color{highlight}\\rule{\\linewidth}{1.2pt}}\n' +
-'\\vspace{3mm}\n\n' +
-'{\\color{highlight}\\textbf{\\small WHAT YOU WILL RECEIVE}}\\\\[0.5mm]\n' +
-'{\\color{highlight}\\rule{60mm}{0.8pt}}\n' +
-'\\vspace{1.5mm}\n\n' +
-'\\renewcommand{\\arraystretch}{1.5}\n' +
-'\\begin{tabularx}{\\linewidth}{M{6mm} L}\n' +
-scopeRowsNumbered(inv.scopeReceive) +
-'\\end{tabularx}\n\n' +
-'\\vspace{3.5mm}\n\n' +
-'{\\color{highlight}\\textbf{\\small PRODUCTION COMMITMENTS}}\\\\[0.5mm]\n' +
-'{\\color{highlight}\\rule{60mm}{0.8pt}}\n' +
-'\\vspace{1.5mm}\n\n' +
-'\\begin{tabularx}{\\linewidth}{M{6mm} L}\n' +
-scopeRowsCheck(inv.scopeCommit) +
-'\\end{tabularx}\n\n' +
-'\\vspace{3.5mm}\n\n' +
-'{\\color{highlight}\\textbf{\\small NOT INCLUDED}}\\\\[0.5mm]\n' +
-'{\\color{highlight}\\rule{60mm}{0.8pt}}\n' +
-'\\vspace{1.5mm}\n\n' +
-'\\begin{tabularx}{\\linewidth}{M{6mm} L}\n' +
-scopeRowsCross(inv.scopeExclude) +
-'\\end{tabularx}\n\n' +
-'\\vspace{4mm}\n\n' +
-'\\vspace{3.5mm}\n\n' +
-'{\\color{highlight}\\textbf{\\small PORTFOLIO \\& CREDIT}}\\\\[0.5mm]\n' +
-'{\\color{highlight}\\rule{60mm}{0.8pt}}\\\\[1.5mm]\n' +
-'{\\small ' + esc(inv.portfolioText) + '}\n\n' +
-'\\vspace{4mm}\n\n' +
-'{\\color{highlight}\\textbf{\\small ACCEPTANCE}}\\\\[0.5mm]\n' +
-'{\\color{highlight}\\rule{60mm}{0.8pt}}\\\\[1.5mm]\n' +
-'{\\small ' + esc(inv.acceptanceText) + '}\n\n' +
-'\\vspace{5mm}\n' +
-'\\begin{tabular}{@{}p{70mm}@{}}\n' +
-'  \\small \\textbf{Corn\\\'e Prinsloo} \\\\[8mm]\n' +
-'  \\hrule \\\\[1mm]\n' +
-'  \\small Signature \\\\ ' + invDate + ' \\\\\n' +
-'\\end{tabular}\n' +
-'\\end{minipage}\n\n' +
-'\\vspace*{\\fill}\n\n' +
-'\\end{document}\n';
-
-    var blob = new Blob([tex], {type:'text/plain'});
-    var url  = URL.createObjectURL(blob);
-    var a    = document.createElement('a');
-    a.href = url; a.download = inv.invoiceNo + '.tex'; a.click();
-    URL.revokeObjectURL(url);
-    document.getElementById('invGetFilename').click();
-  });
-
-  invAddLine('Shoot Day 1','2 hrs','200');
-  invAddLine('Video Editing','4 hrs','200');
-  invAddLine('Travel -- 32 km @ R5.00/km','32 km','5');
 
   // ── Reviews panel ──────────────────────────────────────────────────────
   function loadReviews() {
