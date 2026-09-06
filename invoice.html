@@ -295,6 +295,8 @@ function boot(){
       brands[b.key] = b;
       sel.innerHTML += '<option value="'+b.key+'">'+b.display_name+'</option>';
     });
+    var want = new URLSearchParams(location.search).get('brand');
+    if (want && brands[want]) sel.value = want;
     brandChanged();
     refreshList();
   }).catch(fail);
