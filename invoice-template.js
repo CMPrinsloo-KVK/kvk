@@ -134,8 +134,30 @@
     var cAccent    = hex(brand.dark_colour, '0B0A09')
     var cHighlight = hex(brand.accent_colour, 'D37835')
 
-    var logo = brand.logo_file || 'kvk_logo2.png'
+    var logo = brand.logo_file || ''
     var sig  = brand.signature_file || ''
+
+    /* raw LaTeX fragments, brand specific. Not escaped. */
+    var preambleTex = brand.preamble_tex || ''
+
+    var logoTex = brand.logo_tex || (logo
+      ? '  \\IfFileExists{' + logo + '}{%\n' +
+        '    \\node[anchor=north west] at ([xshift=12mm, yshift=-3mm]current page.north west)\n' +
+        '      {\\includegraphics[width=38mm, height=30mm, keepaspectratio]{' + logo + '}};\n' +
+        '  }{}%\n'
+      : '')
+
+    var headerTex = brand.header_tex ||
+      ('  \\node[white, font=\\bfseries\\large, anchor=east] at\n' +
+       '    ([xshift=-18mm, yshift=-15mm]current page.north east)\n' +
+       '    {' + esc(brand.display_name) + '};\n' +
+       '  \\node[white, font=\\small, anchor=east] at\n' +
+       '    ([xshift=-18mm, yshift=-22mm]current page.north east)\n' +
+       '    {' + esc(brand.tagline) + '};\n')
+
+    var footerTex = brand.footer_tex ||
+      ('  \\node[white, font=\\small] at ([yshift=5mm]current page.south)\n' +
+       '    {' + esc(brand.footer_text) + '};\n')
 
     /* optional VAT row */
     var vatRow = Number(invoice.vat_pct) > 0
@@ -186,21 +208,13 @@
 '\\setlength{\\parindent}{0pt}\n\n' +
 '\\newcolumntype{M}[1]{>{\\centering\\arraybackslash}m{#1}}\n' +
 '\\newcolumntype{L}{>{\\raggedright\\arraybackslash}m{\\dimexpr\\linewidth-8mm\\relax}}\n\n' +
+preambleTex +
 '\\begin{document}\n\n' +
 
 '% ---------- PAGE 1 ----------\n\n' +
 '\\begin{tikzpicture}[remember picture, overlay]\n' +
 '  \\fill[accent] (current page.north west) rectangle ([yshift=-38mm]current page.north east);\n\n' +
-'  \\IfFileExists{' + logo + '}{%\n' +
-'    \\node[anchor=north west] at ([xshift=12mm, yshift=-3mm]current page.north west)\n' +
-'      {\\includegraphics[width=38mm, height=30mm, keepaspectratio]{' + logo + '}};\n' +
-'  }{}%\n\n' +
-'  \\node[white, font=\\bfseries\\large, anchor=east] at\n' +
-'    ([xshift=-18mm, yshift=-15mm]current page.north east)\n' +
-'    {' + esc(brand.display_name) + '};\n' +
-'  \\node[white, font=\\small, anchor=east] at\n' +
-'    ([xshift=-18mm, yshift=-22mm]current page.north east)\n' +
-'    {' + esc(brand.tagline) + '};\n' +
+logoTex + '\n' + headerTex +
 '\\end{tikzpicture}\n\n' +
 '\\vspace{38mm}\n\n' +
 '\\hspace{18mm}%\n' +
@@ -257,8 +271,7 @@ payBlock +
 '\\newpage\n\n' +
 '\\begin{tikzpicture}[remember picture, overlay]\n' +
 '  \\fill[accent] (current page.south west) rectangle ([yshift=10mm]current page.south east);\n' +
-'  \\node[white, font=\\small] at ([yshift=5mm]current page.south)\n' +
-'    {' + esc(brand.footer_text) + '};\n' +
+footerTex +
 '\\end{tikzpicture}\n\n' +
 '\\vspace{10mm}\n\n' +
 '\\hspace{18mm}%\n' +
