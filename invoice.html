@@ -94,7 +94,7 @@ textarea{resize:vertical;min-height:70px;font-size:12px}
 .inv-totals{text-align:right;font-size:9px;color:#75726C}
 .inv-grand{display:inline-block;background:#0B0A09;color:#fff;padding:4px 8px;font-weight:700;font-size:10px;margin-top:4px;border-radius:2px}
 .inv-scope{padding:0 18px 16px;font-size:9px;color:#4C433B}
-.inv-scope h4{font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#B34B1D;margin:10px 0 4px}
+.inv-scope h4{font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--sienna);margin:10px 0 4px}
 .inv-scope li{margin-left:14px;margin-bottom:2px}
 .gate{max-width:340px;margin:100px auto;background:rgba(255,255,255,.6);border:1px solid var(--rule);border-radius:6px;padding:28px}
 .gate h2{font-family:'Gloock',serif;font-size:24px;margin-bottom:14px}
@@ -252,7 +252,7 @@ footer::before{content:'';display:block;height:3px;background:var(--sienna)}
 /* ---------- CONFIG ---------- */
 var SUPABASE_URL  = 'https://jqwdzkxcspuzbvismjhl.supabase.co';
 var SUPABASE_ANON = 'sb_publishable_cZlEmuWU3aFxkGIv75AA5A_qhKxzeOU';
-var RENDER_TOKEN  = 'thisismysecretrendertokenhopefullyitstayssecretandnooneknowsit';
+var RENDER_TOKEN  = 'PASTE_YOUR_RENDER_TOKEN_HERE';
 var ADMIN_PASS    = 'kvk2026';
 var FN_URL = SUPABASE_URL + '/functions/v1/render-invoice';
 
@@ -433,21 +433,30 @@ function draw(){
       (a>0?a.toFixed(2):'&mdash;')+'</td></tr>';
   }).join('');
 
+  var cDark = '#' + (b.dark_colour   || '0B0A09');
+  var cAcc  = '#' + (b.accent_colour || 'D37835');
+  var logoImg = b.logo_file
+    ? '<img src="'+esc(b.logo_file)+'" style="height:38px;margin-bottom:6px;display:block" '+
+      'onerror="this.style.display=\'none\'" />'
+    : '';
+
   document.getElementById('preview').innerHTML =
-    '<div class="inv-header"><div><div class="inv-brand">'+esc(b.display_name||'')+'</div>'+
+    '<div class="inv-header" style="background:'+cDark+'"><div>'+logoImg+
+    '<div class="inv-brand">'+esc(b.display_name||'')+'</div>'+
     '<div class="inv-brand-sub">'+esc(b.tagline||'')+'</div></div>'+
     '<div class="inv-meta-block">'+
       metaRow(isQ?'Quote No.':'Invoice No.', document.getElementById('fNumber').value || 'unsaved')+
       metaRow('Date', document.getElementById('fIssue').value)+
       metaRow(isQ?'Valid Until':'Due', document.getElementById('fDue').value)+
-    '</div></div><div class="inv-accent"></div>'+
+    '</div></div><div class="inv-accent" style="background:'+cAcc+'"></div>'+
     '<div class="inv-body"><div class="inv-title">'+(isQ?'QUOTATION':'INVOICE')+'</div>'+
     '<div class="inv-billed-lbl">Billed to</div>'+
     '<div class="inv-billed-to">'+esc(document.getElementById('fClient').value||'&mdash;')+'</div>'+
     '<table class="inv-table"><tr><th>Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>'+rows+'</table>'+
     '<div class="inv-totals">Subtotal R '+t.sub.toFixed(2)+'<br/>Discount -R '+t.disc.toFixed(2)+
     (t.vp>0?'<br/>VAT R '+t.vat.toFixed(2):'')+
-    '<br/><span class="inv-grand">'+(isQ?'TOTAL':'TOTAL DUE')+' R '+t.total.toFixed(2)+'</span></div></div>'+
+    '<br/><span class="inv-grand" style="background:'+cDark+'">'+(isQ?'TOTAL':'TOTAL DUE')+
+    ' R '+t.total.toFixed(2)+'</span></div></div>'+
     '<div class="inv-scope"><h4>What you will receive</h4><ul>'+
       scope.receive.map(function(s){return '<li>'+esc(s)+'</li>';}).join('')+
     '</ul><h4>Production commitments</h4><ul>'+
@@ -539,7 +548,8 @@ function saveAndRender(){
     });
   }).then(function(r){
     return r.json().then(function(j){
-      if (!r.ok) throw new Error(j.error || 'render request failed');
+      if (!r.ok) throw new Error((j.error || 'render request failed') +
+                                 (j.detail ? ' -- ' + String(j.detail).slice(0,400) : ''));
       info('<span class="spin"></span>Compiling. This takes two to four minutes.');
       poll(0);
     });

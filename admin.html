@@ -430,7 +430,6 @@
     sbFetch('projects?select=*&order=created_at.desc').then(function(data) {
       allProjects = Array.isArray(data) ? data : [];
       renderProjectsGrid(allProjects);
-      populateInvProjectDropdown(allProjects);
     }).catch(function(e) {
       console.error(e);
       document.getElementById('projectsGrid').innerHTML =
@@ -712,7 +711,6 @@
     try { loadReviews();  } catch(e) { console.error('loadReviews failed:', e); }
   }
 
-  invRecalc();
 })();
 </script>
 </body>
